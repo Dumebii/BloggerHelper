@@ -95,11 +95,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-**Built with 💡 by [Okolo Dumebi**](https://dev.to/dumebii)
+**Built with 💡 by [Okolo Dumebi](https://dev.to/dumebii)**
 
-
-
-
-**Would you like me to help you draft a "Project Story" for your GitHub profile README to link this all together?**
-
-```
