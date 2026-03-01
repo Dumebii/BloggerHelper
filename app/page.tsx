@@ -24,6 +24,7 @@ const PostCard = ({ platform, content, day, webhookUrl }: PostCardProps) => {
   const [editedContent, setEditedContent] = useState(content);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
+  const [isCopied, setIsCopied] = useState(false); // New state for copy feedback
 
   const charLimit = 250;
   const isLong = editedContent.length > charLimit;
@@ -31,6 +32,16 @@ const PostCard = ({ platform, content, day, webhookUrl }: PostCardProps) => {
     isExpanded || isEditing
       ? editedContent
       : editedContent.substring(0, charLimit) + "...";
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(editedContent);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      alert("❌ Failed to copy text.");
+    }
+  };
 
   const handlePost = async () => {
     if (platform.toLowerCase() !== "discord") return;
@@ -70,12 +81,27 @@ const PostCard = ({ platform, content, day, webhookUrl }: PostCardProps) => {
         <span className="bg-red-50 text-red-700 text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest">
           Day {day}
         </span>
-        <button
-          onClick={() => setIsEditing(!isEditing)}
-          className="text-slate-400 hover:text-red-600 text-[11px] font-black uppercase transition-colors tracking-widest"
-        >
-          {isEditing ? "💾 Save" : "✏️ Edit"}
-        </button>
+
+        {/* New Action Bar with Copy Button */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleCopy}
+            className={`${
+              isCopied
+                ? "text-green-600"
+                : "text-slate-400 hover:text-slate-600"
+            } text-[11px] font-black uppercase transition-colors tracking-widest`}
+          >
+            {isCopied ? "✅ Copied" : "📋 Copy"}
+          </button>
+          <div className="w-[1px] h-3 bg-slate-200"></div>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="text-slate-400 hover:text-red-600 text-[11px] font-black uppercase transition-colors tracking-widest"
+          >
+            {isEditing ? "💾 Save" : "✏️ Edit"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-2 min-h-[100px]">
@@ -103,15 +129,18 @@ const PostCard = ({ platform, content, day, webhookUrl }: PostCardProps) => {
         </button>
       )}
 
-      <div className="mt-6 pt-5 border-t border-slate-100 flex gap-3">
-        <button
-          onClick={handlePost}
-          disabled={isPosting || isEditing}
-          className="flex-1 bg-red-700 text-white text-[11px] font-black py-3.5 rounded-xl active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 transition-all uppercase tracking-[0.2em] shadow-lg shadow-red-900/10"
-        >
-          {isPosting ? "Processing..." : `Deploy to ${platform}`}
-        </button>
-      </div>
+      {/* Conditionally render the Deploy button ONLY for Discord to keep the UI clean */}
+      {platform.toLowerCase() === "discord" && (
+        <div className="mt-6 pt-5 border-t border-slate-100 flex gap-3">
+          <button
+            onClick={handlePost}
+            disabled={isPosting || isEditing}
+            className="flex-1 bg-red-700 text-white text-[11px] font-black py-3.5 rounded-xl active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 transition-all uppercase tracking-[0.2em] shadow-lg shadow-red-900/10"
+          >
+            {isPosting ? "Processing..." : `Deploy to ${platform}`}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
