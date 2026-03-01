@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     // We use Gemini 1.5 Pro here for its massive context window (ideal for raw HTML and long thesis notes)
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro",
+      model: "gemini-2.5-pro",
       // Injecting your Supabase Profile natively as the System Prompt
       systemInstruction: personaVoice,
     });
