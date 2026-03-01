@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { supabase } from "../lib/supabase"; // Ensure your client is exported from here
 
-// --- Interfaces for Type Safety ---
+// --- Interfaces ---
 interface CampaignDay {
   day: number;
   x: string;
@@ -18,7 +19,7 @@ interface PostCardProps {
   day: number;
 }
 
-// --- Sub-Component: Social Post Card ---
+// --- Sub-Component: Social Post Card (Remains unchanged) ---
 const PostCard = ({ platform, content, day }: PostCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
@@ -103,13 +104,45 @@ const PostCard = ({ platform, content, day }: PostCardProps) => {
 
 // --- Main Page Component ---
 export default function Home() {
+  const [session, setSession] = useState<any>(null);
   const [inputContent, setInputContent] = useState("");
   const [sourceType, setSourceType] = useState<"url" | "context">("url");
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // 1. Listen for Auth State Changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 2. Auth Handlers
+  const signInWithGithub = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+    });
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   const generateCampaign = async () => {
+    if (!session?.user) {
+      setError("Please authenticate via GitHub to orchestrate context.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
@@ -119,7 +152,8 @@ export default function Home() {
         body: JSON.stringify({
           context: inputContent,
           sourceType: sourceType,
-          userId: "00000000-0000-0000-0000-000000000000",
+          // Sending the cryptographically verified User ID to pull your Persona
+          userId: session.user.id,
         }),
       });
       const data = await res.json();
@@ -137,10 +171,47 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 selection:bg-red-100 selection:text-red-900">
       <header className="relative bg-slate-950 pt-20 pb-24 px-6 text-center overflow-hidden">
+        {/* The Auth Bridge UI */}
+        <div className="absolute top-6 right-6 z-50 flex items-center gap-4">
+          {session ? (
+            <div className="flex items-center gap-3 bg-slate-900/50 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                {session.user.user_metadata.preferred_username ||
+                  "Authenticated"}
+              </span>
+              <button
+                onClick={signOut}
+                className="text-red-500 hover:text-red-400 text-xs font-bold uppercase transition-colors"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={signInWithGithub}
+              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full border border-slate-700 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+              Connect GitHub
+            </button>
+          )}
+        </div>
+
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-900/10 rounded-full blur-[150px]"></div>
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-slate-900/40 rounded-full blur-[100px]"></div>
 
-        <div className="relative z-10 flex flex-col items-center">
+        <div className="relative z-10 flex flex-col items-center mt-8">
           <div className="mb-6 bg-red-700 p-4 rounded-3xl shadow-2xl shadow-red-950/40 group hover:rotate-6 transition-transform duration-500 cursor-pointer">
             <svg
               width="36"
@@ -170,7 +241,6 @@ export default function Home() {
           </p>
 
           <div className="mt-10 max-w-2xl mx-auto w-full">
-            {/* Tab Selectors */}
             <div className="flex justify-center gap-2 mb-3">
               <button
                 type="button"
@@ -196,7 +266,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Input Area */}
             <div className="flex flex-col md:flex-row gap-0 p-1.5 bg-white rounded-b-3xl rounded-tr-3xl shadow-2xl border-[6px] border-slate-900 focus-within:border-red-900/30 transition-colors">
               {sourceType === "url" ? (
                 <input
@@ -204,18 +273,24 @@ export default function Home() {
                   placeholder="Paste source URL here..."
                   value={inputContent}
                   onChange={(e) => setInputContent(e.target.value)}
+                  disabled={!session}
                 />
               ) : (
                 <textarea
                   className="flex-1 px-6 py-4 outline-none text-slate-900 text-sm font-medium placeholder:text-slate-300 bg-transparent min-h-[140px] resize-y transition-all"
-                  placeholder="Paste your personal notes, transcripts, or drafts here..."
+                  placeholder={
+                    session
+                      ? "Paste your 5G optimization research gaps, transcripts, or drafts here..."
+                      : "Please connect GitHub to unlock the Context Tank..."
+                  }
                   value={inputContent}
                   onChange={(e) => setInputContent(e.target.value)}
+                  disabled={!session}
                 />
               )}
               <button
                 onClick={generateCampaign}
-                disabled={loading || !inputContent}
+                disabled={loading || !inputContent || !session}
                 className="bg-red-700 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-red-800 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 mt-2 md:mt-0"
               >
                 {loading ? "Reasoning..." : "Ingest"}
@@ -230,6 +305,7 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Main Campaign Grid */}
       <main className="max-w-7xl mx-auto p-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {["X", "LinkedIn", "Discord"].map((platform) => (
