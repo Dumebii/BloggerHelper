@@ -1,27 +1,43 @@
 import { test, expect } from "@playwright/test";
 
 test("should allow inline editing of generated posts", async ({ page }) => {
-  // 1. Navigate to the app
+  // 1. MOCK THE API: Intercept the request so we don't hit the real Gemini API
+  await page.route("/api/generate", async (route) => {
+    const fakeResponse = {
+      output: JSON.stringify({
+        campaign: [
+          {
+            day: 1,
+            x: "Mocked X Post",
+            linkedin: "Mocked LI",
+            discord: "Mocked Discord",
+          },
+        ],
+      }),
+    };
+    await route.fulfill({ json: fakeResponse });
+  });
+
+  // 2. Navigate to the app
   await page.goto("/");
 
-  // 2. Generate a campaign first so the Edit buttons appear
-  const input = page.getByPlaceholder("Source article URL...");
-  await input.fill("https://example.com/test-article");
+  // 3. Trigger the generation
+  const input = page.getByPlaceholder(/Source article URL/i);
+  await input.fill("https://dev.to/dumebii/test-article");
   await page.getByRole("button", { name: /Architect/i }).click();
 
-  // Wait for the generation to finish by looking for the pipeline headers
-  await expect(page.getByText(/X Pipeline/i)).toBeVisible({ timeout: 15000 });
-
-  // 3. Now test the Edit logic
-  const editBtn = page.locator('button:has-text("Edit")').first();
+  // 4. Wait for the actual mocked card to appear (looking for the specific emoji)
+  const editBtn = page.getByRole("button", { name: /✏️ Edit/i }).first();
+  await expect(editBtn).toBeVisible(); // This wait is now safe and instant!
   await editBtn.click();
 
+  // 5. Test the Edit logic
   const textarea = page.locator("textarea");
   await textarea.fill("This is a manual QA edit.");
 
-  const saveBtn = page.getByText("Save");
+  const saveBtn = page.getByRole("button", { name: /💾 Save/i });
   await saveBtn.click();
 
-  // 4. Verify the edit was saved
+  // 6. Verify the edit was saved to the DOM
   await expect(page.getByText("This is a manual QA edit.")).toBeVisible();
 });
