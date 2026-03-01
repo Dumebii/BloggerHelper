@@ -1,33 +1,19 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function POST(req: Request) {
   try {
-    const { content, userId } = await req.json();
+    const { content, webhookUrl } = await req.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized. Please sign in." }, { status: 401 });
+    if (!webhookUrl) {
+      return NextResponse.json(
+        { error: "No Discord webhook configured." },
+        { status: 400 }
+      );
     }
 
-    // 1. Securely fetch the user's specific webhook from Supabase
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('discord_webhook')
-      .eq('user_id', userId)
-      .single();
-
-    if (error || !profile?.discord_webhook) {
-      return NextResponse.json({ error: "No Discord webhook configured. Please update your Identity Settings." }, { status: 400 });
-    }
-
-    // 2. Transmit to the user's Discord server
-    const response = await fetch(profile.discord_webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
 
