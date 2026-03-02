@@ -74,7 +74,7 @@ export default function Header({
             onClick={signIn}
             className="bg-red-700 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shrink-0"
           >
-            Connect
+            Connect to Github
           </button>
         )}
       </div>
