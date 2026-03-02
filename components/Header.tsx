@@ -39,7 +39,7 @@ export default function Header({
         </div>
         {/* Hides the text on very small screens to prevent overlap */}
         <span className="font-black italic uppercase tracking-tighter text-slate-900 hidden sm:block">
-          WriterHelper
+          OziGi
         </span>
       </div>
 

@@ -3,7 +3,7 @@ export default function Footer() {
     <footer className="bg-slate-950 text-slate-400 py-12 text-center border-t border-slate-900">
       <div className="max-w-4xl mx-auto px-6">
         <h3 className="text-white font-black italic uppercase tracking-widest mb-4">
-          WriterHelper
+          OziGi
         </h3>
         <p className="text-xs font-medium mb-8 max-w-md mx-auto leading-relaxed">
           An Agentic Content Engine built to close the gap between raw research

@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WriterHelper | Context Tank",
+  title: "Ozigi | Agentic Social Media Manager",
   description:
-    "An Agentic Content Engine for technical writers and developer educators.",
+    "An Agentic Content Engine for social media handlers, technical writers and developer educators.",
   openGraph: {
-    title: "WriterHelper | Context Tank",
+    title: "Ozigi | Agentic Social Media Manager",
     description:
       "Architect 3-day social media distribution strategies from raw context and URLs.",
-    siteName: "WriterHelper",
+    siteName: "Ozigi",
   },
 };
 
