@@ -13,7 +13,7 @@ export default function Hero({ onStart }: { onStart: () => void }) {
         </span>
       </h1>
       <p className="max-w-2xl text-slate-500 text-base md:text-lg font-medium mb-10 md:mb-12 leading-relaxed px-2 md:px-0">
-        Stop struggling to extract content from your context. WriterHelper
+        Stop struggling to extract content from your context. OziGi
         ingests your long-form articles, personal notes, and meeting transcripts
         to architect a 3-day social media campaign that actually sounds like
         you.
