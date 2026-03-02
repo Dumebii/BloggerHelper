@@ -8,12 +8,14 @@ export default function Header({
   session,
   view,
   setView,
+  onSignIn,
   onOpenHistory,
 }: {
   session: any;
   view: string;
   setView: (v: "landing" | "dashboard") => void;
   onOpenHistory: () => void;
+  onSignIn: () => void;
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);

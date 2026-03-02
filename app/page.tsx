@@ -8,6 +8,7 @@ import DistributionGrid from "../components/DistributionGrid";
 import UpgradeBanner from "../components/GuestModeBanner";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import AuthModal from "../components/AuthModal";
 
 export default function Home() {
   const [session, setSession] = useState<any>(null);
@@ -18,9 +19,12 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [pastCampaigns, setPastCampaigns] = useState<any[]>([]);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    const savedView = localStorage.getItem("writerhelper_view") as "landing" | "dashboard";
+    const savedView = localStorage.getItem("writerhelper_view") as
+      | "landing"
+      | "dashboard";
     if (savedView) setView(savedView);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +32,9 @@ export default function Home() {
       if (session?.user) fetchHistory(session.user.id);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) fetchHistory(session.user.id);
     });
@@ -71,20 +77,25 @@ export default function Home() {
           personaVoice: "Expert Content Strategist",
         }),
       });
-      
+
       const data = await res.json();
-      
+
       // 🛑 SAFETY CHECK: Stop here if the API threw an error
       if (!res.ok || data.error) {
-        setErrorMessage(data.error || "Failed to generate campaign. The site might be blocking bots.");
+        setErrorMessage(
+          data.error ||
+            "Failed to generate campaign. The site might be blocking bots."
+        );
         setLoading(false);
-        return; 
+        return;
       }
 
       // ✅ ONLY NOW is it safe to use .replace()
-      const cleanJson = data.output.replace(/```json/gi, '').replace(/```/gi, '');
-      const finalCampaign = JSON.parse(cleanJson);      
-      
+      const cleanJson = data.output
+        .replace(/```json/gi, "")
+        .replace(/```/gi, "");
+      const finalCampaign = JSON.parse(cleanJson);
+
       if (finalCampaign.campaign) {
         setCampaign(finalCampaign.campaign);
         if (session?.user) {
@@ -99,7 +110,9 @@ export default function Home() {
       }
     } catch (err) {
       console.error("Context error:", err);
-      setErrorMessage("A syntax error occurred while parsing the AI response. Try again.");
+      setErrorMessage(
+        "A syntax error occurred while parsing the AI response. Try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -111,6 +124,7 @@ export default function Home() {
         session={session}
         view={view}
         setView={handleSetView}
+        onSignIn={() => setIsAuthModalOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
       />
 
@@ -158,11 +172,13 @@ export default function Home() {
           <Hero onStart={() => handleSetView("dashboard")} />
         ) : (
           <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 w-full pt-4 md:pt-8">
-            {!session && <UpgradeBanner />}
+            {!session && (
+              <UpgradeBanner onSignIn={() => setIsAuthModalOpen(true)} />
+            )}
             <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-12">
               Context Engine
             </h2>
-            
+
             {/* ⚠️ ERROR BANNER INJECTED HERE */}
             {errorMessage && (
               <div className="mb-8 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2 shadow-sm">
@@ -177,13 +193,17 @@ export default function Home() {
               onGenerate={handleGenerate}
               loading={loading}
             />
-            
+
             {campaign.length > 0 && (
               <div className="mt-16">
                 <DistributionGrid campaign={campaign} />
               </div>
             )}
           </div>
+        )}
+        {/* Render Auth Modal at the top level */}
+        {isAuthModalOpen && (
+          <AuthModal onClose={() => setIsAuthModalOpen(false)} />
         )}
       </main>
       <Footer />
