@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import AuthModal from "./AuthModal";
 import SettingsModal from "./SettingsModal"; // Import the new modal
 
 export default function Header({
@@ -15,7 +16,7 @@ export default function Header({
   onOpenHistory: () => void;
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const signIn = async () =>
     await supabase.auth.signInWithOAuth({ provider: "github" });
   const signOut = async () => await supabase.auth.signOut();
@@ -103,10 +104,10 @@ export default function Header({
             </div>
           ) : (
             <button
-              onClick={signIn}
-              className="bg-red-700 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shrink-0"
+              onClick={() => setIsAuthModalOpen(true)}
+              className="bg-red-700 text-white px-5 md:px-8 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg active:scale-95 shrink-0"
             >
-              Connect to Github
+              Sign In
             </button>
           )}
         </div>
@@ -118,6 +119,11 @@ export default function Header({
           session={session}
           onClose={() => setIsSettingsOpen(false)}
         />
+      )}
+
+      {/* Render Auth Modal */}
+      {isAuthModalOpen && (
+        <AuthModal onClose={() => setIsAuthModalOpen(false)} />
       )}
     </>
   );
