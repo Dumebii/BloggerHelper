@@ -5,67 +5,66 @@ export const maxDuration = 60;
 
 // Catch people trying to visit the API directly in their browser
 export async function GET(request: Request) {
-  return NextResponse.redirect(new URL('/', request.url));
+  return NextResponse.redirect(new URL("/", request.url));
 }
 
 export async function POST(req: Request) {
   try {
-    const { urlContext, textContext, personaVoice } = await req.json();
+    // 1. Extract the FormData
+    const formData = await req.formData();
+    const urlContext = formData.get("urlContext") as string | null;
+    const textContext = formData.get("textContext") as string | null;
+    const personaVoice = formData.get("personaVoice") as string | null;
+    const file = formData.get("file") as File | null;
 
     let finalContext = "";
 
-    // 1. Process URL if provided (Using Jina AI Proxy to bypass blocks)
+    // 2. Process URL via Jina Proxy
     if (urlContext && urlContext.trim() !== "") {
       const targetUrl = `https://r.jina.ai/${urlContext}`;
-      
       const urlResponse = await fetch(targetUrl, {
         headers: {
-          "Accept": "text/event-stream", // Jina prefers this for markdown
-          "User-Agent": "Ozigi Content Engine Bot"
+          Accept: "text/event-stream",
+          "User-Agent": "Ozigi Content Engine Bot",
         },
       });
 
       if (!urlResponse.ok) {
-        // If URL is blocked, check if we have manual notes to fall back on
-        if (textContext && textContext.trim() !== "") {
-          finalContext += `[NOTE: The provided URL was blocked by anti-bot protection, but here are the user's manual notes:]\n\n`;
+        if (textContext || file) {
+          finalContext += `[NOTE: The provided URL was blocked by anti-bot protection, but here is the other provided context:]\n\n`;
         } else {
-          // If we ONLY had a URL and it failed, throw the error back to the UI
-          throw new Error("This website blocks AI scrapers. Please copy and paste the article text directly into the notes section!");
+          throw new Error(
+            "This website blocks AI scrapers. Please provide a file or text notes instead!"
+          );
         }
       } else {
-        // Jina returns pure Markdown! No need for crazy regex HTML replacements.
         const scrapedMarkdown = await urlResponse.text();
         finalContext += `[SOURCE ARTICLE/URL CONTENT]\n${scrapedMarkdown}\n\n`;
       }
     }
 
-    // 2. Process Raw Notes if provided
+    // 3. Process Raw Notes
     if (textContext && textContext.trim() !== "") {
       finalContext += `[ADDITIONAL USER NOTES/RAW TEXT]\n${textContext}\n\n`;
     }
 
-    if (!finalContext.trim()) {
+    if (!finalContext.trim() && !file) {
       return NextResponse.json(
-        { error: "No context provided. Please enter a URL or some text notes." },
+        {
+          error:
+            "No context provided. Please enter a URL, text, or upload a file.",
+        },
         { status: 400 }
       );
     }
 
-    // 3. Orchestrate with Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
-      systemInstruction:
-        personaVoice || "You are a professional content architect.",
-    });
-
+    // 4. Set up the Prompt Array for Gemini
     const prompt = `
-      TASK: Analyze the provided context (which may include a scraped webpage, raw user notes, or both).
+      TASK: Analyze the provided context (which may include scraped webpages, raw notes, images, or PDFs).
       Architect a 3-day social media distribution strategy based on this information. 
       CRITICAL: If the persona dictates a specific sign-off, tone, or phrase, you MUST include it in the generated text for every single post.
 
-      SOURCE CONTEXT:
+      SOURCE TEXT CONTEXT:
       ${finalContext}
 
       OUTPUT RULES:
@@ -81,7 +80,32 @@ export async function POST(req: Request) {
       }
     `;
 
-    const result = await model.generateContent(prompt);
+    // We build an array to hold both our text prompt AND our file data
+    const generativeParts: any[] = [prompt];
+
+    // 5. Process the File into a Base64 Buffer for Gemini
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      generativeParts.push({
+        inlineData: {
+          data: buffer.toString("base64"),
+          mimeType: file.type, // e.g., 'application/pdf', 'image/jpeg'
+        },
+      });
+    }
+
+    // 6. Orchestrate with Gemini
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-pro",
+      systemInstruction:
+        personaVoice || "You are a professional content architect.",
+    });
+
+    // Pass the combined array of text and file buffers to the model
+    const result = await model.generateContent(generativeParts);
     const response = await result.response;
     const outputText = response.text();
 

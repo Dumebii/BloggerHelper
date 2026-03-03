@@ -15,7 +15,15 @@ export default function Home() {
   const [view, setView] = useState<"landing" | "dashboard">("landing");
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
-  const [inputs, setInputs] = useState({ url: "", text: "" });
+  const [inputs, setInputs] = useState<{
+    url: string;
+    text: string;
+    file: File | null;
+  }>({
+    url: "",
+    text: "",
+    file: null,
+  });
   const [errorMessage, setErrorMessage] = useState("");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [pastCampaigns, setPastCampaigns] = useState<any[]>([]);
@@ -59,6 +67,7 @@ export default function Home() {
     setInputs({
       url: record.source_url || "",
       text: record.source_notes || "",
+      file: null,
     });
     setCampaign(record.generated_content);
     setIsHistoryOpen(false);
@@ -66,21 +75,25 @@ export default function Home() {
 
   const handleGenerate = async () => {
     setLoading(true);
-    setErrorMessage(""); // Clear old errors when starting a new generation
+    setErrorMessage("");
+
     try {
+      // 1. We must use FormData to send physical files over HTTP
+      const formData = new FormData();
+      if (inputs.url) formData.append("urlContext", inputs.url);
+      if (inputs.text) formData.append("textContext", inputs.text);
+      if (inputs.file) formData.append("file", inputs.file);
+      formData.append("personaVoice", "Expert Content Strategist");
+
+      // 2. Do NOT set the 'Content-Type' header.
+      // The browser automatically sets the correct multi-part boundary for FormData!
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          urlContext: inputs.url,
-          textContext: inputs.text,
-          personaVoice: "Expert Content Strategist",
-        }),
+        body: formData,
       });
 
       const data = await res.json();
 
-      // 🛑 SAFETY CHECK: Stop here if the API threw an error
       if (!res.ok || data.error) {
         setErrorMessage(
           data.error ||
@@ -90,7 +103,6 @@ export default function Home() {
         return;
       }
 
-      // ✅ ONLY NOW is it safe to use .replace()
       const cleanJson = data.output
         .replace(/```json/gi, "")
         .replace(/```/gi, "");
