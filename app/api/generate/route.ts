@@ -1,123 +1,81 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-export const maxDuration = 60;
-
-// Catch people trying to visit the API directly in their browser
-export async function GET(request: Request) {
-  return NextResponse.redirect(new URL("/", request.url));
-}
+// Initialize the Gemini Client
+// Ensure you have GEMINI_API_KEY in your .env.local file
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 export async function POST(req: Request) {
   try {
-    // 1. Extract the FormData
     const formData = await req.formData();
+
+    // Extract standard text/url inputs
     const urlContext = formData.get("urlContext") as string | null;
     const textContext = formData.get("textContext") as string | null;
-    const personaVoice = formData.get("personaVoice") as string | null;
-    const tweetFormat = formData.get("tweetFormat") as string | "single"; // 👈 Extract this
+    const tweetFormat = formData.get("tweetFormat") as string | "single";
+    const personaVoice = formData.get("personaVoice") as
+      | string
+      | "Expert Content Strategist";
+
+    // Extract the physical file
     const file = formData.get("file") as File | null;
 
-    let finalContext = "";
-
-    // 2. Process URL via Jina Proxy
-    if (urlContext && urlContext.trim() !== "") {
-      const targetUrl = `https://r.jina.ai/${urlContext}`;
-      const urlResponse = await fetch(targetUrl, {
-        headers: {
-          Accept: "text/event-stream",
-          "User-Agent": "Ozigi Content Engine Bot",
-        },
-      });
-
-      if (!urlResponse.ok) {
-        if (textContext || file) {
-          finalContext += `[NOTE: The provided URL was blocked by anti-bot protection, but here is the other provided context:]\n\n`;
-        } else {
-          throw new Error(
-            "This website blocks AI scrapers. Please provide a file or text notes instead!"
-          );
-        }
-      } else {
-        const scrapedMarkdown = await urlResponse.text();
-        finalContext += `[SOURCE ARTICLE/URL CONTENT]\n${scrapedMarkdown}\n\n`;
-      }
-    }
-
-    // 3. Process Raw Notes
-    if (textContext && textContext.trim() !== "") {
-      finalContext += `[ADDITIONAL USER NOTES/RAW TEXT]\n${textContext}\n\n`;
-    }
-
-    if (!finalContext.trim() && !file) {
-      return NextResponse.json(
-        {
-          error:
-            "No context provided. Please enter a URL, text, or upload a file.",
-        },
-        { status: 400 }
-      );
-    }
-
-    // 4. Set up the Prompt Array for Gemini
-    const prompt = `
+    let textPrompt = `
       TASK: Analyze the provided context (which may include scraped webpages, raw notes, images, or PDFs).
       Architect a 3-day social media distribution strategy based on this information. 
-      CRITICAL: If the persona dictates a specific sign-off, tone, or phrase, you MUST include it in the generated text for every single post.
+      
+      PERSONA/VOICE: ${personaVoice}
 
       CRITICAL X/TWITTER FORMAT RULE: 
       The user requested the Twitter format to be: "${tweetFormat}".
       If "single", the "x" field must contain EXACTLY ONE punchy, high-impact tweet.
-      If "thread", the "x" field must contain a compelling 3-to-5 part thread. Separate each part of the thread with two blank lines and number them (e.g., 1/5, 2/5).
-
-      SOURCE TEXT CONTEXT:
-      ${finalContext}
+      If "thread", the "x" field must contain a compelling 3-to-5 part thread. Separate each part with two blank lines and number them (e.g., 1/5, 2/5).
 
       OUTPUT RULES:
-      Return ONLY a valid JSON object. Do not include markdown formatting.
-      You must include a "rule_check" field explicitly stating the exact sign-off or stylistic rule requested in the persona.
+      Return ONLY a valid JSON object. Do not include markdown formatting like \`\`\`json.
       
       Format: 
       {
-        "rule_check": "I will end every post with the exact phrase: ...",
         "campaign": [
           {"day": 1, "x": "...", "linkedin": "...", "discord": "..."}
         ]
       }
+      
+      CONTEXT TO ANALYZE:
     `;
 
-    // We build an array to hold both our text prompt AND our file data
-    const generativeParts: any[] = [prompt];
+    if (textContext) textPrompt += `\nRaw Notes: ${textContext}\n`;
+    if (urlContext) textPrompt += `\nSource URL: ${urlContext}\n`;
 
-    // 5. Process the File into a Base64 Buffer for Gemini
-    if (file) {
+    // The Gemini input array can hold both text strings and file objects
+    const geminiInput: any[] = [textPrompt];
+
+    // ✨ THE MAGIC: Process the Image or PDF
+    if (file && file.size > 0) {
+      // 1. Convert the file into a raw binary buffer
       const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      // 2. Encode that buffer into a Base64 string that Gemini can read securely over HTTP
+      const base64Data = Buffer.from(arrayBuffer).toString("base64");
 
-      generativeParts.push({
+      // 3. Push it into the payload using Gemini's specific inlineData format
+      geminiInput.push({
         inlineData: {
-          data: buffer.toString("base64"),
-          mimeType: file.type, // e.g., 'application/pdf', 'image/jpeg'
+          data: base64Data,
+          mimeType: file.type, // Automatically passes 'application/pdf', 'image/png', etc.
         },
       });
     }
 
-    // 6. Orchestrate with Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
-      systemInstruction:
-        personaVoice || "You are a professional content architect.",
-    });
+    // We use gemini-1.5-pro because it handles complex PDF reasoning and dense images beautifully
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-    // Pass the combined array of text and file buffers to the model
-    const result = await model.generateContent(generativeParts);
-    const response = await result.response;
-    const outputText = response.text();
+    // Fire the multimodal request
+    const result = await model.generateContent(geminiInput);
+    const responseText = result.response.text();
 
-    return NextResponse.json({ output: outputText });
+    return NextResponse.json({ output: responseText });
   } catch (error: any) {
-    console.error("Generation Error:", error);
+    console.error("Generate API Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -24,15 +24,17 @@ function ExpandableText({ text }: { text: string }) {
   );
 }
 
-// 2. Universal Social Card Component
+// 2. Universal Social Card Component (Upgraded with Image Gen)
 function SocialCard({
   day,
+  platformName,
   initialText,
   onPost,
   postStatus,
   actionButtonConfig,
 }: {
   day: number;
+  platformName: string;
   initialText: string;
   onPost?: (text: string, day: number) => void;
   postStatus?: "idle" | "loading" | "success" | "error";
@@ -47,10 +49,33 @@ function SocialCard({
   const [isEditing, setIsEditing] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // ✨ New Image Generation State
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isGeneratingImg, setIsGeneratingImg] = useState(false);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleGenerateImage = async () => {
+    setIsGeneratingImg(true);
+    try {
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, platform: platformName }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setImageUrl(data.imageUrl);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate image.");
+    } finally {
+      setIsGeneratingImg(false);
+    }
   };
 
   return (
@@ -75,6 +100,31 @@ function SocialCard({
         </div>
       </div>
 
+      {/* ✨ NEW: Image Display Area */}
+      {imageUrl ? (
+        <div className="mb-4 relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+          <img src={imageUrl} alt="Generated graphic" className="w-full h-auto object-cover aspect-video" />
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+             <button 
+               onClick={handleGenerateImage}
+               disabled={isGeneratingImg}
+               className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors"
+             >
+               {isGeneratingImg ? "Generating..." : "Regenerate"}
+             </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={handleGenerateImage}
+          disabled={isGeneratingImg}
+          className="w-full mb-6 py-4 border-2 border-dashed border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-700 hover:border-red-200 hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+        >
+          {isGeneratingImg ? "🎨 Painting pixels..." : "🎨 Generate Image Graphic"}
+        </button>
+      )}
+
+      {/* Text Area */}
       {isEditing ? (
         <textarea
           value={text}
@@ -85,6 +135,7 @@ function SocialCard({
         <ExpandableText text={text} />
       )}
 
+      {/* Action Button */}
       {onPost && actionButtonConfig && (
         <button
           onClick={() => onPost(text, day)}
@@ -124,38 +175,12 @@ export default function DistributionGrid({
     [day: number]: "idle" | "loading" | "success" | "error";
   }>({});
 
-  // const handlePostToX = async (text: string, day: number) => {
-  //   if (!session?.access_token) return alert("You must be signed in to post!");
-  //   setXStatuses((prev) => ({ ...prev, [day]: "loading" }));
-  //   try {
-  //     const res = await fetch("/api/publish/x", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${session.access_token}`,
-  //       },
-  //       body: JSON.stringify({ text, userId: session.user.id }),
-  //     });
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data.error || "Failed to post to X");
-  //     setXStatuses((prev) => ({ ...prev, [day]: "success" }));
-  //     setTimeout(() => setXStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
-  //   } catch (error: any) {
-  //     console.error("X Posting Error:", error);
-  //     setXStatuses((prev) => ({ ...prev, [day]: "error" }));
-  //     alert(`Failed to post: ${error.message}`);
-  //   }
-  // };
   const handlePostToX = async (text: string, day: number) => {
-    // We don't need the session check or backend API anymore!
-    // We just encode the text and pop open Twitter's pre-filled posting window.
-
     const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       text
     )}`;
     window.open(intentUrl, "_blank", "noopener,noreferrer");
 
-    // Optional: Still trigger the green "Success" UI for good UX
     setXStatuses((prev) => ({ ...prev, [day]: "success" }));
     setTimeout(
       () => setXStatuses((prev) => ({ ...prev, [day]: "idle" })),
@@ -240,6 +265,7 @@ export default function DistributionGrid({
                   <SocialCard
                     key={`x-${dayData.day}`}
                     day={dayData.day}
+                    platformName="X"
                     initialText={dayData.x}
                     onPost={handlePostToX}
                     postStatus={xStatuses[dayData.day]}
@@ -279,6 +305,7 @@ export default function DistributionGrid({
                   <SocialCard
                     key={`li-${dayData.day}`}
                     day={dayData.day}
+                    platformName="LinkedIn"
                     initialText={dayData.linkedin}
                     onPost={handlePostToLinkedIn}
                     postStatus={liStatuses[dayData.day]}
@@ -318,6 +345,7 @@ export default function DistributionGrid({
                   <SocialCard
                     key={`disc-${dayData.day}`}
                     day={dayData.day}
+                    platformName="Discord"
                     initialText={dayData.discord}
                     onPost={handlePostToDiscord}
                     postStatus={discordStatuses[dayData.day]}
