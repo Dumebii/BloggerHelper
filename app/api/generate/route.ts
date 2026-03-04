@@ -1,23 +1,16 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { VertexAI } from "@google-cloud/vertexai";
 import { NextResponse } from "next/server";
-
-// Initialize the Gemini Client
-// Ensure you have GEMINI_API_KEY in your .env.local file
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
-    // Extract standard text/url inputs
     const urlContext = formData.get("urlContext") as string | null;
     const textContext = formData.get("textContext") as string | null;
     const tweetFormat = formData.get("tweetFormat") as string | "single";
     const personaVoice = formData.get("personaVoice") as
       | string
       | "Expert Content Strategist";
-
-    // Extract the physical file
     const file = formData.get("file") as File | null;
 
     let textPrompt = `
@@ -53,35 +46,53 @@ export async function POST(req: Request) {
     if (textContext) textPrompt += `\nRaw Notes: ${textContext}\n`;
     if (urlContext) textPrompt += `\nSource URL: ${urlContext}\n`;
 
-    // The Gemini input array can hold both text strings and file objects
-    const geminiInput: any[] = [textPrompt];
+    // 1. Array of "parts" strictly required by the Vertex AI SDK
+    const parts: any[] = [{ text: textPrompt }];
 
-    // ✨ THE MAGIC: Process the Image or PDF
+    // Handle Image/PDF Uploads
     if (file && file.size > 0) {
-      // 1. Convert the file into a raw binary buffer
       const arrayBuffer = await file.arrayBuffer();
-      // 2. Encode that buffer into a Base64 string that Gemini can read securely over HTTP
       const base64Data = Buffer.from(arrayBuffer).toString("base64");
 
-      // 3. Push it into the payload using Gemini's specific inlineData format
-      geminiInput.push({
+      parts.push({
         inlineData: {
           data: base64Data,
-          mimeType: file.type, // Automatically passes 'application/pdf', 'image/png', etc.
+          mimeType: file.type,
         },
       });
     }
 
-    // We use gemini-1.5-pro because it handles complex PDF reasoning and dense images beautifully
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    // 2. Initialize Enterprise Vertex AI with your new .env variables
+    const vertex_ai = new VertexAI({
+      project: process.env.GOOGLE_CLOUD_PROJECT_ID as string,
+      location: "us-central1",
+      googleAuthOptions: {
+        credentials: {
+          client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+          // Replaces literal '\n' characters in the env string with actual line breaks
+          private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(
+            /\\n/g,
+            "\n"
+          ),
+        },
+      },
+    });
 
-    // Fire the multimodal request
-    const result = await model.generateContent(geminiInput);
-    const responseText = result.response.text();
+    // Tap into the unthrottled Vertex Gemini 2.5 Pro model
+    const model = vertex_ai.getGenerativeModel({ model: "gemini-2.5-pro" });
+
+    // 3. Fire the properly formatted enterprise request
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: parts }],
+    });
+
+    // 4. Extract text response (Vertex paths are slightly different than AI Studio)
+    const responseText =
+      result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     return NextResponse.json({ output: responseText });
   } catch (error: any) {
-    console.error("Generate API Error:", error);
+    console.error("Vertex AI Generate Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
