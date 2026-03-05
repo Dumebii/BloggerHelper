@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [inputs, setInputs] = useState<{
     url: string;
     text: string;
+    personaId: string;
     file: File | null;
     tweetFormat: "single" | "thread";
   }>({
@@ -24,6 +25,7 @@ export default function Dashboard() {
     text: "",
     file: null,
     tweetFormat: "single",
+    personaId: "default",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);

@@ -34,23 +34,27 @@ export default function Distillery({
 
   const handlePersonaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
+    
+    // 🚨 1. First line of defense: Check if the click even registers
+    console.log("🔥 Dropdown clicked! Selected value:", value);
+
     if (value === "create_new") {
-      // 1. Broadcast the "Open Settings" signal
-      window.dispatchEvent(new Event("openSettingsModal"));
-      // 2. Reset the dropdown so it doesn't stay on "Create New"
-      setInputs({ ...inputs, personaId: "default" });
+      console.log("🔥 'Create New' detected! Triggering modal...");
+      
+      // 🚨 2. Check if the parent passed the function correctly
+      if (onOpenSettings) {
+        onOpenSettings();
+      } else {
+        console.error("❌ ERROR: onOpenSettings prop is missing!");
+      }
+
+      // 3. Reset the dropdown back to default instantly using the safest React pattern
+      setInputs((prev: any) => ({ ...prev, personaId: "default" }));
     } else {
-      setInputs({ ...inputs, personaId: value });
+      // 4. Save the actual persona ID
+      setInputs((prev: any) => ({ ...prev, personaId: value }));
     }
   };
-
-  if (loading) {
-    return (
-      <section className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden min-h-[400px]">
-        <DynamicLoader />
-      </section>
-    );
-  }
 
   return (
     <section className="flex flex-col gap-6 p-2 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
