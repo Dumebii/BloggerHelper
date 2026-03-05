@@ -108,6 +108,9 @@ export async function POST(req: Request) {
       }
     }
 
+    // ✨ THE FIX: Force a 2.5-second delay to let LinkedIn process the S3 file
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
     // ✨ 4. Create the Post
     const postPayload: any = {
       author: authorUrn,
