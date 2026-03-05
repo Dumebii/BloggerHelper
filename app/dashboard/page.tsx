@@ -151,6 +151,8 @@ export default function Dashboard() {
       text: record.source_notes || "",
       file: null,
       tweetFormat: "single",
+      personaId: "default", // ✨ FIXED: Added missing property
+      additionalInfo: "",
     });
     setCampaign(record.generated_content);
     setIsHistoryOpen(false);
@@ -311,22 +313,20 @@ export default function Dashboard() {
             </div>
           )}
 
-          <Distillery
-            session={session}
-            inputs={inputs}
-            setInputs={setInputs}
-            onGenerate={handleGenerate}
-            loading={loading}
-            userPersonas={userPersonas} // ✨ Pass the fetched personas to the dropdown!
-            onOpenSettings={() => {
-              console.log("🚀 Broadcasting openSettingsModal signal...");
-              window.dispatchEvent(new Event("openSettingsModal"));
-            }}
-          />
-
-          {/* Replace the giant animate-pulse div with this: */}
-          {loading && (
-            <div className="mt-16 flex items-center justify-center min-h-[400px]">
+          {!loading ? (
+            <Distillery
+              session={session}
+              inputs={inputs}
+              setInputs={setInputs}
+              onGenerate={handleGenerate}
+              loading={loading}
+              userPersonas={userPersonas}
+              onOpenSettings={() => {
+                window.dispatchEvent(new Event("openSettingsModal"));
+              }}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden min-h-[400px] animate-in fade-in zoom-in-95 duration-500">
               <DynamicLoader />
             </div>
           )}

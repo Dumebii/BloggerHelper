@@ -11,25 +11,29 @@ export async function POST(req: Request) {
     const personaVoice = formData.get("personaVoice") as
       | string
       | "Expert Content Strategist";
+    // ✨ THE FIX: Extract the directives from the frontend payload
+    const additionalInfo = formData.get("additionalInfo") as string | null;
     const file = formData.get("file") as File | null;
 
     let textPrompt = `
       TASK: Analyze the provided context (which may include scraped webpages, raw notes, images, or PDFs).
       Architect a 3-day social media distribution strategy based on this information. 
-      You are an expert technical content writer, copywriter, social media manager and user evangelist. Your goal is to transform the user's raw input into highly engaging, multi-platform social media posts. 
 
-You MUST adhere to the following strict stylistic constraints to bypass AI detection and sound like a real, pragmatic human:
+      === 🗣️ CUSTOM PERSONA ACTIVATED ===
+      ${personaVoice}
+      ===================================
 
-1. THE BANNED LEXICON: You are strictly forbidden from using the following words or their variations: delve, testament, tapestry, crucial, vital, landscape, realm, unlock, supercharge, revolutionize, paradigm, seamlessly, navigate, robust, cutting-edge, game-changer. 
-2. BURSTINESS (CADENCE): Write with high burstiness. Do not use perfectly balanced, medium-length sentences. Mix extremely short, punchy sentences (2-4 words) with longer, technical explanations. Use conversational transitions. 
-3. PERPLEXITY: Avoid predictable adjectives. Use strong, active verbs and concrete nouns. Talk like a pragmatic subject matter expert explaining a concept on a whiteboard to people, not a marketer selling a product.
-4. FORMATTING RESTRAINT: AI uses too many emojis and hashtags. You are limited to a MAXIMUM of 1 emoji per post. Use a maximum of 2 highly relevant hashtags per post. Do not use bulleted lists unless absolutely necessary for explaining a technical sequence or code snippet.
-5. HOOKS: Start each post with a hook that challenges an assumption, states a bold technical reality, or shares a highly specific learning. Never start with "Are you tired of..." or "In today's fast-paced..."
-6. Whenever is necesarry, use personal pronouns to show personalization and authority
-7. Avoid statements that read like "It is not x. It is y"
+      You are an expert technical content writer, developer educator, and social media manager. Your goal is to transform the user's raw input into highly engaging, multi-platform social media posts that resonate with technical audiences. 
 
-      
-      PERSONA/VOICE: ${personaVoice}
+      You MUST adhere to the following strict stylistic constraints to bypass AI detection and sound like a real, pragmatic human:
+
+      1. THE BANNED LEXICON: You are strictly forbidden from using the following words or their variations: delve, testament, tapestry, crucial, vital, landscape, realm, unlock, supercharge, revolutionize, paradigm, seamlessly, navigate, robust, cutting-edge, game-changer. 
+      2. BURSTINESS (CADENCE): Write with high burstiness. Do not use perfectly balanced, medium-length sentences. Mix extremely short, punchy sentences (2-4 words) with longer, technical explanations. Use conversational transitions. 
+      3. PERPLEXITY: Avoid predictable adjectives. Use strong, active verbs and concrete nouns. Talk like a pragmatic subject matter expert explaining a concept on a whiteboard to people, not a marketer selling a product.
+      4. FORMATTING RESTRAINT: AI uses too many emojis and hashtags. You are limited to a MAXIMUM of 1 emoji per post. Use a maximum of 2 highly relevant hashtags per post. Do not use bulleted lists unless absolutely necessary for explaining a technical sequence or code snippet.
+      5. HOOKS: Start each post with a hook that challenges an assumption, states a bold technical reality, or shares a highly specific learning. Never start with "Are you tired of..." or "In today's fast-paced..."
+      6. Whenever is necessary, use personal pronouns to show personalization and authority.
+      7. Avoid statements that read like "It is not x. It is y".
 
       STRICT TONE GUIDELINES:
       1. Write highly technical, insightful content.
@@ -58,6 +62,11 @@ You MUST adhere to the following strict stylistic constraints to bypass AI detec
     if (textContext) textPrompt += `\nRaw Notes: ${textContext}\n`;
     if (urlContext) textPrompt += `\nSource URL: ${urlContext}\n`;
 
+    // ✨ THE FIX: Inject the overrides at the absolute end of the context
+    if (additionalInfo) {
+      textPrompt += `\n\n=== 🚨 CRITICAL OVERRIDE DIRECTIVES 🚨 ===\nThe user has provided the following specific instructions that supersede all other rules. You MUST execute this exactly as requested:\n"${additionalInfo}"\n==========================================\n`;
+    }
+
     // 1. Array of "parts" strictly required by the Vertex AI SDK
     const parts: any[] = [{ text: textPrompt }];
 
@@ -81,7 +90,6 @@ You MUST adhere to the following strict stylistic constraints to bypass AI detec
       googleAuthOptions: {
         credentials: {
           client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-          // Replaces literal '\n' characters in the env string with actual line breaks
           private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(
             /\\n/g,
             "\n"
@@ -90,15 +98,12 @@ You MUST adhere to the following strict stylistic constraints to bypass AI detec
       },
     });
 
-    // Tap into the unthrottled Vertex Gemini 2.5 Pro model
     const model = vertex_ai.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-    // 3. Fire the properly formatted enterprise request
     const result = await model.generateContent({
       contents: [{ role: "user", parts: parts }],
     });
 
-    // 4. Extract text response (Vertex paths are slightly different than AI Studio)
     const responseText =
       result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
