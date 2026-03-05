@@ -22,6 +22,7 @@
     "google-auth-library": "^10.6.1",
     "lucide-react": "latest",
     "next": "15.5.7",
+    "posthog-js": "^1.359.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-markdown": "10.1.0",

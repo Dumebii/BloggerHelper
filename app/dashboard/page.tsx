@@ -10,8 +10,10 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
 import DynamicLoader from "../../components/DynamicLoader";
+import { usePostHog } from "posthog-js/react";
 
 export default function Dashboard() {
+  const posthog = usePostHog(); // ✨ Initialize PostHog
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
@@ -217,6 +219,14 @@ export default function Dashboard() {
 
       if (finalCampaign.campaign) {
         setCampaign(finalCampaign.campaign);
+        posthog.capture("campaign_generated", {
+          format: inputs.tweetFormat,
+          persona_used:
+            finalVoicePrompt === "Senior Content Engineer"
+              ? "Default"
+              : "Custom",
+          has_additional_info: inputs.additionalInfo.length > 0,
+        });
         setTimeout(() => {
           campaignRef.current?.scrollIntoView({
             behavior: "smooth",
