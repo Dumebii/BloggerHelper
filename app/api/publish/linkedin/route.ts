@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    // ✨ 1. Only ask for the access_token (no provider_id to crash the database)
+    // ✨ 1. The ultra-lean, crash-proof query
     const { data: tokenData, error: tokenError } = await supabase
       .from("user_tokens")
       .select("access_token")
@@ -48,7 +48,6 @@ export async function POST(req: Request) {
     }
 
     const profileData = await profileRes.json();
-    // LinkedIn stores their unique ID in the "sub" field for OIDC
     const authorUrn = `urn:li:person:${profileData.sub}`;
 
     let assetUrn: string | undefined = undefined;
@@ -90,11 +89,23 @@ export async function POST(req: Request) {
       assetUrn = registerData.value.asset;
 
       // Step B: Upload the binary data
-      await fetch(uploadUrl, {
+      // 🚨 CRITICAL: Do NOT send the Authorization header here!
+      // This is an Amazon S3 URL, and it will reject the LinkedIn token.
+      const uploadRes = await fetch(uploadUrl, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${linkedInToken}` },
+        headers: {
+          "Content-Type": "application/octet-stream",
+        },
         body: imageBuffer,
       });
+
+      if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        console.error("Image Upload Failed:", errorText);
+        throw new Error(
+          "Failed to upload the image file to LinkedIn's server."
+        );
+      }
     }
 
     // ✨ 4. Create the Post
