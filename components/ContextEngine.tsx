@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import DynamicLoader from "@/components/DynamicLoader";
 
 interface DistilleryProps {
   inputs: {
@@ -173,7 +174,12 @@ export default function Distillery({
           disabled={loading || (!inputs.url && !inputs.text && !inputs.file)}
           className="w-full mt-4 bg-red-700 text-white py-6 rounded-[1.8rem] font-black uppercase tracking-widest hover:bg-red-800 transition-all disabled:bg-slate-200 shadow-xl shadow-red-900/10 active:scale-[0.98]"
         >
-          {loading ? "Architecting Strategy..." : "Generate Social Campaign"}
+          {loading ? (
+            <DynamicLoader />
+          ) : (
+            // Your normal Generate Button or Form goes here
+            <button onClick={onGenerate}>Generate Campaign</button>
+          )}
         </button>
       </div>
     </section>
