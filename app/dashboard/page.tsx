@@ -32,7 +32,6 @@ export default function Dashboard() {
   const [userPersonas, setUserPersonas] = useState<
     { id: string; name: string; prompt: string }[]
   >([]);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const campaignRef = useRef<HTMLDivElement>(null);
 
@@ -298,8 +297,10 @@ export default function Dashboard() {
             onGenerate={handleGenerate}
             loading={loading}
             userPersonas={userPersonas} // ✨ Pass the fetched personas to the dropdown!
-            onOpenSettings={() => setIsSettingsModalOpen(true)}
-          />
+            onOpenSettings={() => {
+              console.log("🚀 Broadcasting openSettingsModal signal...");
+              window.dispatchEvent(new Event("openSettingsModal"));
+            }}          />
 
           {loading && (
             <div className="mt-16 space-y-8 animate-pulse">
