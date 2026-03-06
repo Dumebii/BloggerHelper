@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "../lib/supabase";
@@ -19,6 +19,19 @@ export default function Header({
 
   const signOut = async () => await supabase.auth.signOut();
   const avatarUrl = session?.user?.user_metadata?.avatar_url;
+  // ✨ THE RECEIVER: Listens for the signal from the Distillery dropdown
+  useEffect(() => {
+    const handleOpenSettings = () => {
+      setIsSettingsOpen(true); 
+    };
+
+    window.addEventListener("openSettingsModal", handleOpenSettings);
+    
+    // Cleanup so React doesn't duplicate the listener
+    return () => {
+      window.removeEventListener("openSettingsModal", handleOpenSettings);
+    };
+  }, []);
 
   return (
     <>
