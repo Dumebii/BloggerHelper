@@ -14,14 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ozigi | Agentic Social Media Manager",
-  description:
-    "An Agentic Content Engine for social media handlers, technical writers and developer educators.",
+  title: 'Ozigi | The Agentic Content Engine',
+  description: 'Turn your ideas and message into structured, multi-platform social media campaigns without the cheesy AI buzzwords.',
+  metadataBase: new URL('https://ozigi.app'),
   openGraph: {
-    title: "Ozigi | Agentic Social Media Manager",
-    description:
-      "Architect 3-day social media distribution strategies from raw context and URLs.",
-    siteName: "Ozigi",
+    title: 'Ozigi | The Agentic Content Engine',
+    description: 'Turn your raw technical research into structured, multi-platform social media campaigns.',
+    url: 'https://ozigi.app',
+    siteName: 'Ozigi',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ozigi | The Agentic Content Engine',
+    description: 'Docs as code? Meet content as code.',
   },
 };
 
