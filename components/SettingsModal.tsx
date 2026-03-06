@@ -188,6 +188,9 @@ export default function SettingsModal({
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 mt-2">
                 Discord Webhook URL
               </label>
+              <p className="text-[10px] text-slate-500 mb-2">
+  Need help finding your Webhook? <a href="/docs" target="_blank" className="text-red-600 hover:underline font-bold">Read the 15-second setup guide →</a>
+</p>
               <div className="flex gap-2">
                 <input
                   type="url"
