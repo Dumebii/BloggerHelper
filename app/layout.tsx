@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Ozigi | The Agentic Content Engine',
-  description: 'Turn your ideas and message into structured, multi-platform social media campaigns without the cheesy AI buzzwords.',
-  metadataBase: new URL('https://ozigi.app'),
+  title: "Ozigi | Agentic Social Media Manager",
+  description:
+    "An Agentic Content Engine for social media handlers, technical writers and developer educators.",
   openGraph: {
     title: "Ozigi | Agentic Social Media Manager",
     description:
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "Ozigi",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: "/opengraph-image.png", // Points to public/landing-preview.png
         width: 1200,
         height: 630,
         alt: "Ozigi.app Landing Page Preview",
@@ -34,14 +34,10 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Ozigi - Your Catchy Slogan",
-    description: "A brief description of what Ozigi.app does.",
     images: ["/opengraph-image.png"],
-    title: 'Ozigi | The Agentic Content Engine',
-    description: 'Docs as code? Meet content as code.',
-    url: 'https://ozigi.app',
-    siteName: 'Ozigi',
-    type: 'website',
+    description: "Docs as code? Meet content as code.",
   },
+};
 
 export default function RootLayout({
   children,
