@@ -2,8 +2,8 @@
   // These tasks will run in order when initializing your CodeSandbox project.
   "setupTasks": [
     {
-      "name": "Install Dependencies",
-      "command": "pnpm install"
+      "command": "pnpm install",
+      "name": "Install Dependencies"
     }
   ],
 
@@ -17,29 +17,36 @@
         "port": 3000
       },
       "restartOn": {
-        "files": ["./pnpm-lock.yaml"]
+        "files": [
+          "./pnpm-lock.yaml"
+        ],
+        "branch": false,
+        "clone": false,
+        "resume": false
       }
     },
     "build": {
       "name": "Build",
-      "command": "pnpm run build",
-      "runAtStart": false
+      "command": "pnpm run build"
     },
     "start": {
       "name": "Start Server",
-      "command": "pnpm run start",
-      "runAtStart": false
+      "command": "pnpm run start"
     },
     "lint": {
       "name": "Lint",
-      "command": "pnpm run lint",
-      "runAtStart": false
+      "command": "pnpm run lint"
     },
     "install": {
       "name": "Install Dependencies",
       "command": "pnpm install",
       "restartOn": {
-        "files": ["./package.json"]
+        "files": [
+          "./package.json"
+        ],
+        "branch": false,
+        "clone": false,
+        "resume": false
       }
     }
   }
