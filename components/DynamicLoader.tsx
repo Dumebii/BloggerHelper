@@ -9,6 +9,19 @@ const loadingSteps = [
   "💼 Optimizing LinkedIn hooks...",
   "👾 Structuring Discord announcements...",
   "✨ Finalizing your campaign...",
+  "⌛Ten more seconds, really... ",
+  "🔄️Countdown with me...",
+  "10...🕙",
+  "9...🕙",
+  "8...🕙",
+  "7...🕙",
+  "6...🕙",
+  "5...🕙",
+  "4...🕙",
+  "3...🕙",
+  "2...🕙",
+  "1...🕙",
+  "Worth the wait, wasn't it? 😁💖",
 ];
 
 export default function DynamicLoader() {
