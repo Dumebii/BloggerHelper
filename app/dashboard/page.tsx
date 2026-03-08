@@ -122,10 +122,12 @@ export default function Dashboard() {
       if (inputs.file) formData.append("file", inputs.file);
       formData.append("tweetFormat", inputs.tweetFormat);
 
-      formData.append(
-        "personaVoice",
-        session?.user?.user_metadata?.persona || "Senior Content Engineer"
-      );
+// ✨ NEW: Route the correct voice to the API based on the dropdown
+      const selectedVoice = inputs.personaId === "custom" 
+        ? (session?.user?.user_metadata?.persona || "Senior Content Engineer") 
+        : "Senior Content Engineer"; // The default fallback
+
+      formData.append("personaVoice", selectedVoice);
 
       const res = await fetch("/api/generate", {
         method: "POST",
