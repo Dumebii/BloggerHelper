@@ -185,20 +185,22 @@ export default function Distillery({
                   </span>
                 </div>
               ) : (
-                <select
+               <select
                 value={inputs.personaId || "default"}
                 onChange={handlePersonaChange}
                 className="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none cursor-pointer hover:border-slate-300"
               >
                 <option value="default">Default (Pragmatic Tech)</option>
                 
-                {/* ✨ Checks if a custom persona exists in user_metadata */}
-                {session?.user?.user_metadata?.persona && (
-                  <option value="custom">My Custom Voice</option>
-                )}
+                {/* ✨ RESTORED: Maps over your actual Supabase personas! */}
+                {userPersonas.map((persona) => (
+                  <option key={persona.id} value={persona.id}>
+                    {persona.name}
+                  </option>
+                ))}
                 
                 <option value="create_new" className="font-black text-red-600">
-                  {session?.user?.user_metadata?.persona ? "✏️ Edit Custom Voice" : "+ Create Custom Voice"}
+                  + Create New Persona
                 </option>
               </select>
               )}
