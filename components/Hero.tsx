@@ -191,8 +191,6 @@ export default function Home() {
         </section>
       </main>
 
-      <Footer />
-
       {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
     </div>
   );
