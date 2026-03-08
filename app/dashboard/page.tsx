@@ -155,7 +155,7 @@ export default function Dashboard() {
       formData.append("tweetFormat", inputs.tweetFormat);
 
       // ✨ FIXED P1: Strict fallback logic, zero ambiguity.
-      let selectedVoice = "Senior Content Engineer";
+      let selectedVoice = "Expert Social Media Copywriter who adapts perfectly to the provided context";
       if (inputs.personaId && inputs.personaId !== "default") {
         const found = personas.find((p: any) => p.id === inputs.personaId);
         if (found && found.prompt) {
