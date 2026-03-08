@@ -82,12 +82,13 @@ You MUST adhere to the following strict stylistic constraints to bypass AI detec
       location: "us-central1",
       googleAuthOptions: {
         credentials: {
-          client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-          // Replaces literal '\n' characters in the env string with actual line breaks
-          private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(
-            /\\n/g,
-            "\n"
-          ),
+          // ✨ RESTORED: Removes rogue quotes just in case they were copied over
+          client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL?.replace(/"/g, ''),
+          
+          // ✨ RESTORED: Replaces literal '\n' characters AND strips rogue JSON quotes
+          private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY
+            ?.replace(/\\n/g, "\n")
+            ?.replace(/"/g, ""),
         },
       },
     });
