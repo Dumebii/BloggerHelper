@@ -65,7 +65,7 @@ export default function SettingsModal({
     if (!cleanName || !cleanPrompt) return; // Basic validation
 
     setIsSavingPersona(true);
-    const { error } = await supabase.from("personas").insert({
+    const { error } = await supabase.from("user_personas").insert({
       user_id: session.user.id,
       name: cleanName,
       prompt: cleanPrompt, 
@@ -162,7 +162,7 @@ export default function SettingsModal({
           {/* --- NEW DATABASE PERSONAS FORM --- */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
-              🗣️ Create Database Persona
+              🗣️ Create Persona
             </h3>
             
             <div>
@@ -193,7 +193,7 @@ export default function SettingsModal({
               onClick={handleSaveDatabasePersona}
               className="w-full bg-red-700 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-red-800 transition-all disabled:opacity-50 disabled:bg-slate-300 text-xs shadow-lg"
             >
-              {isSavingPersona ? "Saving..." : "Save to Database"}
+              {isSavingPersona ? "Saving..." : "Save"}
             </button>
           </div>
 
