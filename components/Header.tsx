@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "../lib/supabase";
@@ -15,10 +15,22 @@ export default function Header({
   onSignIn: () => void;
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const pathname = usePathname(); // Detects if we are on "/" or "/dashboard"
+  const pathname = usePathname(); 
 
   const signOut = async () => await supabase.auth.signOut();
   const avatarUrl = session?.user?.user_metadata?.avatar_url;
+
+  // ✨ FIXED: The missing listener is back! 
+  // Now the Header can "hear" the dropdown signal to open the Settings Modal.
+  useEffect(() => {
+    const handleOpenSettings = () => {
+      setIsSettingsOpen(true);
+    };
+    window.addEventListener("openSettingsModal", handleOpenSettings);
+    return () => {
+      window.removeEventListener("openSettingsModal", handleOpenSettings);
+    };
+  }, []);
 
   return (
     <>
@@ -41,7 +53,6 @@ export default function Header({
           </Link>
 
           <div className="flex items-center gap-2 md:gap-4">
-            {/* If on landing page, show link to Dashboard. If on Dashboard, show History (if logged in) */}
             {pathname === "/" ? (
               <Link
                 href="/dashboard"
