@@ -1,3 +1,4 @@
+export const maxDuration = 60; // ✨ Tells Vercel to wait up to 60 seconds for Vertex AI to finish!
 import { VertexAI } from "@google-cloud/vertexai";
 import { NextResponse } from "next/server";
 
