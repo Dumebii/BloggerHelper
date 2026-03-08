@@ -29,10 +29,6 @@ export default function Dashboard() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [pastCampaigns, setPastCampaigns] = useState<any[]>([]);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [userPersonas, setUserPersonas] = useState<
-    { id: string; name: string; prompt: string }[]
-  >([]);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const campaignRef = useRef<HTMLDivElement>(null);
 
@@ -50,14 +46,14 @@ export default function Dashboard() {
     }
 
     // Supabase Auth
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) fetchHistory(session.user.id);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       if (session?.user) {
         fetchHistory(session.user.id);
@@ -66,7 +62,7 @@ export default function Dashboard() {
           // Because users can link accounts, we must figure out WHICH provider this token belongs to.
           // We do this by finding the most recently updated identity in their session.
           const identities = session.user.identities || [];
-          const latestIdentity = identities.reduce((prev: any, current: any) =>
+          const latestIdentity = identities.reduce((prev, current) =>
             new Date(prev.updated_at || 0).getTime() >
             new Date(current.updated_at || 0).getTime()
               ? prev
@@ -92,45 +88,6 @@ export default function Dashboard() {
     });
     return () => subscription.unsubscribe();
   }, []);
-
-  // ✨ 1. Define the function OUTSIDE the useEffect so the whole file can use it
-  const fetchPersonas = async () => {
-    console.log("1. fetchPersonas triggered...");
-
-    const {
-      data: { session: currentSession },
-    } = await supabase.auth.getSession();
-
-    if (!currentSession) {
-      console.log("2. No session found. Aborting fetch.");
-      return;
-    }
-
-    console.log("3. Session found, fetching from database...");
-    const { data, error } = await supabase
-      .from("user_personas")
-      .select("id, name, prompt")
-      .eq("user_id", currentSession.user.id)
-      .order("created_at", { ascending: false });
-
-    if (data) {
-      console.log("4. Personas fetched successfully:", data);
-      setUserPersonas(data);
-    } else if (error) {
-      console.error("4. Failed to fetch personas:", error);
-    }
-  };
-
-  useEffect(() => {
-    console.log("0. Dashboard Component Mounted. Running useEffect...");
-    fetchPersonas();
-
-    window.addEventListener("refreshPersonas", fetchPersonas);
-
-    return () => {
-      window.removeEventListener("refreshPersonas", fetchPersonas);
-    };
-  }, [session?.user?.id]); // <-- Double-checking this is strictly empty or has currently what's in!
 
   const fetchHistory = async (userId: string) => {
     const { data } = await supabase
@@ -292,14 +249,11 @@ export default function Dashboard() {
           )}
 
           <Distillery
-            session={session}
             inputs={inputs}
             setInputs={setInputs}
             onGenerate={handleGenerate}
             loading={loading}
-            userPersonas={userPersonas} // ✨ Pass the fetched personas to the dropdown!
-onOpenSettings={() => window.dispatchEvent(new Event("openSettingsModal"))}
-            />
+          />
 
           {loading && (
             <div className="mt-16 space-y-8 animate-pulse">

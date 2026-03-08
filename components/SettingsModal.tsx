@@ -1,35 +1,29 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase"; // Make sure this path is correct for your app!
+import { supabase } from "../lib/supabase";
 
 interface SettingsModalProps {
   session: any;
   onClose: () => void;
-  // ✨ Optional: A callback to tell the dashboard to refetch personas when a new one is made
-  onPersonaCreated?: () => void;
 }
 
 export default function SettingsModal({
   session,
   onClose,
-  onPersonaCreated,
 }: SettingsModalProps) {
-  // --- Discord Webhook State ---
+  // --- Workspace State ---
+  const [persona, setPersona] = useState("");
   const [webhook, setWebhook] = useState("");
-  const [isSavingWebhook, setIsSavingWebhook] = useState(false);
-
-  // --- ✨ NEW: Multi-Persona State ---
-  const [personaName, setPersonaName] = useState("");
-  const [personaPrompt, setPersonaPrompt] = useState("");
-  const [isSavingPersona, setIsSavingPersona] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // --- OAuth Linking State ---
   const [connections, setConnections] = useState<string[]>([]);
   const [linkLoading, setLinkLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    // 1. Load Webhook Preference
+    // 1. Load Workspace Preferences
     if (session?.user?.user_metadata) {
+      setPersona(session.user.user_metadata.persona || "");
       setWebhook(session.user.user_metadata.discord_webhook || "");
     }
     // 2. Load Social Connections
@@ -49,52 +43,14 @@ export default function SettingsModal({
     }
   };
 
-  // ✨ Separate save function for the webhook
-  const handleSaveWebhook = async () => {
-    setIsSavingWebhook(true);
+  const handleSave = async () => {
+    setIsSaving(true);
     const { error } = await supabase.auth.updateUser({
-      data: { discord_webhook: webhook },
+      data: { persona, discord_webhook: webhook },
     });
-    setIsSavingWebhook(false);
-    if (error) {
-      console.error("Failed to update webhook:", error.message);
-      alert("Failed to save webhook.");
-    } else {
-      alert("Webhook saved!");
-    }
-  };
-
-  // ✨ NEW: Function to insert the new persona into our database table
-  const handleCreatePersona = async () => {
-    if (!personaName.trim() || !personaPrompt.trim()) {
-      return alert(
-        "Please provide both a name and instructions for your persona."
-      );
-    }
-
-    setIsSavingPersona(true);
-
-    const { error } = await supabase.from("user_personas").insert([
-      {
-        user_id: session.user.id,
-        name: personaName.trim(),
-        prompt: personaPrompt.trim(),
-      },
-    ]);
-
-    setIsSavingPersona(false);
-
-    if (error) {
-      console.error("Failed to save persona:", error.message);
-      alert(`Error saving persona: ${error.message}`);
-    } else {
-      // Clear the form, alert the parent component to refetch, and close the modal
-      setPersonaName("");
-      setPersonaPrompt("");
-      window.dispatchEvent(new Event("refreshPersonas"));
-      if (onPersonaCreated) onPersonaCreated();
-      onClose();
-    }
+    setIsSaving(false);
+    if (!error) onClose();
+    else console.error("Failed to update settings:", error.message);
   };
 
   const handleLinkAccount = async (provider: "x" | "linkedin_oidc") => {
@@ -138,79 +94,47 @@ export default function SettingsModal({
         </h2>
 
         <div className="space-y-8">
-          {/* --- SECTION 1: CREATE CUSTOM PERSONA --- */}
+          {/* --- SECTION 1: WORKSPACE PREFERENCES --- */}
           <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2 flex items-center gap-2">
-              🗣️ Create Voice Persona
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
+              Workspace Preferences
             </h3>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 mt-2">
-                Persona Name
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 mt-4">
+                Custom Persona Voice
               </label>
-              <input
-                type="text"
-                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-bold text-slate-900"
-                placeholder="e.g., Snarky Indie Hacker"
-                value={personaName}
-                onChange={(e) => setPersonaName(e.target.value)}
+              <textarea
+                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium min-h-[80px] resize-y text-slate-900"
+                placeholder="e.g., You are an expert developer educator who writes punchy, highly technical content..."
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
               />
             </div>
 
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                Writing Instructions (The Prompt)
+                Discord Webhook URL
               </label>
-              <textarea
-                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium min-h-[100px] resize-y text-slate-900"
-                placeholder="e.g., Write with high burstiness, use extreme sarcasm, and never use bullet points..."
-                value={personaPrompt}
-                onChange={(e) => setPersonaPrompt(e.target.value)}
+              <input
+                type="url"
+                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
+                placeholder="https://discord.com/api/webhooks/..."
+                value={webhook}
+                onChange={(e) => setWebhook(e.target.value)}
               />
             </div>
 
             <button
-              onClick={handleCreatePersona}
-              disabled={isSavingPersona}
+              onClick={handleSave}
+              disabled={isSaving}
               className="w-full bg-slate-900 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-red-700 transition-all disabled:opacity-50 text-[10px] sm:text-xs shadow-lg mt-2"
             >
-              {isSavingPersona ? "Saving Persona..." : "+ Save New Persona"}
+              {isSaving ? "Saving..." : "Save Preferences"}
             </button>
           </div>
 
-          {/* --- SECTION 2: DISCORD INTEGRATION --- */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2 flex items-center gap-2">
-              👾 Discord Integration
-            </h3>
-
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 mt-2">
-                Discord Webhook URL
-              </label>
-              <p className="text-[10px] text-slate-500 mb-2">
-                  Need help finding your Webhook? <a href="/docs" target="_blank" className="text-red-600 hover:underline font-bold">Read the 15-second setup guide →</a>
-               </p>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
-                  placeholder="https://discord.com/api/webhooks/..."
-                  value={webhook}
-                  onChange={(e) => setWebhook(e.target.value)}
-                />
-                <button
-                  onClick={handleSaveWebhook}
-                  disabled={isSavingWebhook}
-                  className="px-4 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-xl font-black uppercase tracking-widest transition-all disabled:opacity-50 text-[10px]"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* --- SECTION 3: CONNECTED ACCOUNTS --- */}
+          {/* --- SECTION 2: CONNECTED ACCOUNTS --- */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
               Social Connections
@@ -218,6 +142,35 @@ export default function SettingsModal({
             <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest leading-relaxed">
               Link your accounts to enable one-click publishing.
             </p>
+
+            {/* X (Twitter) Connection */}
+            <div className="flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-slate-50 hidden">
+              <div className="flex items-center gap-3">
+                <svg
+                  className="w-4 h-4 text-slate-900"
+                  viewBox="0 0 1200 1227"
+                  fill="currentColor"
+                >
+                  <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
+                </svg>
+                <span className="font-black uppercase tracking-widest text-xs">
+                  X (Twitter)
+                </span>
+              </div>
+              {connections.includes("x") ? (
+                <span className="text-[10px] font-black uppercase tracking-widest text-green-700 bg-green-100 px-3 py-1.5 rounded-lg border border-green-200">
+                  Connected
+                </span>
+              ) : (
+                <button
+                  onClick={() => handleLinkAccount("x")}
+                  disabled={linkLoading !== null}
+                  className="text-[10px] font-black uppercase tracking-widest text-white bg-black hover:bg-slate-800 px-4 py-2 rounded-lg transition-all shadow-sm"
+                >
+                  {linkLoading === "x" ? "Linking..." : "Connect"}
+                </button>
+              )}
+            </div>
 
             {/* LinkedIn Connection */}
             <div className="flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-slate-50">

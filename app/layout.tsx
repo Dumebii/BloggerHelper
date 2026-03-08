@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Ozigi - Your Catchy Slogan",
+    description: "A brief description of what Ozigi.app does.",
     images: ["/opengraph-image.png"],
-    description: "Docs as code? Meet content as code.",
   },
 };
 

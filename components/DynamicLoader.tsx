@@ -35,11 +35,11 @@ export default function DynamicLoader() {
         <div className="absolute w-full h-full border-4 border-slate-900 rounded-full border-t-transparent animate-spin"></div>
       </div>
 
-{/* Dynamic Text */}
-      <div className="h-12 md:h-6 overflow-hidden flex items-center justify-center px-4">
+      {/* Dynamic Text */}
+      <div className="h-6 overflow-hidden flex items-center justify-center">
         <p
-          key={stepIndex}
-          className="text-xs md:text-sm text-center font-black uppercase tracking-widest text-slate-700 animate-in slide-in-from-bottom-2 fade-in duration-300"
+          key={stepIndex} // This forces the animation to re-trigger on text change
+          className="text-sm font-black uppercase tracking-widest text-slate-700 animate-in slide-in-from-bottom-2 fade-in duration-300"
         >
           {loadingSteps[stepIndex]}
         </p>

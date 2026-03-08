@@ -162,18 +162,19 @@ export default function Distillery({
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="w-full mt-6 py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200"
         >
-          {showAdvanced ? "Hide Advanced Options ⬆" : "⚙️ Advanced Options (Personas, Formats) ⬇"}
+          {showAdvanced
+            ? "Hide Advanced Options ⬆"
+            : "⚙️ Advanced Options (Personas, Formats) ⬇"}
         </button>
 
         {/* ✨ The Hidden Engine Room */}
         {showAdvanced && (
           <div className="mt-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-200 animate-in fade-in slide-in-from-top-2 flex flex-col gap-6">
-            
             {/* Persona Selector */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-1">
-                  🗣️ Voice Persona
+                  🗣️ Voice or Persona
                 </h4>
               </div>
 
@@ -195,7 +196,10 @@ export default function Distillery({
                       {persona.name}
                     </option>
                   ))}
-                  <option value="create_new" className="font-black text-red-600">
+                  <option
+                    value="create_new"
+                    className="font-black text-red-600"
+                  >
                     + Create New Persona
                   </option>
                 </select>
@@ -225,7 +229,9 @@ export default function Distillery({
               </label>
               <div className="flex bg-white p-1 rounded-xl border border-slate-200">
                 <button
-                  onClick={() => setInputs({ ...inputs, tweetFormat: "single" })}
+                  onClick={() =>
+                    setInputs({ ...inputs, tweetFormat: "single" })
+                  }
                   className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     inputs.tweetFormat === "single"
                       ? "bg-slate-100 text-slate-900 shadow-sm"
@@ -235,7 +241,9 @@ export default function Distillery({
                   Single Tweet
                 </button>
                 <button
-                  onClick={() => setInputs({ ...inputs, tweetFormat: "thread" })}
+                  onClick={() =>
+                    setInputs({ ...inputs, tweetFormat: "thread" })
+                  }
                   className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     inputs.tweetFormat === "thread"
                       ? "bg-slate-100 text-slate-900 shadow-sm"
@@ -246,7 +254,6 @@ export default function Distillery({
                 </button>
               </div>
             </div>
-
           </div>
         )}
 
