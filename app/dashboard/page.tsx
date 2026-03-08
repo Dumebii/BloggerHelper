@@ -123,7 +123,7 @@ export default function Dashboard() {
 
   const fetchPersonas = async (userId: string) => {
     const { data } = await supabase
-      .from("personas")
+      .from("user_personas")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
