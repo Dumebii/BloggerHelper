@@ -94,7 +94,7 @@ You MUST adhere to the following strict stylistic constraints to bypass AI detec
     });
 
     // Tap into the unthrottled Vertex Gemini 2.5 Pro model
-    const model = vertex_ai.getGenerativeModel({ model: "claude-3-7-sonnet" });
+    const model = vertex_ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // 3. Fire the properly formatted enterprise request
     const result = await model.generateContent({
