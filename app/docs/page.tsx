@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Footer from "../../components/Footer"; // Adjust path if your Footer is somewhere else!
+import Footer from "../../components/Footer";
 
 export default function DocsPage() {
   return (
@@ -14,7 +14,7 @@ export default function DocsPage() {
           </Link>
           <Link
             href="/dashboard"
-            className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors"
+            className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm"
           >
             Go to Dashboard →
           </Link>
@@ -28,52 +28,61 @@ export default function DocsPage() {
             Platform Documentation
           </h1>
           <p className="text-lg text-slate-600 font-medium leading-relaxed">
-            Ozigi is an agentic content engine designed to bridge the gap
-            between your raw research and structured social distribution. Here
-            is how to wire it up.
+            Ozigi is an intelligent context engine designed to cure "blank page syndrome" by bridging the gap between your raw research and structured social distribution.
           </p>
         </div>
 
         <div className="space-y-16">
-          {/* Section 1: The Context Engine */}
+          {/* Section 1: The Context Engine & Multimodal Ingestion */}
           <section>
             <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-              1. The Context Engine
+              1. Multimodal Ingestion
             </h2>
             <p className="text-slate-600 font-medium leading-relaxed mb-4">
-              Unlike standard AI chatbots, Ozigi does not require prompt
-              engineering on your end. You simply provide the context, and the
-              engine handles the stylistic constraints.
+              Unlike standard AI chatbots, Ozigi does not require prompt engineering on your end. Powered by Google's Gemini 2.5 Pro, the engine handles massive context windows so you can simply drop in your raw data:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600 font-medium mb-6">
               <li>
-                <strong>URL Ingestion:</strong> Paste a link to your blog post
-                or documentation.
+                <strong>URL Extraction:</strong> Paste a link to your blog post, GitHub PR, or API documentation.
               </li>
               <li>
-                <strong>Raw Notes:</strong> Dump unformatted meeting transcripts
-                or thought dumps.
+                <strong>Raw Notes:</strong> Dump unformatted meeting transcripts or brain dumps directly into the text area.
               </li>
               <li>
-                <strong>Directives:</strong> Use the "Additional Directives"
-                field to pass strict rules (e.g., "End the final post with a
-                link to my newsletter").
+                <strong>Document Uploads:</strong> Upload PDFs or images. Ozigi will natively extract the core narrative without you needing to summarize it first.
               </li>
             </ul>
           </section>
 
-          {/* Section 2: Custom Personas */}
+          {/* Section 2: The Banned Lexicon (DevRel Positioning) */}
           <section>
             <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-              2. Custom Personas
+              2. The Banned Lexicon (Anti-AI Constraints)
             </h2>
             <p className="text-slate-600 font-medium leading-relaxed mb-4">
-              You can save multiple voice profiles in your Settings modal. When
-              writing your persona prompt, focus on <strong>who</strong> you
-              are, not what you are writing.
+              The primary differentiator of Ozigi is its aggressive stance against "AI-speak." Standard LLMs fall into predictable cadence patterns and vocabulary crutches.
+            </p>
+            <p className="text-slate-600 font-medium leading-relaxed mb-4">
+              At the API route level, Ozigi intercepts the generation and enforces a strict <strong>Banned Lexicon</strong>. The engine is actively penalized for using words like:
+            </p>
+            <div className="bg-slate-900 text-red-400 p-6 rounded-2xl font-mono text-sm shadow-lg leading-relaxed">
+              delve, testament, tapestry, crucial, vital, landscape, realm, unlock, supercharge, revolutionize, paradigm, seamlessly, robust...
+            </div>
+            <p className="text-slate-500 text-sm font-medium mt-4">
+              This forces the model to bypass AI detection tools and generate highly bursty, pragmatic copy that sounds like a battle-tested professional.
+            </p>
+          </section>
+
+          {/* Section 3: Custom Personas */}
+          <section>
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+              3. Database-Backed Personas
+            </h2>
+            <p className="text-slate-600 font-medium leading-relaxed mb-4">
+              Ozigi does not rely on a single, global prompt. You can save multiple voice profiles in your database (via the Settings modal). When writing your persona prompt, focus on <strong>who</strong> you are, not what you are writing.
             </p>
             <div className="bg-slate-900 text-slate-300 p-6 rounded-2xl text-sm font-mono leading-relaxed shadow-lg">
-              <span className="text-red-400 font-bold mb-2 block">
+              <span className="text-green-400 font-bold mb-2 block">
                 // Good Persona Example
               </span>
               "You are a pragmatic, battle-tested software engineer. You speak
@@ -82,14 +91,14 @@ export default function DocsPage() {
             </div>
           </section>
 
-          {/* Section 3: Publishing Integrations */}
+          {/* Section 4: Publishing Integrations (Kept your excellent tactical guides) */}
           <section>
             <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-              3. Publishing & Formatting
+              4. Publishing & Formatting
             </h2>
             <p className="text-slate-600 font-medium leading-relaxed mb-6">
               Ozigi does not post to your accounts without your final say. We
-              use a combination of secure OAuth and Web Intents to give you
+              use a combination of secure Web Intents and Webhooks to give you
               total control over the final published product.
             </p>
 
@@ -103,12 +112,11 @@ export default function DocsPage() {
                 <p className="text-slate-600 font-medium leading-relaxed mb-4 text-sm">
                   To ensure you can review character limits and add media, Ozigi
                   uses <strong>Twitter Web Intents</strong>. When you click
-                  "Publish" for an X post, we don't use a background API.
-                  Instead, we instantly compile your generated text and pop open
+                  "Publish" for an X post, we instantly compile your generated text and pop open
                   a new Twitter tab with your content pre-loaded and ready to
                   tweet.
                 </p>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-2">
                     Threads vs. Singles
                   </h4>
@@ -133,7 +141,7 @@ export default function DocsPage() {
                   Discord, you just need a Webhook URL. It takes exactly 15
                   seconds to create one:
                 </p>
-                <ol className="list-decimal pl-5 space-y-3 text-sm text-slate-700 font-medium font-sans">
+                <ol className="list-decimal pl-5 space-y-3 text-sm text-slate-700 font-medium font-sans marker:text-slate-400 marker:font-black">
                   <li>
                     Open your Discord server and click your{" "}
                     <strong>Server Name</strong> in the top left corner.
