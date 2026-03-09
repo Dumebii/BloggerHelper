@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
   const [personas, setPersonas] = useState<any[]>([]); 
 
+  // ✨ FIXED P0: Added personaId to strict TypeScript interface and initialized state
   const [inputs, setInputs] = useState<{
     url: string;
     text: string;
@@ -38,11 +39,9 @@ export default function Dashboard() {
   const campaignRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let isMounted = true; 
-
     const handlePersonaRefresh = () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user?.id && isMounted) {
+        if (session?.user?.id) {
           fetchPersonas(session.user.id);
         }
       });
@@ -60,28 +59,25 @@ export default function Dashboard() {
       window.history.replaceState(null, "", window.location.pathname);
     }
 
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      if (isMounted) {
-        setSession(initialSession);
-        if (initialSession?.user) {
-          fetchHistory(initialSession.user.id);
-          fetchPersonas(initialSession.user.id);
-        }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        fetchHistory(session.user.id);
+        fetchPersonas(session.user.id);
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (!isMounted) return; 
-      
-      setSession(newSession);
-      if (newSession?.user) {
-        fetchHistory(newSession.user.id);
-        fetchPersonas(newSession.user.id);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      if (session?.user) {
+        fetchHistory(session.user.id);
+        // ✨ FIXED P1: Now fetches personas on auth state change (login)
+        fetchPersonas(session.user.id);
         
-        if (newSession.provider_token) {
-          const identities = newSession.user.identities || [];
+        if (session.provider_token) {
+          const identities = session.user.identities || [];
           const latestIdentity = identities.reduce((prev, current) =>
             new Date(prev.updated_at || 0).getTime() >
             new Date(current.updated_at || 0).getTime()
@@ -91,26 +87,26 @@ export default function Dashboard() {
 
           const provider = latestIdentity
             ? latestIdentity.provider
-            : newSession.user.app_metadata.provider;
+            : session.user.app_metadata.provider;
 
           await supabase.from("user_tokens").upsert(
             {
-              user_id: newSession.user.id,
+              user_id: session.user.id,
               provider: provider, 
-              access_token: newSession.provider_token,
-              refresh_token: newSession.provider_refresh_token || null,
+              access_token: session.provider_token,
+              refresh_token: session.provider_refresh_token || null,
               updated_at: new Date().toISOString(),
             },
             { onConflict: "user_id, provider" }
           );
         }
       } else {
+        // Clear personas if user logs out
         setPersonas([]);
       }
     });
 
     return () => {
-      isMounted = false; 
       subscription.unsubscribe();
       window.removeEventListener("refreshPersonas", handlePersonaRefresh);
     };
@@ -158,6 +154,7 @@ export default function Dashboard() {
       if (inputs.file) formData.append("file", inputs.file);
       formData.append("tweetFormat", inputs.tweetFormat);
 
+      // ✨ FIXED P1: Strict fallback logic, zero ambiguity.
       let selectedVoice = "Expert Social Media Copywriter who adapts perfectly to the provided context";
       if (inputs.personaId && inputs.personaId !== "default") {
         const found = personas.find((p: any) => p.id === inputs.personaId);
@@ -172,25 +169,6 @@ export default function Dashboard() {
         method: "POST",
         body: formData,
       });
-
-      // ✨ NEW: Granular Error Handling for Provider Overloads
-      if (res.status === 504) {
-        setErrorMessage("The AI provider took too long to read your context and timed out. It's not us, it's them. Try providing a slightly shorter link or text.");
-        setLoading(false);
-        return;
-      }
-
-      if (res.status === 503 || res.status === 500) {
-        setErrorMessage("The AI engine is currently overloaded with requests. It's not us, it's them. Give it a few seconds and try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (res.status === 429) {
-        setErrorMessage("You're moving too fast! The engine needs a breather. Please wait a moment.");
-        setLoading(false);
-        return;
-      }
 
       const data = await res.json();
 
@@ -228,9 +206,8 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error("Context error:", err);
-      // This specifically catches JSON.parse errors (when AI hallucinates bad formatting)
       setErrorMessage(
-        "The AI struggled to format your context perfectly. It's not us, it's them. Try generating again."
+        "The AI returned an unexpected format. Please try tweaking your context and generating again."
       );
     } finally {
       setLoading(false);
@@ -300,8 +277,8 @@ export default function Dashboard() {
           </h2>
 
           {errorMessage && (
-            <div className="mb-8 p-5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm font-bold flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-4">
-              <span className="text-xl">⚠️</span> {errorMessage}
+            <div className="mb-8 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2 shadow-sm">
+              <span className="text-lg">⚠️</span> {errorMessage}
             </div>
           )}
 
@@ -331,7 +308,11 @@ export default function Dashboard() {
 
           {campaign.length > 0 && !loading && (
             <div className="mt-16 scroll-mt-32" ref={campaignRef}>
-              <DistributionGrid campaign={campaign} session={session} />
+              <DistributionGrid
+                campaign={campaign}
+                session={session}
+                discordWebhook={session?.user?.user_metadata?.discord_webhook ?? ""}
+              />
             </div>
           )}
         </div>

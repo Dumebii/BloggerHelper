@@ -207,9 +207,11 @@ function SocialCard({
 export default function DistributionGrid({
   campaign,
   session,
+  discordWebhook = "",
 }: {
   campaign: CampaignDay[];
   session: any;
+  discordWebhook?: string;
 }) {
   const [xStatuses, setXStatuses] = useState<{
     [day: number]: "idle" | "loading" | "success" | "error";
@@ -235,16 +237,21 @@ export default function DistributionGrid({
   };
 
   const handlePostToDiscord = async (text: string, day: number) => {
-    const webhookUrl = prompt("Enter your Discord Channel Webhook URL:");
-    if (!webhookUrl) return;
+    if (!discordWebhook) {
+      alert(
+        "No Discord webhook configured. Go to Settings → Workspace Preferences to add one."
+      );
+      return;
+    }
     setDiscordStatuses((prev) => ({ ...prev, [day]: "loading" }));
     try {
-      const res = await fetch(webhookUrl, {
+      const res = await fetch("/api/post-discord", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify({ content: text, webhookUrl: discordWebhook }),
       });
-      if (!res.ok) throw new Error("Discord rejected the webhook payload.");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Discord rejected the payload.");
       setDiscordStatuses((prev) => ({ ...prev, [day]: "success" }));
       setTimeout(
         () => setDiscordStatuses((prev) => ({ ...prev, [day]: "idle" })),
@@ -402,11 +409,12 @@ export default function DistributionGrid({
                     onPost={handlePostToDiscord}
                     postStatus={discordStatuses[dayData.day]}
                     actionButtonConfig={{
-                      idle: "👾 Send to Discord",
+                      idle: discordWebhook ? "👾 Send to Discord" : "⚙️ Add Webhook in Settings",
                       loading: "Posting...",
                       success: "✅ Sent!",
-                      classes:
-                        "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95",
+                      classes: discordWebhook
+                        ? "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95"
+                        : "bg-slate-100 text-slate-500 border border-slate-200 cursor-pointer hover:bg-slate-200",
                     }}
                   />
                 )
