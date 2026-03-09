@@ -48,6 +48,9 @@ dependencies:
   twitter-api-v2:
     specifier: ^1.29.0
     version: 1.29.0
+  chart.js:
+    specifier: ^4.5.1
+    version: 4.5.1 
 
 devDependencies:
   '@eslint/eslintrc':
