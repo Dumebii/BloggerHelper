@@ -76,18 +76,41 @@ export default function DocsPage() {
           {/* Section 3: Custom Personas */}
           <section>
             <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-              3. Database-Backed Personas
+              3. System Personas: Your Secret Weapon
             </h2>
             <p className="text-slate-600 font-medium leading-relaxed mb-4">
-              Ozigi does not rely on a single, global prompt. You can save multiple voice profiles in your database (via the Settings modal). When writing your persona prompt, focus on <strong>who</strong> you are, not what you are writing.
+              Most users treat AI prompts as instructions ("Write a tweet about X"). Ozigi treats prompts as <strong>Editorial Briefs</strong>. Your Persona is the most powerful differentiator in the platform.
             </p>
-            <div className="bg-slate-900 text-slate-300 p-6 rounded-2xl text-sm font-mono leading-relaxed shadow-lg">
-              <span className="text-green-400 font-bold mb-2 block">
-                // Good Persona Example
-              </span>
-              "You are a pragmatic, battle-tested software engineer. You speak
-              directly, use dry humor, and hate corporate buzzwords. You prefer
-              short, punchy sentences."
+            <p className="text-slate-600 font-medium leading-relaxed mb-6">
+              Using the Settings modal, you can create and save multiple database-backed voice profiles. When writing your persona, do not describe what you want the AI to write; describe <strong>who the AI is</strong>, their attitude, and their formatting rules.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Bad Example */}
+              <div className="bg-red-50 p-6 rounded-2xl border border-red-100">
+                <span className="text-red-700 font-black uppercase tracking-widest text-xs mb-2 block">
+                  ❌ Weak Persona
+                </span>
+                <p className="font-mono text-sm text-slate-700 leading-relaxed">
+                  "You are a helpful marketing assistant. Write engaging and professional posts about my software updates. Make sure to use emojis to make it fun."
+                </p>
+                <p className="text-xs text-slate-500 font-medium mt-4">
+                  Result: Generic output, heavy reliance on buzzwords, sounds like an intern wrote it.
+                </p>
+              </div>
+
+              {/* Good Example */}
+              <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg">
+                <span className="text-green-400 font-black uppercase tracking-widest text-xs mb-2 block">
+                  ✅ High-Impact Persona
+                </span>
+                <p className="font-mono text-sm text-slate-300 leading-relaxed">
+                  "You are a pragmatic, battle-tested Staff Engineer. You speak directly, use dry humor, and absolutely despise corporate fluff. You prefer short, punchy sentences. You never apologize. You optimize for brutal clarity."
+                </p>
+                <p className="text-xs text-slate-400 font-medium mt-4">
+                  Result: Authoritative, highly-readable content that commands respect and stops the scroll.
+                </p>
+              </div>
             </div>
           </section>
 
