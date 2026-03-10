@@ -112,7 +112,7 @@ function SocialCard({
   };
 
   return (
-    // 🔥 TIGHTENED: Reduced border width, sharpended corners, reduced padding (p-5 instead of p-6)
+    // 🔥 We keep fadeUp here. It will be triggered by the direct parent grid.
     <motion.div variants={fadeUp} className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col p-5 hover:border-slate-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
         <span className="text-xs font-black uppercase tracking-widest text-slate-900">
@@ -281,49 +281,148 @@ export default function DistributionGrid({
   const hasDiscord = campaign.some((d) => d.discord);
 
   return (
-    <motion.div 
-      className="space-y-12"
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-    >
+    // Changed the parent to a standard div to prevent context breakages
+    <div className="space-y-12">
+      
       {/* X ROW */}
       {hasX && (
         <section>
-          {/* ... existing header ... */}
-          {/* 🔥 Goal 2: Added "items-start" to prevent cards from stretching vertically */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
-            {/* ... mapped cards ... */}
-          </div>
+          <motion.div 
+            initial="hidden" animate="visible" variants={fadeUp} 
+            className="flex items-center gap-3 mb-5"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 1200 1227" fill="currentColor">
+              <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
+            </svg>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              X Strategy
+            </h3>
+          </motion.div>
+          
+          {/* 🔥 This is the direct orchestrator. It passes the signal directly to the SocialCards */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {campaign.map(
+              (dayData) =>
+                dayData.x && (
+                  <SocialCard
+                    key={`x-${dayData.day}`}
+                    day={dayData.day}
+                    platformName="X"
+                    initialText={dayData.x}
+                    onPost={handlePostToX}
+                    postStatus={xStatuses[dayData.day]}
+                    actionButtonConfig={{
+                      idle: "🚀 Post to X",
+                      loading: "Posting...",
+                      success: "✅ Published!",
+                      classes: "bg-black text-white hover:bg-slate-800 active:scale-95",
+                    }}
+                  />
+                )
+            )}
+          </motion.div>
         </section>
       )}
 
       {/* LINKEDIN ROW */}
       {hasLinkedIn && (
         <section>
-          {/* ... existing header ... */}
-          {/* 🔥 Goal 2: Added "items-start" */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
-            {/* ... mapped cards ... */}
-          </div>
+          <motion.div 
+            initial="hidden" animate="visible" variants={fadeUp} 
+            className="flex items-center gap-3 mb-5"
+          >
+            <svg className="w-5 h-5 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+            </svg>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              LinkedIn Strategy
+            </h3>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {campaign.map(
+              (dayData) =>
+                dayData.linkedin && (
+                  <SocialCard
+                    key={`li-${dayData.day}`}
+                    day={dayData.day}
+                    platformName="LinkedIn"
+                    initialText={dayData.linkedin}
+                    onPost={handlePostToLinkedIn}
+                    postStatus={liStatuses[dayData.day]}
+                    actionButtonConfig={{
+                      idle: "💼 Post to LinkedIn",
+                      loading: "Posting...",
+                      success: "✅ Published!",
+                      classes: "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95",
+                    }}
+                  />
+                )
+            )}
+          </motion.div>
         </section>
       )}
 
       {/* DISCORD ROW */}
       {hasDiscord && (
         <section>
-          {/* ... existing header ... */}
-          {/* 🔥 Goal 2: Added "items-start" */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
-            {/* ... mapped cards ... */}
-          </div>
+          <motion.div 
+            initial="hidden" animate="visible" variants={fadeUp} 
+            className="flex items-center gap-3 mb-5"
+          >
+            <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 127.14 96.36" fill="currentColor">
+              <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77.7,77.7,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+            </svg>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              Discord Strategy
+            </h3>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {campaign.map(
+              (dayData) =>
+                dayData.discord && (
+                  <SocialCard
+                    key={`disc-${dayData.day}`}
+                    day={dayData.day}
+                    platformName="Discord"
+                    initialText={dayData.discord}
+                    onPost={handlePostToDiscord}
+                    postStatus={discordStatuses[dayData.day]}
+                    actionButtonConfig={{
+                      idle: "👾 Send to Discord",
+                      loading: "Posting...",
+                      success: "✅ Sent!",
+                      classes: "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95",
+                    }}
+                  />
+                )
+            )}
+          </motion.div>
         </section>
       )}
 
-      {/* 🔥 Goal 4: The Upcoming Platforms Announcement */}
-      <motion.section variants={fadeUp} className="mt-20 border-t border-dashed border-slate-200 pt-16">
+      {/* VISUAL PLATFORMS ANNOUNCEMENT */}
+      <motion.section 
+        initial="hidden" animate="visible" variants={fadeUp} 
+        className="mt-20 border-t border-dashed border-slate-200 pt-16"
+      >
          <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative group">
-            {/* Aesthetic background blur */}
             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-slate-200/50 blur-3xl rounded-full pointer-events-none group-hover:bg-slate-300/50 transition-colors duration-500"></div>
             
             <div className="relative z-10 flex-1">
@@ -347,6 +446,6 @@ export default function DistributionGrid({
          </div>
       </motion.section>
 
-    </motion.div>
+    </div>
   );
 }
