@@ -1,6 +1,41 @@
 export const maxDuration = 60; // ✨ Tells Vercel to wait up to 60 seconds for Vertex AI to finish!
-import { VertexAI } from "@google-cloud/vertexai";
+import { VertexAI, SchemaType } from "@google-cloud/vertexai";
 import { NextResponse } from "next/server";
+
+// 1. Define the strict JSON Schema
+// This physically prevents the model from returning conversational pre-text or malformed data
+const distributionSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    campaign: {
+      type: SchemaType.ARRAY,
+      description: "A list of 3 daily social media posts.",
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          day: { 
+            type: SchemaType.INTEGER, 
+            description: "The day number in the sequence (1, 2, or 3)" 
+          },
+          x: { 
+            type: SchemaType.STRING, 
+            description: "Content for X/Twitter. Must match the requested single/thread format." 
+          },
+          linkedin: { 
+            type: SchemaType.STRING, 
+            description: "Content for LinkedIn." 
+          },
+          discord: { 
+            type: SchemaType.STRING, 
+            description: "Content for Discord." 
+          }
+        },
+        required: ["day", "x", "linkedin", "discord"]
+      }
+    }
+  },
+  required: ["campaign"]
+};
 
 export async function POST(req: Request) {
   try {
@@ -14,8 +49,8 @@ export async function POST(req: Request) {
       | "Expert Content Strategist";
     const file = formData.get("file") as File | null;
 
-    // ✨ FIXED: Removed all hardcoded "tech/developer/code" biases!
-// ✨ FIXED: Added Domain Adaptation Rule and stripped implicit B2B/Tech phrasing
+    // ✨ Notice how we removed the "OUTPUT RULES" asking for JSON.
+    // The Schema handles that natively now.
     let textPrompt = `
       TASK: Analyze the provided context (which may include scraped webpages, raw notes, images, or PDFs).
       Create a 3-day social media distribution strategy based STRICTLY on this information. 
@@ -40,26 +75,10 @@ export async function POST(req: Request) {
       
       PERSONA/VOICE: ${personaVoice}
 
-      STRICT TONE GUIDELINES:
-      1. Write highly insightful, engaging content adapted perfectly to the provided context's specific niche.
-      2. ZERO HASHTAGS. Do not use a single hashtag on any platform.
-      3. ZERO CHEESY AI WORDS. Completely avoid words like "delve", "robust", "unleash", "supercharge", "transformative", or "tapestry". 
-      4. Sound like an authentic, highly-experienced insider in whatever field the context belongs to.
-
       CRITICAL X/TWITTER FORMAT RULE: 
       The user requested the Twitter format to be: "${tweetFormat}".
       If "single", the "x" field must contain EXACTLY ONE punchy, high-impact tweet.
       If "thread", the "x" field must contain a compelling 3-to-5 part thread. Separate each part with two blank lines and number them (e.g., 1/5, 2/5).
-
-      OUTPUT RULES:
-      Return ONLY a valid JSON object. Do not include markdown formatting like \`\`\`json.
-      
-      Format: 
-      {
-        "campaign": [
-          {"day": 1, "x": "...", "linkedin": "...", "discord": "..."}
-        ]
-      }
       
       CONTEXT TO ANALYZE:
     `;
@@ -67,7 +86,7 @@ export async function POST(req: Request) {
     if (textContext) textPrompt += `\nRaw Notes: ${textContext}\n`;
     if (urlContext) textPrompt += `\nSource URL: ${urlContext}\n`;
 
-    // 1. Array of "parts" strictly required by the Vertex AI SDK
+    // 2. Array of "parts" strictly required by the Vertex AI SDK
     const parts: any[] = [{ text: textPrompt }];
 
     // Handle Image/PDF Uploads
@@ -83,16 +102,13 @@ export async function POST(req: Request) {
       });
     }
 
-    // 2. Initialize Enterprise Vertex AI with your new .env variables
+    // 3. Initialize Enterprise Vertex AI
     const vertex_ai = new VertexAI({
       project: process.env.GOOGLE_CLOUD_PROJECT_ID as string,
       location: "us-central1",
       googleAuthOptions: {
         credentials: {
-          // ✨ RESTORED: Removes rogue quotes just in case they were copied over
           client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL?.replace(/"/g, ''),
-          
-          // ✨ RESTORED: Replaces literal '\n' characters AND strips rogue JSON quotes
           private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY
             ?.replace(/\\n/g, "\n")
             ?.replace(/"/g, ""),
@@ -100,15 +116,20 @@ export async function POST(req: Request) {
       },
     });
 
-    // Tap into the unthrottled Vertex Gemini 2.5 Pro model
-    const model = vertex_ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // 4. ✨ Attach the Schema to the Model Configuration
+    const model = vertex_ai.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: distributionSchema,
+      }
+    });
 
-    // 3. Fire the properly formatted enterprise request
+    // 5. Fire the properly formatted enterprise request
     const result = await model.generateContent({
       contents: [{ role: "user", parts: parts }],
     });
 
-    // 4. Extract text response (Vertex paths are slightly different than AI Studio)
     const responseText =
       result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
