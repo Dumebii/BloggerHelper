@@ -261,7 +261,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <main className="pt-28 md:pt-32 pb-8 flex-1">
+<main className="pt-28 md:pt-32 pb-8 flex-1">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 w-full">
           {!session && (
             <UpgradeBanner onSignIn={() => setIsAuthModalOpen(true)} />
@@ -282,8 +282,9 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 🔥 Goal 1: Hide Engine when campaign exists */}
-          {!campaign.length && !loading && (
+          {/* 🔥 FIX 1: We allow Distillery to render when campaign is empty, regardless of loading state. 
+              This allows it to successfully mount your custom DynamicLoader! */}
+          {!campaign.length && (
             <Distillery
               session={session}
               userPersonas={personas}
@@ -295,18 +296,7 @@ export default function Dashboard() {
             />
           )}
 
-          {loading && (
-            <div className="mt-8 space-y-8 animate-pulse">
-              <div className="h-8 bg-slate-200 rounded w-64 mx-auto mb-8"></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-slate-100 rounded-[1.5rem] h-96 border border-slate-200"></div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 🔥 Goal 1: Bring user immediately to grid with a reset button */}
+          {/* 🔥 FIX 2: Only show the grid and 'Architect New' button AFTER generation is done and loading is false */}
           {campaign.length > 0 && !loading && (
             <div className="mt-4 animate-in fade-in slide-in-from-bottom-8">
               <div className="flex justify-between items-center mb-8">
@@ -318,18 +308,12 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* <div className="scroll-mt-32" ref={campaignRef}>
-                <DistributionGrid campaign={campaign} session={session} />
-              </div>
-            </div>
-          )}
-          {campaign.length > 0 && !loading && (
-            <div className="mt-16 scroll-mt-32" ref={campaignRef}> */}
+              <div className="scroll-mt-32" ref={campaignRef}>
               <DistributionGrid
                 campaign={campaign}
                 session={session}
                 discordWebhook={session?.user?.user_metadata?.discord_webhook ?? ""}
-              />
+              />              </div>
             </div>
           )}
         </div>
