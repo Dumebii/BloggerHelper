@@ -1,0 +1,73 @@
+---
+title: "The Banned Lexicon: Curing AI-Speak"
+readTime: "6 min read"
+tag: "Architecture Deep Dive"
+---
+
+## The Statistical Mean Problem
+
+Large Language Models are predictive engines at their core. When generating text, they gravitate toward the statistical mean of their training data. Because models like Gemini and GPT are trained heavily on corporate documentation, SEO-optimized marketing copy, and standardized business writing, their default output leans on a predictable cadence and a recurring set of vocabulary crutches.
+
+If you spend any time reading technical content on social media, you recognize the symptoms immediately. Paragraphs that open with "In today's fast-paced digital landscape," and an unprompted obsession with words like "delve," "tapestry," and "testament." Nobody talks like this. Nobody writes like this in a Slack message or a code review. But it saturates AI-generated content because it's what the model has seen the most of.
+
+For Ozigi, this was a core problem. The platform is built for engineers, DevRel professionals, and technical founders. Generic, buzzword-laden output doesn't just sound bad in those communities. It destroys credibility outright.
+
+## Engineering a Constraint-Based Workflow
+
+Fixing this with standard prompt engineering doesn't work. Politely asking the model to "sound more natural" or "avoid buzzwords" produces marginal, inconsistent results. LLMs treat soft suggestions as optional guidance, especially when generating longer copy. The model will drift back toward its defaults.
+
+Ozigi takes a different approach. Generation requests are intercepted at the API route level, and a hard negative constraint is injected directly into the system instruction. The model isn't asked to avoid certain words. It's explicitly forbidden from using them. We call this the **Banned Lexicon**.
+
+Here's a simplified look at the interceptor logic in the Next.js backend:
+
+```typescript
+// app/api/generate/route.ts
+const BANNED_LEXICON = `
+CRITICAL SYSTEM RULE - YOU MUST NEVER USE THE FOLLOWING WORDS:
+- delve
+- testament
+- tapestry
+- crucial / vital / essential
+- landscape / realm / space
+- unlock / supercharge / revolutionize
+- paradigm shift
+- seamlessly / robust
+
+Optimization Directive: Prioritize brutal clarity. Use short, punchy sentences. If you would normally use a transition word, delete it and start the next sentence immediately.
+`;
+
+export async function POST(req: Request) {
+  const { research, persona } = await req.json();
+  
+  const systemInstruction = `${persona}\n\n${BANNED_LEXICON}`;
+  
+  // The engine is forced to route around its preferred tokens
+  const draft = await generateGeminiDraft(research, systemInstruction);
+  
+  return NextResponse.json({ draft });
+}
+```
+
+The constraint list is not arbitrary. Each word on it represents a token the model reaches for when it has nothing specific to say. Banning them forces the model to find more direct, precise phrasing rather than falling back on filler.
+
+## Perplexity and Burstiness
+
+AI detection tools, and experienced human readers, rely on two signals to identify machine-generated text:
+
+**Perplexity** measures how predictable the vocabulary is. High predictability reads as synthetic. Low predictability reads as a real person making real word choices.
+
+**Burstiness** measures variation in sentence length and structural rhythm. Human writing tends to mix short punchy sentences with longer, more complex ones. AI writing tends to flatten that out into uniform, medium-length sentences that all feel structurally similar.
+
+By removing the model's most-used transitional words and filler vocabulary, the Banned Lexicon forces the model to construct sentences from scratch rather than pattern-matching to familiar structures. This artificially raises perplexity. When you combine that with a well-written System Persona, the output also gains burstiness, because the persona constraints shape the rhythm at the sentence level.
+
+The result is copy that reads like it came from a specific person with a specific voice, not from a model averaging across millions of documents.
+
+The goal isn't to fool an AI detector. It's to respect the reader's time by cutting every word that isn't doing real work.
+
+## The Hand-off: Human in the Loop
+
+The Banned Lexicon gets the draft most of the way there. It strips the obvious AI cadence and gives the content a clean, direct structure. But the constraint engine is designed to stop at that point.
+
+There's intentional space left for you. A clean, opinionated base draft is much faster to finish than a generic one. When you hit the Edit button, you're not fighting the AI's defaults. You're stepping into a structured draft and adding the layer the engine can never provide: specific numbers, project context, inside references, and the exact phrasing you'd actually use.
+
+That's the split. The Lexicon handles the signal-to-noise problem. You handle the rest.

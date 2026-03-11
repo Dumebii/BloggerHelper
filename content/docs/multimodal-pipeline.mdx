@@ -1,0 +1,67 @@
+---
+title: "The Multimodal Ingestion Pipeline"
+readTime: "8 min read"
+tag: "Architecture Deep Dive"
+---
+
+## The Blank Page Problem
+
+The hardest part of content creation isn't formatting a tweet or structuring a LinkedIn post. It's staring at the cursor with nothing to show for it.
+
+Developers and founders produce high-value material constantly: pull requests, API docs, meeting transcripts, architecture diagrams. The problem is the translation layer. Getting from that raw output to something worth posting takes time, effort, and a level of context-switching that most people don't have spare bandwidth for.
+
+If a tool requires you to carefully format your input, or spend ten minutes crafting a specific prompt before it does anything useful, it hasn't solved that problem. It's just moved it.
+
+## Ozigi's Ingestion Architecture
+
+Ozigi is built on Google's Gemini 2.5 Flash, chosen specifically for its large context window and native multimodal capabilities. The engine is designed to take raw, unstructured data and extract the core narrative without you doing the extraction work first.
+
+### Unstructured Text Dumps
+
+You do not need to summarize or clean up your input before pasting it into Ozigi. The engine is built to work with noise.
+
+**Meeting Transcripts.** If you have an unedited transcript from a 45-minute call, paste the whole thing. The Context Engine identifies the primary technical decisions or product updates and ignores the scheduling chat and tangents.
+
+**Brain Dumps.** You can type a frantic, grammatically incorrect stream of consciousness and the engine will work with it. The Banned Lexicon constraints force the output into clear, direct copy regardless of how chaotic the input is. The mess stays on your side of the pipeline.
+
+### The Document Extraction Layer
+
+Standard AI wrappers require you to process files separately, running them through OCR tools or copy-pasting content before you can prompt anything. Ozigi handles this natively.
+
+When you drag and drop a file into the Context Engine, it goes directly into the multimodal stream.
+
+**PDFs.** Drop in a whitepaper, a slide deck, or a technical spec. The engine reads the text layer and the structural hierarchy at the same time. You don't need to pull out the relevant pages first.
+
+**Images and Screenshots.** If you take a screenshot of a code snippet or a broken UI state, upload the PNG. The engine's vision layer reads the code directly from the image and can produce a technical breakdown of the bug, the fix, or both. No transcription step required.
+
+### URL Hydration
+
+If you've already published content somewhere, you shouldn't have to copy it back out again. Pass a URL into the engine and it handles the fetch itself.
+
+```typescript
+// Conceptual URL Hydration Logic
+export async function handleIngestion(input: string) {
+  if (isValidURL(input)) {
+    // 1. Fetch the raw HTML
+    const html = await fetchWebPage(input);
+    
+    // 2. Strip out navigation, footers, and ad scripts
+    const cleanContent = extractMainArticle(html);
+    
+    // 3. Pipe directly into the Context Engine
+    return processWithGemini(cleanContent);
+  }
+  
+  return processWithGemini(input);
+}
+```
+
+Pass in a blog post, a GitHub PR, or a documentation page. The engine fetches the live content, strips out the navigation and boilerplate, and works from the article itself. The output is a structured draft formatted for whichever platform you're targeting.
+
+## Zero-Shot Prompting
+
+Because the multimodal pipeline handles extraction and the System Personas handle tone, you don't need to write prompts. That's not a simplification. There's no hidden prompt you're supposed to be crafting in the background.
+
+You provide the raw material. The engine produces a structured draft. You finish it.
+
+That's the full workflow. The ingestion layer exists specifically to make the first step frictionless enough that you actually do it.

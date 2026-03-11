@@ -1,0 +1,65 @@
+---
+title: "Human-in-the-Loop: Agentic Collaboration"
+readTime: "8 min read"
+tag: "Philosophy & Pipeline"
+---
+
+## The Automation Fallacy
+
+The loudest pitch in AI right now is the "one-click" content workflow: feed the model a topic, and it researches, drafts, edits, and publishes. Entirely on its own. No human needed.
+
+It's a compelling idea. It's also wrong, at least for professional content.
+
+Here's the problem: the things that make content worth reading (sharp opinions, relevant context, specific details that only you would know) are also the things an AI cannot independently source. A model can synthesize what's already been written. It cannot tell your audience about the bug you fixed at 2am last Thursday, or make the kind of offhand remark that only lands because your followers know your history.
+
+Full automation doesn't produce better content at scale. It produces more forgettable content at scale. Volume is not the same thing as signal.
+
+At Ozigi, that distinction shapes every product decision we make.
+
+## The 90/10 Rule
+
+Ozigi runs on a **Human-in-the-Loop (HITL)** architecture. The engine is designed to be a co-pilot, not an autopilot. We call the underlying principle the 90/10 Rule, and it's straightforward:
+
+**The engine does 90%.** Ozigi ingests your raw material (a URL, a PDF, a messy block of meeting notes) and handles the structural work. It extracts the core narrative, applies the Banned Lexicon constraints to keep the output sounding like a person rather than a press release, and formats the draft for whichever platform you're targeting: X, LinkedIn, or Discord.
+
+What the engine produces is a solid, well-shaped draft. Not a finished post.
+
+**You do the 10%.** That last stretch belongs to you, and deliberately so. The Edit phase is where the draft becomes *your* content, carrying your voice, your context, and the kind of specificity that makes readers stop scrolling.
+
+Ten percent sounds small. In practice, it's the part that determines whether anyone cares.
+
+## The Edit Button Is Not a Mistake-Fixer
+
+Most AI tools treat editing as damage control, a way to catch the model's errors before they go live. In Ozigi, the Edit phase is an intended step in the pipeline. The draft you receive is explicitly designed to be finished by you.
+
+When a campaign is generated, it sits in a staging state inside your dashboard. Nothing goes anywhere until you've touched it. The Edit button is your handoff point. Here's what that phase is actually for:
+
+**Adding context the engine couldn't have.** Your raw input is a snapshot. It reflects what you gave Ozigi at generation time. But your knowledge isn't static. Maybe you shipped a hotfix after you wrote those notes. Maybe a stakeholder changed the messaging on the product feature you're writing about. The Edit phase is where you close that gap.
+
+**Injecting specificity.** Specificity is what makes content trustworthy. "We reduced p95 latency by 40% after switching to edge caching" is a different sentence than "we improved performance." The engine can surface the general claim; only you can supply the number. Add the real figure, the specific tradeoff, the actual timeline. That's what turns a draft into something credible.
+
+**Calibrating tone.** The Ozigi persona system goes a long way toward matching your voice, but no static profile fully captures how you write on a specific topic, on a specific day, in a specific mood. The Edit phase is where you make a phrase sound exactly like you, the way you'd say it out loud, not the way a model approximates it.
+
+**Adding the inside layer.** Team-specific humor, running references your community expects, a nod to something that happened in your Discord last week. The engine has no access to any of this. You do. That layer is small but it's often what makes content feel like it came from an actual person.
+
+The goal isn't a perfect first draft from the engine. The goal is a first draft that's worth spending five minutes finishing.
+
+## Why Generation and Publishing Are Separated
+
+The HITL philosophy carries through into the publishing layer. Ozigi keeps generation and distribution strictly separate, by design.
+
+Once a draft is generated, it does not touch any live platform without your explicit action. There is no background publishing, no scheduled auto-post, no quiet distribution while you're looking at something else. The draft stays staged until you decide to move it.
+
+When you're ready to publish to X (Twitter), Ozigi uses Web Intents: your approved copy is pushed into a native Twitter composition window, where you make the final call before anything posts. You can still adjust the copy, attach media, or back out. The model never speaks to your audience; you do.
+
+For Discord, Ozigi executes a Webhook to drop the draft into a specific channel of your choosing. Again, the mechanism puts the content in front of you and your team before it lands anywhere public.
+
+This matters for a straightforward reason: an AI-generated draft, however well-shaped, reflects what the model inferred from the input you gave it. That inference can be slightly off. The publishing separation is a safety rail that ensures your audience only ever sees content you've actually reviewed.
+
+## What This Architecture Gets You
+
+A purely automated system optimizes for throughput. The HITL architecture optimizes for trust: with your audience, and with your own output.
+
+The practical effect is this: Ozigi handles the time-consuming part of content creation (going from nothing to a structured draft) while keeping you in control of the part that actually matters (saying something worth reading). The engine takes blank-page syndrome off the table. The Edit phase puts your authority back in.
+
+That's the architecture. Not because full automation is technically impossible, but because removing the human from professional content is a choice that trades quality for convenience, and we don't think that's a good trade.
