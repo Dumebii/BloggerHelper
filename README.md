@@ -1,5 +1,16 @@
 # Ozigi: The Intelligent Context Engine ⚡
 
+## Table of Contents
+
+- Overview
+- Core Problem it Solves
+- Key Features
+- Tech Stack & Architecture
+- Local Development Setup
+- Project Structure
+- Contributing
+- License
+
 Ozigi is a universal context engine designed to cure "blank page syndrome" for technical writers, founders, and content creators. 
 
 Instead of relying on generic prompt engineering, Ozigi ingests raw, unformatted context (PDFs, scraped URLs, meeting transcripts, or rough notes) and architects a structured, multi-platform social media distribution strategy in a strictly constrained, authentic human voice.
@@ -56,3 +67,8 @@ To run Ozigi locally, you will need Node.js (v18+) and `pnpm` installed.
 
 ## 🤝 Philosophy & Contribution
 Ozigi was built to optimize the technical content lifecycle. It prioritizes workflow automation and developer experience (DevEx) over complex prompt engineering. If you have suggestions for new integrations (e.g., scheduling APIs or Dev.to publishing), feel free to open an issue or submit a pull request!
+
+## License
+
+This project is licensed under the MIT License.
+See the LICENSE file for details.
