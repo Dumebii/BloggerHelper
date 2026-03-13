@@ -5,27 +5,8 @@ import { buildGenerationPrompt } from "../../../lib/prompts";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import path from "path";
-
-// ==========================================
-// 🛡️ THE TITANIUM PEM RECONSTRUCTOR
-// ==========================================
-// This completely bypasses Vercel's environment variable formatting bugs.
-function buildFlawlessPrivateKey(brokenKey: string): string {
-  // 1. Strip headers, footers, and any accidental quotes
-  let purePayload = brokenKey
-    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
-    .replace(/-----END PRIVATE KEY-----/g, '')
-    .replace(/"/g, '');
-
-  // 2. Strip ALL noise: spaces, literal newlines, escaped newlines, carriage returns
-  purePayload = purePayload.replace(/\\n/g, '').replace(/[\s\r\n]/g, '');
-
-  // 3. Mathematically rebuild the key exactly how OpenSSL demands (64 chars per line)
-  const chunks = purePayload.match(/.{1,64}/g)?.join('\n') || '';
-
-  // 4. Reattach the headers with explicit, perfect line breaks
-  return `-----BEGIN PRIVATE KEY-----\n${chunks}\n-----END PRIVATE KEY-----\n`;
-}
+import fs from "fs";
+import os from "os";
 
 // ==========================================
 // 1. INITIALIZE SECURITY LAYER (UPSTASH)
@@ -105,25 +86,23 @@ export async function POST(req: Request) {
       parts.push({ inlineData: { data: base64Data, mimeType: file.type } });
     }
 
-
-    // ⚡ THE BASE64 FILE BYPASS
-   // ==========================================
-    // ⚡ THE ENTERPRISE MINIFIED BYPASS
+    // ==========================================
+    // ⚡ THE VERCEL /TMP DIRECTORY BYPASS
     // ==========================================
     let authOptions = {};
 
     if (process.env.GCP_CREDENTIALS) {
-      // PROD: Parse the perfectly escaped, single-line JSON string
-      const gcpCredentials = JSON.parse(process.env.GCP_CREDENTIALS);
+      // PROD: We are on Vercel. Write the env var to a physical file on Vercel's ephemeral disk.
+      const tmpKeyPath = path.join(os.tmpdir(), "gcp-key.json");
+      
+      // Write the file synchronously so it exists before Vertex AI looks for it
+      fs.writeFileSync(tmpKeyPath, process.env.GCP_CREDENTIALS, "utf8");
       
       authOptions = {
-        credentials: {
-          client_email: gcpCredentials.client_email,
-          private_key: gcpCredentials.private_key,
-        },
+        keyFilename: tmpKeyPath,
       };
     } else {
-      // LOCAL: Fallback to the local file
+      // LOCAL: Use the file sitting in your root directory
       authOptions = {
         keyFilename: path.join(process.cwd(), "gcp-service-account.json"),
       };
