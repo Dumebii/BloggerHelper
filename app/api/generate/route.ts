@@ -79,15 +79,27 @@ export async function POST(req: Request) {
       parts.push({ inlineData: { data: base64Data, mimeType: file.type } });
     }
 
-    // ==========================================
-    // ⚡ HYBRID AUTH (LOCAL FILE vs VERCEL ENV)
-    // ==========================================
+    // HYBRID AUTH (LOCAL FILE vs VERCEL ENV)
+
     let authOptions = {};
     if (process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_CLIENT_EMAIL) {
+      
+      // ⚡ THE TITANIUM PARSER: Fixes Vercel's multi-line mangling
+      let cleanPrivateKey = process.env.GOOGLE_PRIVATE_KEY;
+      
+      // 1. Strip accidental surrounding quotes 
+      cleanPrivateKey = cleanPrivateKey.replace(/^"|"$/g, '');
+      
+      // 2. Convert literal "\n" strings into actual newlines (if they exist)
+      cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, '\n');
+      
+      // 3. Strip hidden Windows carriage returns (\r) that crash the crypto parser
+      cleanPrivateKey = cleanPrivateKey.replace(/\r/g, '');
+
       authOptions = {
         credentials: {
           client_email: process.env.GOOGLE_CLIENT_EMAIL,
-          private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          private_key: cleanPrivateKey,
         },
       };
     } else {
