@@ -1,3 +1,23 @@
+// lib/prompts.ts
+
+// ==========================================
+// SECURITY: PROMPT INJECTION SCANNER
+// ==========================================
+const JAILBREAK_PATTERNS = [
+  /ignore\s+(all\s+)?previous\s+(instructions|directions|prompts)/i,
+  /disregard\s+(all\s+)?previous/i,
+  /system\s+prompt/i,
+  /banned\s+lexicon/i,
+  /bypass\s+rules/i,
+  /you\s+are\s+now/i,     // Tries to overwrite the persona
+  /forget\s+that/i,
+  /output\s+your\s+instructions/i,
+];
+
+export const containsPromptInjection = (text: string | null): boolean => {
+  if (!text) return false;
+  return JAILBREAK_PATTERNS.some((pattern) => pattern.test(text));
+};
 
 export interface PromptParams {
   tweetFormat: string;
@@ -5,8 +25,6 @@ export interface PromptParams {
   textContext: string | null;
   urlContext: string | null;
 }
-
-
 
 export const buildGenerationPrompt = ({
   tweetFormat,
@@ -17,6 +35,7 @@ export const buildGenerationPrompt = ({
   const xConstraint = tweetFormat === "thread"
     ? "STRICT RULE: Format the 'x' field as a 3-to-5 part THREAD. Number each part (1/5, 2/5) and use double line breaks between parts."
     : "STRICT RULE: Format the 'x' field as EXACTLY ONE single, high-impact tweet. DO NOT use numbering. DO NOT create multiple parts. Maximum 280 characters.";
+    
   let textPrompt = `
 TASK: Analyze the provided context (which may include scraped webpages, raw notes, images, or PDFs).
 Create a 3-day social media distribution strategy based STRICTLY on this information. 
@@ -90,9 +109,8 @@ Do not use statements that read like "It is not X. It is Y." or other overly for
 
 ## 8. PLATFORM-SPECIFIC RULES
 
-### X/Twitter Format (${tweetFormat})
-If "single": The "x" field must contain EXACTLY ONE punchy, high-impact tweet.
-If "thread": The "x" field must contain a compelling 3-to-5 part thread. Separate each part with two blank lines and number them (e.g., 1/5, 2/5).
+### X/Twitter Format
+${xConstraint}
 
 ### LinkedIn Format
 LinkedIn content should be more substantive and professional while maintaining the banned lexicon constraints. Structure with:
