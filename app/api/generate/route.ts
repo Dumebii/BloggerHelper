@@ -98,11 +98,18 @@ export async function POST(req: Request) {
     const projectId = process.env.GCP_PROJECT_ID || "ozigi-489021";
     let authOptions: any;
 
-    if (process.env.VERCEL) {
-      const saEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+if (process.env.VERCEL) {
+      // ⚡ Restore the full string construction using your existing Vercel variables
+      const projectNumber = process.env.GCP_PROJECT_NUMBER?.trim();
+      const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID?.trim();
+      const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID?.trim();
+      const saEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL?.trim();
+
+      const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+
       const authClient = ExternalAccountClient.fromJSON({
         type: 'external_account',
-        audience: `//iam.googleapis.com/${process.env.GCP_WORKLOAD_IDENTITY_PROVIDER}`,
+        audience: audience,
         subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
         token_url: 'https://sts.googleapis.com/v1/token',
         service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${saEmail}:generateAccessToken`,
