@@ -15,13 +15,12 @@ export default function Header({
   onSignIn: () => void;
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const pathname = usePathname(); 
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   const signOut = async () => await supabase.auth.signOut();
   const avatarUrl = session?.user?.user_metadata?.avatar_url;
 
-  // ✨ FIXED: The missing listener is back! 
-  // Now the Header can "hear" the dropdown signal to open the Settings Modal.
   useEffect(() => {
     const handleOpenSettings = () => {
       setIsSettingsOpen(true);
@@ -32,109 +31,133 @@ export default function Header({
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
-<header className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col items-center pt-5 gap-4">
-        
-        {/* CONDITIONAL RENDER: Only show the pill on the root landing page */}
-        {pathname === "/" && (
+      {/* Announcement Banner - only on landing page */}
+      {pathname === "/" && (
+        <div className="fixed top-0 left-0 right-0 z-[60] flex justify-center pt-3 px-4 pointer-events-none">
           <Link
             href="/dashboard"
-            className="pointer-events-auto inline-flex items-center justify-center bg-slate-900 px-5 py-1.5 text-xs sm:text-sm font-semibold text-slate-100 rounded-full shadow-md hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-lg transition-all group border border-slate-700/50"
+            className="pointer-events-auto inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-lg hover:bg-slate-800 hover:-translate-y-0.5 transition-all"
           >
-            <span className="flex items-center gap-2">
-              <span className="text-amber-400">⚡</span> 
-              Ozigi is live — try it free today
-              <span className="group-hover:translate-x-1 transition-transform opacity-60 ml-1">&rarr;</span>
-            </span>
+            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Ozigi is live — try it free today
+            <svg className="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
           </Link>
-        )}
-        <div className="w-full px-4 md:px-8 pointer-events-none">
-        <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/80 backdrop-blur-xl border-2 border-slate-900 rounded-[2rem] p-3 md:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] pointer-events-auto transition-all">
-          <Link
-            href="/"
-            className="flex items-center gap-2 group cursor-pointer"
-          >
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-red-700 rounded-xl md:rounded-2xl rotate-3 group-hover:rotate-12 transition-all flex items-center justify-center shadow-lg shadow-red-900/20">
-              <img
-                src="/icon.svg"
-                alt="Ozigi Logo"
-                className="w-8 h-8 md:w-10 md:h-10 object-contain transition-transform group-hover:scale-105"
-              />
-            </div>
-            <span className="font-black italic uppercase tracking-tighter text-xl md:text-2xl hidden sm:block text-slate-900">
-              Ozigi
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-2 md:gap-4">
-                        <nav className="hidden md:flex items-center gap-4 mr-2 border-r border-slate-200 pr-4">
-              <Link 
-                href="/docs" 
-                className={`text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/docs' ? 'text-red-700' : 'text-slate-500 hover:text-slate-900'}`}
-              >
-                Docs
-              </Link>
-              <Link 
-                href="/architecture" 
-                className={`text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/architecture' ? 'text-red-700' : 'text-slate-500 hover:text-slate-900'}`}
-              >
-                Architecture
-              </Link>
-            </nav>
-            {pathname === "/" ? (
-              <Link
-                href="/dashboard"
-                className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors px-2 md:px-4"
-              >
-                Try It Now
-              </Link>
-            ) : (
-              session && (
-                <button
-                  onClick={onOpenHistory}
-                  className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors px-2 md:px-4 hidden sm:block"
-                >
-                  History
-                </button>
-              )
-            )}
-
-            {!session ? (
-              <button
-                onClick={onSignIn}
-                className="bg-red-700 text-white px-5 md:px-8 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg active:scale-95 shrink-0"
-              >
-                Sign In
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 md:gap-3 bg-slate-100 p-1 md:p-1.5 rounded-[1.5rem] border border-slate-200">
-                <button
-                  onClick={() => setIsSettingsOpen(true)}
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-300 overflow-hidden border-2 border-white hover:border-red-400 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 shrink-0"
-                >
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white font-bold text-xs">
-                      {session.user.email?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </button>
-                <button
-                  onClick={signOut}
-                  className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 px-3 md:px-4 pr-4 md:pr-5 transition-colors hidden sm:block"
-                >
-                  Log Out
-                </button>
-              </div>
-            )}
-          </div>
         </div>
+      )}
+
+      <header
+        className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
+          pathname === "/" ? "top-10" : "top-0"
+        }`}
+      >
+        <div className="px-4 md:px-8 pt-3">
+          <div
+            className={`max-w-6xl mx-auto flex items-center justify-between rounded-2xl px-5 py-3 transition-all duration-300 ${
+              scrolled
+                ? "bg-white/90 backdrop-blur-xl shadow-lg shadow-slate-900/5 border border-slate-200/80"
+                : "bg-white/60 backdrop-blur-md border border-slate-200/40"
+            }`}
+          >
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
+                <img
+                  src="/icon.svg"
+                  alt="Ozigi Logo"
+                  className="w-9 h-9 object-contain"
+                />
+              </div>
+              <span className="text-lg font-black italic uppercase tracking-tighter text-slate-900 hidden sm:block">
+                Ozigi
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              {[
+                { href: "/docs", label: "Docs" },
+                { href: "/architecture", label: "Architecture" },
+                { href: "#pricing", label: "Pricing" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    pathname === link.href
+                      ? "text-slate-900 bg-slate-100"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-3">
+              {!session ? (
+                <>
+                  <button
+                    onClick={onSignIn}
+                    className="hidden sm:block px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={onSignIn}
+                    className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm active:scale-95"
+                  >
+                    Get Started
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {pathname !== "/" && (
+                    <button
+                      onClick={onOpenHistory}
+                      className="hidden sm:block px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+                    >
+                      History
+                    </button>
+                  )}
+                  <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-full border border-slate-200">
+                    <button
+                      onClick={() => setIsSettingsOpen(true)}
+                      className="w-8 h-8 rounded-full bg-slate-300 overflow-hidden border-2 border-white hover:border-indigo-300 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 shrink-0"
+                    >
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt="Avatar"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white font-bold text-xs">
+                          {session.user.email?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      onClick={signOut}
+                      className="text-xs font-bold text-slate-500 hover:text-slate-900 px-3 transition-colors hidden sm:block"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 
