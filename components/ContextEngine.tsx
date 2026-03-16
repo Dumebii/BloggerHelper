@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import DynamicLoader from "@/components/DynamicLoader";
+import SkeletonGrid from "./SkeletonGrid";
+import { uploadLargeAsset } from "@/lib/utils";
 
 interface DistilleryProps {
   session?: any;
@@ -9,8 +11,9 @@ interface DistilleryProps {
   inputs: {
     url: string;
     text: string;
-    files: File[];               // 🚀 array of files
-    platforms: string[];          // 🚀 selected platforms (should default to ['x','linkedin','discord'])
+    files: File[];
+    fileUrls: string[]; // Tracks the R2 public links
+    platforms: string[];
     tweetFormat: "single" | "thread";
     additionalInfo?: string;
     personaId?: string;
@@ -33,6 +36,7 @@ export default function Distillery({
 }: DistilleryProps) {
   const [activeTab, setActiveTab] = useState<Tab>("link");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isUploading, setIsUploading] = useState(false); // Local upload state
 
   const handlePersonaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -44,20 +48,41 @@ export default function Distillery({
     }
   };
 
-  // multi‑file handling
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+// 🚀 UPDATED: Handle selection + R2 Upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
+      
+      // Instantly show the files in the UI queue
       setInputs({ ...inputs, files: [...inputs.files, ...newFiles] });
+      
+      // Lock the generate button and start uploading
+      setIsUploading(true);
+      try {
+        // Upload all selected files concurrently
+        const uploadPromises = newFiles.map(file => uploadLargeAsset(file));
+        const newUrls = await Promise.all(uploadPromises);
+        
+        // Save the resulting R2 URLs to our state
+        setInputs((prev: any) => ({ 
+          ...prev, 
+          fileUrls: [...(prev.fileUrls || []), ...newUrls] 
+        }));
+      } catch (error) {
+        console.error("R2 Upload error:", error);
+        alert("Failed to upload some files to storage. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
-  const removeFile = (index: number) => {
+const removeFile = (index: number) => {
     const updatedFiles = inputs.files.filter((_, i) => i !== index);
-    setInputs({ ...inputs, files: updatedFiles });
+    const updatedUrls = inputs.fileUrls.filter((_, i) => i !== index);
+    setInputs({ ...inputs, files: updatedFiles, fileUrls: updatedUrls });
   };
 
-  // platform toggle: remove if present, add if absent
   const togglePlatform = (platform: string) => {
     const active = inputs.platforms.includes(platform);
     if (active) {
@@ -70,14 +95,14 @@ export default function Distillery({
   if (loading) {
     return (
       <section className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden min-h-[400px]">
-        <DynamicLoader />
+        <SkeletonGrid />
       </section>
     );
   }
 
   return (
-    <section className="flex flex-col gap-6 p-2 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
-      {/* 🧭 Tab Navigation */}
+<section className="flex flex-col gap-6 p-2 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
+        {/* Tab Navigation */}
       <div className="flex p-2 bg-slate-50 rounded-[2rem] gap-1">
         {(["link", "text", "file"] as Tab[]).map((tab) => (
           <button
@@ -97,7 +122,7 @@ export default function Distillery({
       </div>
 
       <div className="px-4 pb-4">
-        {/* 🔗 LINK TAB */}
+        {/* LINK TAB */}
         {activeTab === "link" && (
           <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex items-center bg-slate-50 rounded-2xl px-5 py-4 border border-slate-200 group focus-within:border-red-500/50 transition-colors">
@@ -108,7 +133,6 @@ export default function Distillery({
                 onChange={(e) => setInputs({ ...inputs, url: e.target.value })}
               />
             </div>
-
             {!inputs.url && (
               <div className="flex flex-wrap items-center gap-3 mt-1 px-2 text-[10px] font-black uppercase tracking-widest">
                 <span className="text-slate-400">Examples:</span>
@@ -140,7 +164,7 @@ export default function Distillery({
           </div>
         )}
 
-        {/* 📝 TEXT TAB */}
+        {/* TEXT TAB */}
         {activeTab === "text" && (
           <div className="flex items-start bg-slate-50 rounded-2xl px-5 py-4 border border-slate-200 group focus-within:border-red-500/50 transition-colors animate-in fade-in slide-in-from-bottom-2">
             <textarea
@@ -152,7 +176,7 @@ export default function Distillery({
           </div>
         )}
 
-        {/* 📎 FILE TAB – multiple files */}
+        {/* FILE TAB */}
         {activeTab === "file" && (
           <div className="flex flex-col animate-in fade-in slide-in-from-bottom-2">
             <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-8 border-2 border-dashed border-slate-200 group hover:border-red-500/50 transition-all cursor-pointer">
@@ -168,7 +192,7 @@ export default function Distillery({
                 className="hidden"
                 id="file-upload"
                 multiple
-                accept=".pdf,.txt,.csv,image/*"
+                accept=".pdf,.txt,.csv,image/*,video/*, audio/*"
                 onChange={handleFileChange}
               />
               <label
@@ -178,7 +202,6 @@ export default function Distillery({
                 Add Files
               </label>
             </div>
-
             {inputs.files.length > 0 && (
               <ul className="mt-4 space-y-2">
                 {inputs.files.map((file, idx) => (
@@ -199,64 +222,70 @@ export default function Distillery({
             )}
           </div>
         )}
-{/* 🔥 Platform selector – always visible */}
+
+        {/* Platform selector – always visible */}
 <div className="mt-6">
   <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 block">
     Target Platforms (click to exclude)
   </label>
   <div className="flex gap-2 flex-wrap">
     {["x", "linkedin", "discord"].map((platform) => (
-      <button
-        key={platform}
-        onClick={() => togglePlatform(platform)}
-        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-          inputs.platforms.includes(platform)
-            ? "bg-slate-900 text-white"
-            : "bg-white text-slate-400 border border-slate-200"
-        }`}
-      >
-        {platform === "x" ? "X" : platform.charAt(0).toUpperCase() + platform.slice(1)}
-      </button>
+      <div key={platform} className="relative group">
+        <button
+          onClick={() => togglePlatform(platform)}
+          className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+            inputs.platforms.includes(platform)
+              ? "bg-slate-900 text-white"
+              : "bg-white text-slate-400 border border-slate-200"
+          }`}
+        >
+          {platform === "x" ? "X" : platform.charAt(0).toUpperCase() + platform.slice(1)}
+        </button>
+        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50 shadow-lg">
+          {platform === "x" && "Opens tweet intent in new tab"}
+          {platform === "linkedin" && "Direct OAuth post with image support"}
+          {platform === "discord" && "Send via webhook (configure in Settings)"}
+        </span>
+      </div>
     ))}
 
-    {/* Disabled Email button (pro feature) */}
-    <button
-      disabled
-      className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white text-slate-300 border border-slate-200 cursor-not-allowed relative group"
-    >
-      Email
-      <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+    <div className="relative group">
+      <button
+        disabled
+        className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white text-slate-300 border border-slate-200 cursor-not-allowed"
+      >
+        Email
+      </button>
+      <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50 shadow-lg">
         included in Pro
       </span>
-    </button>
+    </div>
   </div>
   <p className="text-[8px] text-slate-400 mt-2">
     Selected platforms will appear in the distribution grid. Uncheck any you don't need.
   </p>
 </div>
-        {/* Progressive disclosure toggle */}
-<button
-  onClick={() => setShowAdvanced(!showAdvanced)}
-  className="w-full mt-6 py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200"
->
-  {showAdvanced
-    ? "Hide Advanced Options ⬆"
-    : "⚙️ Advanced Options (Personas, Directives, Format) ⬇"}
-</button>
 
-        {/* Advanced options panel */}
+        {/* Advanced toggle */}
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="w-full mt-6 py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200"
+        >
+          {showAdvanced
+            ? "Hide Advanced Options ⬆"
+            : "⚙️ Advanced Options (Personas, Directives, Format) ⬇"}
+        </button>
+
+        {/* Advanced panel (now without platforms) */}
         {showAdvanced && (
           <div className="mt-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-200 animate-in fade-in slide-in-from-top-2 flex flex-col gap-6">
-          
-
-            {/* Persona selector (unchanged) */}
+            {/* Persona selector */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-1">
                   🗣️ Voice or Persona
                 </h4>
               </div>
-
               {!session ? (
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-100 whitespace-nowrap">
@@ -269,7 +298,6 @@ export default function Distillery({
                     inputs.personaId === "default" ||
                     userPersonas.some((p) => p.id === inputs.personaId);
                   const safePersonaId = isValidPersona ? inputs.personaId : "default";
-
                   return (
                     <select
                       value={safePersonaId}
@@ -277,7 +305,6 @@ export default function Distillery({
                       className="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none cursor-pointer hover:border-slate-300"
                     >
                       <option value="default">Default Persona</option>
-
                       {userPersonas.length > 0 && (
                         <optgroup label="Your Saved Voices">
                           {userPersonas.map((persona) => (
@@ -287,7 +314,6 @@ export default function Distillery({
                           ))}
                         </optgroup>
                       )}
-
                       <option value="create_new" className="font-black text-red-600">
                         {userPersonas.length > 0 ? "⚙️ Manage Personas" : "+ Create New Persona"}
                       </option>
@@ -297,7 +323,7 @@ export default function Distillery({
               )}
             </div>
 
-            {/* Directives (unchanged) */}
+            {/* Directives */}
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 flex items-center gap-2">
                 Campaign Directives
@@ -313,16 +339,14 @@ export default function Distillery({
               />
             </div>
 
-            {/* X Format Toggle (unchanged) */}
+            {/* X Format Toggle */}
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 block">
                 X (Twitter) Format
               </label>
               <div className="flex bg-white p-1 rounded-xl border border-slate-200">
                 <button
-                  onClick={() =>
-                    setInputs({ ...inputs, tweetFormat: "single" })
-                  }
+                  onClick={() => setInputs({ ...inputs, tweetFormat: "single" })}
                   className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     inputs.tweetFormat === "single"
                       ? "bg-slate-100 text-slate-900 shadow-sm"
@@ -332,9 +356,7 @@ export default function Distillery({
                   Single Tweet
                 </button>
                 <button
-                  onClick={() =>
-                    setInputs({ ...inputs, tweetFormat: "thread" })
-                  }
+                  onClick={() => setInputs({ ...inputs, tweetFormat: "thread" })}
                   className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     inputs.tweetFormat === "thread"
                       ? "bg-slate-100 text-slate-900 shadow-sm"
@@ -348,13 +370,13 @@ export default function Distillery({
           </div>
         )}
 
-        {/* Generate button */}
+{/* Generate button */}
         <button
           onClick={onGenerate}
-          disabled={!inputs.url && !inputs.text && inputs.files.length === 0}
+          disabled={!inputs.url && !inputs.text && inputs.files.length === 0 || isUploading}
           className="w-full mt-6 bg-red-700 text-white py-6 rounded-[1.8rem] font-black uppercase tracking-widest hover:bg-red-800 transition-all disabled:bg-slate-200 disabled:text-slate-400 shadow-xl shadow-red-900/10 active:scale-[0.98]"
         >
-          Generate Campaign ⚡
+          {isUploading ? "Uploading Assets to R2... ⏳" : "Generate Campaign ⚡"}
         </button>
       </div>
     </section>

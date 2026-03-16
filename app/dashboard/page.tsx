@@ -9,27 +9,24 @@ import UpgradeBanner from "../../components/GuestModeBanner";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
+import DynamicLoader from "../../components/DynamicLoader"; // 👈 import
+import SkeletonGrid from "@/components/SkeletonGrid";
 
 export default function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
-  const [personas, setPersonas] = useState<any[]>([]); 
+  const [personas, setPersonas] = useState<any[]>([]);
 
-  const [inputs, setInputs] = useState<{
-    url: string;
-    text: string;
-    files: File[];        // 🚀 1. Blueprint updated to array
-    platforms: string[];  // 🚀 2. Blueprint updated for platforms
-    tweetFormat: "single" | "thread";
-    personaId: string; 
-  }>({
+  const [inputs, setInputs] = useState({
     url: "",
     text: "",
-    files: [],            // 🚀 3. Initialized as an actual empty array
+    files: [],
+    fileUrls: [],
     platforms: ["x", "linkedin", "discord"],
-    tweetFormat: "single",
-    personaId: "default", 
+    tweetFormat: "single" as const,
+    additionalInfo: "",
+    personaId: "default",
   });
   
   const [errorMessage, setErrorMessage] = useState("");
@@ -92,7 +89,7 @@ export default function Dashboard() {
           await supabase.from("user_tokens").upsert(
             {
               user_id: session.user.id,
-              provider: provider, 
+              provider: provider,
               access_token: session.provider_token,
               refresh_token: session.provider_refresh_token || null,
               updated_at: new Date().toISOString(),
@@ -129,32 +126,33 @@ export default function Dashboard() {
     if (data) setPersonas(data);
   };
 
-const restoreCampaign = (record: any) => {
-  setInputs({
-    url: record.source_url || "",
-    text: record.source_notes || "",
-    files: [], // 🚀 Reset to an empty array instead of file: null
-    platforms: ["x", "linkedin", "discord"], // 🚀 Add default platforms
-    tweetFormat: "single",
-    personaId: "default",
-  });
-  setCampaign(record.generated_content);
-  setIsHistoryOpen(false);
-};
+  const restoreCampaign = (record: any) => {
+    setInputs({
+      url: record.source_url || "",
+      text: record.source_notes || "",
+      files: [],
+      fileUrls: [],
+      platforms: ["x", "linkedin", "discord"],
+      tweetFormat: "single",
+      additionalInfo: "",
+      personaId: "default",
+    });
+    setCampaign(record.generated_content);
+    setIsHistoryOpen(false);
+  };
 
-  // ⚡ THE UPDATED HANDLE GENERATE FUNCTION
   const handleGenerate = async () => {
     setLoading(true);
     setErrorMessage("");
-    setCampaign([]); 
+    setCampaign([]);
 
     try {
       const formData = new FormData();
       if (inputs.url) formData.append("urlContext", inputs.url);
       if (inputs.text) formData.append("textContext", inputs.text);
       inputs.files.forEach((file) => {
-  formData.append("files", file); // Note: we are sending it as "files" now
-});
+        formData.append("files", file);
+      });
       formData.append("tweetFormat", inputs.tweetFormat);
 
       let selectedVoice = "Expert Social Media Copywriter who adapts perfectly to the provided context";
@@ -164,7 +162,6 @@ const restoreCampaign = (record: any) => {
           selectedVoice = found.prompt;
         }
       }
-
       formData.append("personaVoice", selectedVoice);
 
       const response = await fetch("/api/generate", {
@@ -172,33 +169,28 @@ const restoreCampaign = (record: any) => {
         body: formData,
       });
 
-      // ⚡ The fix: Intercepting the 429 and other non-200 status codes correctly
       if (!response.ok) {
         let errorMsg = "We encountered a hiccup connecting to the AI engine. Please try again.";
         try {
           const errorData = await response.json();
           if (errorData.error) {
-            errorMsg = errorData.error; // Grabs the "Rate limit exceeded" or custom string from the backend
+            errorMsg = errorData.error;
           }
         } catch (parseError) {
           console.error("Failed to parse error response");
         }
-        
         setErrorMessage(errorMsg);
         setLoading(false);
-        return; 
+        return;
       }
 
       const data = await response.json();
-
-      // Fallback for an odd 200 response that still includes an error payload
       if (data.error) {
         setErrorMessage(data.error);
         setLoading(false);
         return;
       }
 
-      // Safe parse the successful output
       const cleanJson = data.output
         .replace(/```json/gi, "")
         .replace(/```/gi, "");
@@ -301,7 +293,8 @@ const restoreCampaign = (record: any) => {
             </div>
           )}
 
-          {!campaign.length && (
+          {/* Show Distillery only when NOT loading and no campaign */}
+          {!loading && !campaign.length && (
             <Distillery
               session={session}
               userPersonas={personas}
@@ -309,37 +302,41 @@ const restoreCampaign = (record: any) => {
               setInputs={setInputs}
               loading={loading}
               onOpenSettings={() => window.dispatchEvent(new Event("openSettingsModal"))}
-              onGenerate={handleGenerate} 
+              onGenerate={handleGenerate}
             />
           )}
 
+          {/* Show loader while loading */}
+          {loading && (
+            <div className="mt-8 flex justify-center">
+              <SkeletonGrid />
+            </div>
+          )}
+
+          {/* Show campaign when ready */}
           {campaign.length > 0 && !loading && (
             <div className="mt-4 animate-in fade-in slide-in-from-bottom-8">
               <div className="flex justify-between items-center mb-8">
-                <button 
-                  onClick={() => setCampaign([])} 
+                <button
+                  onClick={() => setCampaign([])}
                   className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm hover:shadow-md active:scale-95"
                 >
                   ← Architect New Campaign
                 </button>
               </div>
-
               <div className="scroll-mt-32" ref={campaignRef}>
                 <DistributionGrid
                   campaign={campaign}
                   selectedPlatforms={inputs.platforms}
                   session={session}
-                  discordWebhook={session?.user?.user_metadata?.discord_webhook ?? ""}
-                />              
+                />
               </div>
             </div>
           )}
         </div>
       </main>
 
-      {isAuthModalOpen && (
-        <AuthModal onClose={() => setIsAuthModalOpen(false)} />
-      )}
+      {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
       <Footer />
     </div>
   );

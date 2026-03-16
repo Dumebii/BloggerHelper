@@ -50,8 +50,6 @@ export default function Header({
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col items-center pt-5 gap-4">
-        
-        {/* CONDITIONAL RENDER: Only show the pill on the root landing page */}
         {pathname === "/" && (
           <Link
             href="/dashboard"
@@ -141,7 +139,6 @@ export default function Header({
                     )}
                   </button>
 
-                  {/* Dropdown menu */}
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2">
                       <Link

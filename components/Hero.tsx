@@ -7,6 +7,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthModal from "../components/AuthModal";
 import { motion, Variants } from "framer-motion";
+import PricingWaitlistModal from "./PricingWaitlistModal";
+
 
 export default function Hero() {
   const router = useRouter();
@@ -14,6 +16,8 @@ export default function Hero() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   const prevSession = useRef<any>(null);
+
+const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
@@ -79,14 +83,14 @@ const staggerContainer: Variants = {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-slate-400/10 blur-[120px] rounded-full pointer-events-none" />
 
           <div className="relative max-w-5xl mx-auto px-6 text-center z-10 w-full">
-            <motion.div variants={fadeUp} className="flex justify-center mb-5">
+            {/* <motion.div variants={fadeUp} className="flex justify-center mb-5">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
                 <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="text-xs font-black uppercase tracking-widest text-slate-700">
                   New: Multi-platform content campaigns
                 </span>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             <motion.div variants={fadeUp} className="flex flex-col items-center justify-center mb-4 gap-1">
               <div className="overflow-hidden pb-1 px-4">
@@ -401,9 +405,13 @@ const staggerContainer: Variants = {
                 </li>
               </ul>
               
-              <button disabled className="w-full rounded-xl bg-indigo-200/50 px-4 py-4 text-center text-sm font-bold text-indigo-400 cursor-not-allowed">
+              <button
+                onClick={() => setIsWaitlistOpen(true)}
+                className="w-full rounded-xl bg-indigo-200/50 px-4 py-4 text-center text-sm font-bold text-indigo-400 hover:bg-indigo-300/50 hover:text-indigo-600 transition-colors"
+              >
                 Join the Waitlist
               </button>
+              {isWaitlistOpen && <PricingWaitlistModal onClose={() => setIsWaitlistOpen(false)} />}
             </div>
           </div>
         </section>
