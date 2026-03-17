@@ -1,82 +1,95 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from '@supabase/supabase-js';
 
-export type Plan = "trial" | "free" | "pro" | "power";
+// Default limits for free tier
+const FREE_GENERATIONS_LIMIT = 5;
+const PRO_GENERATIONS_LIMIT = 100; // Adjust as needed
 
-export interface PlanStatus {
-  plan: Plan;
-  isTrialActive: boolean;
-  isTrialExpired: boolean;
-  canGenerate: boolean;
-  generationsUsed: number;
-  generationsLimit: number;
-  trialEndsAt: Date | null;
+export async function getPlanStatus(userId: string) {
+  // Use service role client to bypass RLS
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY! // Must be set in env
+  );
+
+  try {
+    // 1. Try to fetch existing profile
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('plan, generations_used, generations_limit')
+      .eq('id', userId)
+      .maybeSingle(); // 👈 Use maybeSingle to avoid error if not found
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+      throw new Error('Database error while fetching profile');
+    }
+
+    // 2. If profile doesn't exist, create one
+    if (!profile) {
+      const defaultProfile = {
+        id: userId,
+        plan: 'free',
+        generations_used: 0,
+        generations_limit: FREE_GENERATIONS_LIMIT,
+        created_at: new Date().toISOString(),
+      };
+
+      const { error: insertError } = await supabaseAdmin
+        .from('profiles')
+        .insert(defaultProfile);
+
+      if (insertError) {
+        console.error('Error creating profile:', insertError);
+        throw new Error('Could not create user profile');
+      }
+
+      return {
+        plan: 'free',
+        generationsUsed: 0,
+        generationsLimit: FREE_GENERATIONS_LIMIT,
+        canGenerate: true,
+      };
+    }
+
+    // 3. Return existing profile data
+    return {
+      plan: profile.plan || 'free',
+      generationsUsed: profile.generations_used || 0,
+      generationsLimit: profile.generations_limit || FREE_GENERATIONS_LIMIT,
+      canGenerate: (profile.generations_used || 0) < (profile.generations_limit || FREE_GENERATIONS_LIMIT),
+    };
+  } catch (err) {
+    console.error('getPlanStatus error:', err);
+    // Fail open? For now, allow generation with a warning.
+    // Better to throw so the API route can handle it.
+    throw err;
+  }
 }
 
-const GENERATION_LIMITS: Record<Plan, number> = {
-  trial: Infinity,
-  free: 5,
-  pro: 30,
-  power: Infinity,
-};
+export async function incrementGenerationCount(userId: string) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
-export async function getPlanStatus(userId: string): Promise<PlanStatus> {
-  const supabase = await createClient();
+  // Increment the generations_used counter
+  const { error } = await supabaseAdmin.rpc('increment_generations', {
+    user_id: userId,
+  });
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("plan, trial_ends_at, generations_used_this_month, generation_reset_at")
-    .eq("id", userId)
-    .single();
+  // If RPC doesn't exist, fallback to manual update
+  if (error) {
+    console.warn('RPC increment failed, using manual update:', error);
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('generations_used')
+      .eq('id', userId)
+      .single();
 
-  if (error || !profile) {
-    throw new Error("Could not fetch user profile.");
+    const current = profile?.generations_used || 0;
+    await supabaseAdmin
+      .from('profiles')
+      .update({ generations_used: current + 1 })
+      .eq('id', userId);
   }
-
-  const now = new Date();
-  const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-  const isTrialActive = profile.plan === "trial" && trialEndsAt !== null && now < trialEndsAt;
-  const isTrialExpired = profile.plan === "trial" && trialEndsAt !== null && now >= trialEndsAt;
-
-  // If trial just expired, downgrade to free automatically
-  if (isTrialExpired) {
-    await supabase
-      .from("profiles")
-      .update({ plan: "free" })
-      .eq("id", userId);
-  }
-
-  const effectivePlan: Plan = isTrialExpired ? "free" : (profile.plan as Plan);
-  const limit = GENERATION_LIMITS[effectivePlan];
-
-  // Reset monthly generation count if past reset date
-  const resetAt = profile.generation_reset_at ? new Date(profile.generation_reset_at) : null;
-  let generationsUsed = profile.generations_used_this_month;
-
-  if (resetAt && now >= resetAt) {
-    await supabase
-      .from("profiles")
-      .update({
-        generations_used_this_month: 0,
-        generation_reset_at: new Date(now.getFullYear(), now.getMonth() + 1, 1),
-      })
-      .eq("id", userId);
-    generationsUsed = 0;
-  }
-
-  const canGenerate = limit === Infinity || generationsUsed < limit;
-
-  return {
-    plan: effectivePlan,
-    isTrialActive,
-    isTrialExpired,
-    canGenerate,
-    generationsUsed,
-    generationsLimit: limit === Infinity ? -1 : limit,
-    trialEndsAt,
-  };
-}
-
-export async function incrementGenerationCount(userId: string): Promise<void> {
-  const supabase = await createClient();
-  await supabase.rpc("increment_generations", { user_id_input: userId });
 }
