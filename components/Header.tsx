@@ -9,15 +9,16 @@ export default function Header({
   session,
   onOpenHistory,
   onSignIn,
-  onOpenScheduled, // 👈 new prop
+  onOpenScheduled,
 }: {
   session: any;
   onOpenHistory: () => void;
   onSignIn: () => void;
-  onOpenScheduled: () => void; // 👈 add type
+  onOpenScheduled: () => void;
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // 👈 loading state for logout
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -42,8 +43,18 @@ export default function Header({
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setIsDropdownOpen(false);
+    setIsLoggingOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // The onAuthStateChange listener will update the session
+    } catch (error) {
+      console.error("Sign out error:", error);
+      alert("Failed to sign out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+      setIsDropdownOpen(false);
+    }
   };
 
   const avatarUrl = session?.user?.user_metadata?.avatar_url;
@@ -113,7 +124,7 @@ export default function Header({
                       History
                     </button>
                     <button
-                      onClick={onOpenScheduled} // 👈 new button
+                      onClick={onOpenScheduled}
                       className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors px-2 md:px-4 hidden sm:block"
                     >
                       Scheduled
@@ -134,6 +145,7 @@ export default function Header({
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-300 overflow-hidden border-2 border-white hover:border-red-400 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 shrink-0"
+                    disabled={isLoggingOut}
                   >
                     {avatarUrl ? (
                       <img
@@ -169,9 +181,10 @@ export default function Header({
                       <hr className="my-2 border-slate-100" />
                       <button
                         onClick={signOut}
-                        className="block w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+                        disabled={isLoggingOut}
+                        className="block w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Log Out
+                        {isLoggingOut ? "Logging out..." : "Log Out"}
                       </button>
                     </div>
                   )}
