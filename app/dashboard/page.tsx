@@ -9,7 +9,6 @@ import UpgradeBanner from "../../components/GuestModeBanner";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
-import DynamicLoader from "../../components/DynamicLoader"; // 👈 import
 import SkeletonGrid from "@/components/SkeletonGrid";
 import ScheduledPostsModal from "../../components/ScheduledPostsModal";
 
@@ -37,11 +36,19 @@ export default function Dashboard() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const campaignRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(true); // 👈 to prevent state updates after unmount
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handlePersonaRefresh = () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user?.id) {
+        if (session?.user?.id && isMounted.current) {
           fetchPersonas(session.user.id);
         }
       });
@@ -60,18 +67,22 @@ export default function Dashboard() {
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchHistory(session.user.id);
-        fetchPersonas(session.user.id);
+      if (isMounted.current) {
+        setSession(session);
+        if (session?.user) {
+          fetchHistory(session.user.id);
+          fetchPersonas(session.user.id);
+        }
       }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      if (session?.user) {
+      if (isMounted.current) {
+        setSession(session);
+      }
+      if (session?.user && isMounted.current) {
         fetchHistory(session.user.id);
         fetchPersonas(session.user.id);
         
@@ -99,7 +110,7 @@ export default function Dashboard() {
             { onConflict: "user_id, provider" }
           );
         }
-      } else {
+      } else if (isMounted.current) {
         setPersonas([]);
       }
     });
@@ -111,21 +122,23 @@ export default function Dashboard() {
   }, []);
 
   const fetchHistory = async (userId: string) => {
+    if (!isMounted.current) return;
     const { data } = await supabase
       .from("campaigns")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
-    if (data) setPastCampaigns(data);
+    if (data && isMounted.current) setPastCampaigns(data);
   };
 
   const fetchPersonas = async (userId: string) => {
+    if (!isMounted.current) return;
     const { data } = await supabase
       .from("user_personas")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
-    if (data) setPersonas(data);
+    if (data && isMounted.current) setPersonas(data);
   };
 
   const restoreCampaign = (record: any) => {
@@ -143,13 +156,12 @@ export default function Dashboard() {
     setIsHistoryOpen(false);
   };
 
-const handleGenerate = async () => {
+  const handleGenerate = async () => {
     setLoading(true);
     setErrorMessage("");
     setCampaign([]);
 
     try {
-      // 1. Resolve the Persona Voice
       let selectedVoice = "Expert Social Media Copywriter who adapts perfectly to the provided context";
       if (inputs.personaId && inputs.personaId !== "default") {
         const found = personas.find((p: any) => p.id === inputs.personaId);
@@ -158,12 +170,11 @@ const handleGenerate = async () => {
         }
       }
 
-      // 2. Construct the ultimate AI JSON Payload
       const payload = {
         sourceMaterial: {
           url: inputs.url,
           rawText: inputs.text,
-          assetUrls: inputs.fileUrls, // 🚀 Injecting the Cloudflare R2 links!
+          assetUrls: inputs.fileUrls,
         },
         campaignDirectives: {
           platforms: inputs.platforms,
@@ -175,7 +186,6 @@ const handleGenerate = async () => {
 
       console.log("🚀 Firing payload to AI:", payload);
 
-      // 3. Send as application/json instead of FormData
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -206,7 +216,6 @@ const handleGenerate = async () => {
         return;
       }
 
-      // 4. Parse the LLM output
       const cleanJson = data.output
         .replace(/```json/gi, "")
         .replace(/```/gi, "");
@@ -221,12 +230,10 @@ const handleGenerate = async () => {
           });
         }, 100);
 
-        // 5. Save to Supabase History
         if (session?.user) {
           await supabase.from("campaigns").insert({
             user_id: session.user.id,
             source_url: inputs.url,
-            // Optionally, you could append the fileUrls to source_notes so you know what was referenced
             source_notes: inputs.text || inputs.fileUrls.join(", "), 
             generated_content: finalCampaign.campaign,
           });
@@ -242,15 +249,14 @@ const handleGenerate = async () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-  // Check for query parameter to open settings
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('openSettings') === 'true') {
-    window.dispatchEvent(new Event("openSettingsModal"));
-    // Clean up the URL
-    window.history.replaceState({}, '', '/dashboard');
-  }
-}, []);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('openSettings') === 'true') {
+      window.dispatchEvent(new Event("openSettingsModal"));
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, []);
 
   return (
     <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col">
@@ -258,7 +264,7 @@ const handleGenerate = async () => {
         session={session}
         onSignIn={() => setIsAuthModalOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenScheduled={() => setIsScheduledOpen(true)} // 👈 new
+        onOpenScheduled={() => setIsScheduledOpen(true)}
       />
 
       {isHistoryOpen && (
@@ -365,9 +371,9 @@ const handleGenerate = async () => {
       </main>
 
       {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
-        {isScheduledOpen && (
-  <ScheduledPostsModal onClose={() => setIsScheduledOpen(false)} />
-)}
+      {isScheduledOpen && (
+        <ScheduledPostsModal onClose={() => setIsScheduledOpen(false)} />
+      )}
       <Footer />
     </div>
   );

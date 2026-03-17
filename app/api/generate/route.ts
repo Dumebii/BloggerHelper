@@ -8,9 +8,8 @@ import path from "path";
 import { getVercelOidcToken } from '@vercel/oidc';
 import { ExternalAccountClient } from 'google-auth-library';
 import { PostHog } from 'posthog-node';
-import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
-import { createClient } from "@/lib/supabase/server";
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
 import { getPlanStatus, incrementGenerationCount } from "@/lib/plan";
 
 const redis = new Redis({
@@ -63,28 +62,37 @@ export async function POST(req: Request) {
     }
 
     // --- AUTHENTICATION & PLAN CHECK ---
-  const cookieStore = await cookies()
-  
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
+    const cookieStore = await cookies();
+    
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll() {
+            // No-op in API routes – you can't set cookies here
+          },
         },
-        setAll() {
-          // No-op in API routes – you can't set cookies here
-        },
-      },
-    }
-  )
+      }
+    );
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  
-  if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    // Log for debugging (remove in production if desired)
+    console.log('Generate route - auth result:', { 
+      userId: user?.id, 
+      authError: authError?.message 
+    });
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized", details: authError?.message || "No user session" },
+        { status: 401 }
+      );
+    }
 
     const planStatus = await getPlanStatus(user.id);
     if (!planStatus.canGenerate) {
