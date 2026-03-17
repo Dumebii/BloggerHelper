@@ -3,8 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SettingsModal from "./SettingsModal";
-import { createClient } from "../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 export default function Header({
   session,

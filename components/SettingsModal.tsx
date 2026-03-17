@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createClient } from "../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 interface SettingsModalProps {
   session: any;

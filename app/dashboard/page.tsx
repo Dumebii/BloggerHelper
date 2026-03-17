@@ -10,8 +10,7 @@ import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
 import SkeletonGrid from "@/components/SkeletonGrid";
 import ScheduledPostsModal from "../../components/ScheduledPostsModal";
-import { createClient } from "../../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 export default function Dashboard() {
   const [session, setSession] = useState<any>(null);

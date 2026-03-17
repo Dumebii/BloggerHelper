@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Provider } from "@supabase/supabase-js";
-import { createClient } from "../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);

@@ -6,8 +6,7 @@ import Hero from "../components/Hero";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthModal from "../components/AuthModal";
-import { createClient } from "../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 // --- Animation Variants ---
 const fadeUp: Variants = {
@@ -60,7 +59,7 @@ export default function Home() {
       <main className="pt-28 md:pt-32 pb-8 flex-1">
         
         {/* 1. HERO COMPONENT */}
-        <Hero onStart={() => (window.location.href = "/dashboard")} />
+        <Hero  />
         
         {/* 3. ARCHITECTURE & DOCS SECTION */}
         <section className="py-24 px-6 bg-slate-50 border-b border-slate-200 overflow-hidden">

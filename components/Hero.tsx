@@ -7,8 +7,7 @@ import Footer from "../components/Footer";
 import AuthModal from "../components/AuthModal";
 import { motion, Variants } from "framer-motion";
 import PricingWaitlistModal from "./PricingWaitlistModal";
-import { createClient } from "../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 
 export default function Hero() {

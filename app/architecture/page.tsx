@@ -15,8 +15,7 @@ import { Bar, Doughnut } from "react-chartjs-2";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
-import { createClient } from "../../lib/supabase/client";
-const supabase = createClient();
+import { supabase } from "@/lib/supabase/client";
 
 // Register ChartJS components
 ChartJS.register(
