@@ -20,7 +20,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/`,
+    redirectTo: `${window.location.origin}/api/auth/callback`,
         scopes: scopes, // 👈 Ask for write permission here!
       },
     });
@@ -50,9 +50,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
           Choose your preferred provider to start generating agentic social
           content.
         </p>
-        <p className="text-slate-500 text-sm font-medium mb-8 text-center px-4">
-  Choose your preferred provider to start generating agentic social content.
-</p>
+
 
 {/* 👇 New context message */}
 <p className="text-xs text-slate-400 mb-4 text-center border-t border-slate-100 pt-4">
