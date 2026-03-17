@@ -1,0 +1,50 @@
+import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const { posts, scheduledFor, campaignId } = await req.json();
+    const authHeader = req.headers.get("Authorization");
+
+    if (!authHeader) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Get user from auth
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const userEmail = user?.email; // may be null
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Insert scheduled posts
+    const scheduledPosts = posts.map((post: any) => ({
+      user_id: user.id,
+        user_email: userEmail, // store email (could be null)
+      campaign_id: campaignId,
+      platform: post.platform,
+      content: post.content,
+      media_url: post.imageUrl,
+      scheduled_for: scheduledFor,
+      status: 'pending'
+    }));
+
+    const { data, error } = await supabase
+      .from("scheduled_posts")
+      .insert(scheduledPosts)
+      .select();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, data });
+  } catch (error: any) {
+    console.error("Schedule error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

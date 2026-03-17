@@ -11,12 +11,14 @@ import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
 import DynamicLoader from "../../components/DynamicLoader"; // 👈 import
 import SkeletonGrid from "@/components/SkeletonGrid";
+import ScheduledPostsModal from "../../components/ScheduledPostsModal";
 
 export default function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
   const [personas, setPersonas] = useState<any[]>([]);
+  const [isScheduledOpen, setIsScheduledOpen] = useState(false);
 
   const [inputs, setInputs] = useState({
     url: "",
@@ -141,20 +143,13 @@ export default function Dashboard() {
     setIsHistoryOpen(false);
   };
 
-  const handleGenerate = async () => {
+const handleGenerate = async () => {
     setLoading(true);
     setErrorMessage("");
     setCampaign([]);
 
     try {
-      const formData = new FormData();
-      if (inputs.url) formData.append("urlContext", inputs.url);
-      if (inputs.text) formData.append("textContext", inputs.text);
-      inputs.files.forEach((file) => {
-        formData.append("files", file);
-      });
-      formData.append("tweetFormat", inputs.tweetFormat);
-
+      // 1. Resolve the Persona Voice
       let selectedVoice = "Expert Social Media Copywriter who adapts perfectly to the provided context";
       if (inputs.personaId && inputs.personaId !== "default") {
         const found = personas.find((p: any) => p.id === inputs.personaId);
@@ -162,11 +157,31 @@ export default function Dashboard() {
           selectedVoice = found.prompt;
         }
       }
-      formData.append("personaVoice", selectedVoice);
 
+      // 2. Construct the ultimate AI JSON Payload
+      const payload = {
+        sourceMaterial: {
+          url: inputs.url,
+          rawText: inputs.text,
+          assetUrls: inputs.fileUrls, // 🚀 Injecting the Cloudflare R2 links!
+        },
+        campaignDirectives: {
+          platforms: inputs.platforms,
+          tweetFormat: inputs.tweetFormat,
+          additionalContext: inputs.additionalInfo,
+          personaVoice: selectedVoice, 
+        }
+      };
+
+      console.log("🚀 Firing payload to AI:", payload);
+
+      // 3. Send as application/json instead of FormData
       const response = await fetch("/api/generate", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -191,6 +206,7 @@ export default function Dashboard() {
         return;
       }
 
+      // 4. Parse the LLM output
       const cleanJson = data.output
         .replace(/```json/gi, "")
         .replace(/```/gi, "");
@@ -205,11 +221,13 @@ export default function Dashboard() {
           });
         }, 100);
 
+        // 5. Save to Supabase History
         if (session?.user) {
           await supabase.from("campaigns").insert({
             user_id: session.user.id,
             source_url: inputs.url,
-            source_notes: inputs.text,
+            // Optionally, you could append the fileUrls to source_notes so you know what was referenced
+            source_notes: inputs.text || inputs.fileUrls.join(", "), 
             generated_content: finalCampaign.campaign,
           });
           fetchHistory(session.user.id);
@@ -231,6 +249,7 @@ export default function Dashboard() {
         session={session}
         onSignIn={() => setIsAuthModalOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenScheduled={() => setIsScheduledOpen(true)} // 👈 new
       />
 
       {isHistoryOpen && (
@@ -337,6 +356,9 @@ export default function Dashboard() {
       </main>
 
       {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
+        {isScheduledOpen && (
+  <ScheduledPostsModal onClose={() => setIsScheduledOpen(false)} />
+)}
       <Footer />
     </div>
   );

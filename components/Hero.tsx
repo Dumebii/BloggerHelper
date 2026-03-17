@@ -61,12 +61,16 @@ const staggerContainer: Variants = {
   }
 };
 
+  const [isScheduledOpen, setIsScheduledOpen] = useState(false);
+
+
   return (
     <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col">
       <Header
         session={session}
         onSignIn={() => setIsAuthModalOpen(true)}
         onOpenHistory={() => {}}
+        onOpenScheduled={() => setIsScheduledOpen(true)} // 👈 new
       />
 
       <main className="flex-1">

@@ -38,6 +38,7 @@
     "react-dom": "19.0.0",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
+    "resend": "^6.9.4",
     "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {

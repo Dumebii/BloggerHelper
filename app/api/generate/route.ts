@@ -7,7 +7,6 @@ import { Redis } from "@upstash/redis";
 import path from "path";
 import { getVercelOidcToken } from '@vercel/oidc';
 import { ExternalAccountClient } from 'google-auth-library';
-// ✨ IMPORT POSTHOG
 import { PostHog } from 'posthog-node';
 
 const redis = new Redis({
@@ -42,7 +41,6 @@ const distributionSchema = {
 };
 
 export async function POST(req: Request) {
-  // ✨ START STOPWATCH & INITIALIZE POSTHOG
   const startTime = Date.now();
   const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
@@ -60,14 +58,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const formData = await req.formData();
-    const urlContext = formData.get("urlContext") as string | null;
-    const textContext = formData.get("textContext") as string | null;
-    const tweetFormat = formData.get("tweetFormat") as string || "single";
-    const personaVoice = formData.get("personaVoice") as string || "Expert Content Strategist";
-    const file = formData.get("file") as File | null;
+    // 🚀 NEW: Parse the incoming JSON payload instead of FormData
+    const payload = await req.json();
+    const { sourceMaterial, campaignDirectives } = payload;
 
-    if (containsPromptInjection(textContext)) {
+    const urlContext = sourceMaterial?.url || "";
+    const textContext = sourceMaterial?.rawText || "";
+    const assetUrls = sourceMaterial?.assetUrls || [];
+
+    const tweetFormat = campaignDirectives?.tweetFormat || "single";
+    const personaVoice = campaignDirectives?.personaVoice || "Expert Content Strategist";
+
+    // Append additional directives to textContext if they exist
+    const finalContext = campaignDirectives?.additionalContext 
+      ? `${textContext}\n\nAdditional Directives: ${campaignDirectives.additionalContext}`
+      : textContext;
+
+    if (containsPromptInjection(finalContext)) {
       console.warn(`[SECURITY] Prompt injection attempt intercepted from IP: ${ip}`);
       return NextResponse.json(
         { error: "Security Policy Violation: Invalid context structure detected." },
@@ -78,28 +85,40 @@ export async function POST(req: Request) {
     const textPrompt = buildGenerationPrompt({
       tweetFormat,
       personaVoice,
-      textContext,
+      textContext: finalContext,
       urlContext,
     });
 
     const parts: any[] = [{ text: textPrompt }];
 
-    if (file && file.size > 0) {
-      const arrayBuffer = await file.arrayBuffer();
-      const base64Data = Buffer.from(arrayBuffer).toString("base64");
-      parts.push({
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type,
-        },
-      });
+    // 🚀 NEW: Fetch assets from Cloudflare R2 and convert to Base64 for Gemini
+    if (assetUrls && assetUrls.length > 0) {
+      for (const assetUrl of assetUrls) {
+        try {
+          const fileRes = await fetch(assetUrl);
+          if (!fileRes.ok) throw new Error(`HTTP error! status: ${fileRes.status}`);
+          
+          const mimeType = fileRes.headers.get("content-type") || "application/octet-stream";
+          const arrayBuffer = await fileRes.arrayBuffer();
+          const base64Data = Buffer.from(arrayBuffer).toString("base64");
+          
+          parts.push({
+            inlineData: {
+              data: base64Data,
+              mimeType: mimeType,
+            },
+          });
+        } catch (err) {
+          console.error(`Failed to fetch and process asset from R2: ${assetUrl}`, err);
+          // We continue instead of crashing so the text generation still works
+        }
+      }
     }
 
     const projectId = process.env.GCP_PROJECT_ID || "ozigi-489021";
     let authOptions: any;
 
-if (process.env.VERCEL) {
-      // ⚡ Restore the full string construction using your existing Vercel variables
+    if (process.env.VERCEL) {
       const projectNumber = process.env.GCP_PROJECT_NUMBER?.trim();
       const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID?.trim();
       const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID?.trim();
@@ -148,24 +167,23 @@ if (process.env.VERCEL) {
 
     const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
     
-    // ✨ LOG SUCCESS TO POSTHOG
     const durationMs = Date.now() - startTime;
     posthog.capture({
-      distinctId: ip, // Group by IP for unauthenticated tracking
+      distinctId: ip,
       event: 'vertex_generation_completed',
       properties: {
         durationMs,
         personaVoice,
-        hasFile: file !== null,
+        hasFile: assetUrls.length > 0,
+        assetCount: assetUrls.length,
         status: 'success'
       }
     });
-    await posthog.shutdown(); // Ensure event fires before lambda spins down
+    await posthog.shutdown();
 
     return NextResponse.json({ output: responseText });
     
   } catch (error: any) {
-    // ✨ LOG FAILURE TO POSTHOG
     const durationMs = Date.now() - startTime;
     posthog.capture({
       distinctId: req.headers.get("x-forwarded-for") ?? "127.0.0.1",

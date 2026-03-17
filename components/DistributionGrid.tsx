@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { CampaignDay } from "../lib/types";
+import ScheduleModal from "./ScheduleModal";
 
 // --- Framer Motion Variants ---
 const fadeUp: Variants = {
@@ -50,11 +51,13 @@ function SocialCard({
   initialText,
   onPost,
   postStatus,
+  session,
   actionButtonConfig,
 }: {
   day: number;
   platformName: string;
   initialText: string;
+  session: any
   onPost?: (text: string, day: number, imageUrl?: string) => void;
   postStatus?: "idle" | "loading" | "success" | "error";
   actionButtonConfig?: {
@@ -70,6 +73,7 @@ function SocialCard({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [imageTitle, setImageTitle] = useState("");
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -111,6 +115,38 @@ function SocialCard({
     document.body.removeChild(link);
   };
 
+  const handleSchedule = async (scheduledFor: string) => {
+    // Get the user's access token from session
+    const token = session?.access_token;
+    if (!token) {
+      alert("You must be signed in to schedule posts.");
+      return;
+    }
+
+    const response = await fetch("/api/schedule", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // 👈 send token
+      },
+      body: JSON.stringify({
+        posts: [{
+          platform: platformName.toLowerCase(),
+          content: text,
+          imageUrl: imageUrl || undefined,
+          day: day
+        }],
+        scheduledFor,
+        campaignId: null
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to schedule");
+    }
+  };
+
   return (
     <motion.div variants={fadeUp} className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col p-5 hover:border-slate-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
@@ -129,6 +165,13 @@ function SocialCard({
             className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
           >
             {copied ? "Copied!" : "Copy"}
+          </button>
+          {/* Schedule button added */}
+          <button
+            onClick={() => setIsScheduleModalOpen(true)}
+            className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Schedule
           </button>
         </div>
       </div>
@@ -206,19 +249,32 @@ function SocialCard({
             actionButtonConfig.idle}
         </button>
       )}
+
+      {/* Schedule Modal */}
+      {isScheduleModalOpen && (
+        <ScheduleModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+          onSchedule={handleSchedule}
+          postText={text}
+          platform={platformName}
+          day={day}
+          imageUrl={imageUrl || undefined}
+        />
+      )}
     </motion.div>
   );
 }
 
-// 3. Main Grid Component – now accepts selectedPlatforms
+// 3. Main Grid Component
 export default function DistributionGrid({
   campaign,
   session,
-  selectedPlatforms,               // 🚀 new prop
+  selectedPlatforms,
 }: {
   campaign: CampaignDay[];
   session: any;
-  selectedPlatforms: string[];     // 🚀 e.g. ['x', 'linkedin']
+  selectedPlatforms: string[];
 }) {
   const [xStatuses, setXStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
   const [discordStatuses, setDiscordStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
@@ -277,7 +333,6 @@ export default function DistributionGrid({
     }
   };
 
-  // 🚀 Only render rows that the user selected AND for which we have data
   const hasX = campaign.some((d) => d.x) && selectedPlatforms.includes('x');
   const hasLinkedIn = campaign.some((d) => d.linkedin) && selectedPlatforms.includes('linkedin');
   const hasDiscord = campaign.some((d) => d.discord) && selectedPlatforms.includes('discord');
@@ -313,6 +368,7 @@ export default function DistributionGrid({
                     key={`x-${dayData.day}`}
                     day={dayData.day}
                     platformName="X"
+                      session={session} // 👈 pass it
                     initialText={dayData.x}
                     onPost={handlePostToX}
                     postStatus={xStatuses[dayData.day]}
@@ -357,6 +413,7 @@ export default function DistributionGrid({
                     key={`li-${dayData.day}`}
                     day={dayData.day}
                     platformName="LinkedIn"
+                      session={session} // 👈 pass it
                     initialText={dayData.linkedin}
                     onPost={handlePostToLinkedIn}
                     postStatus={liStatuses[dayData.day]}
@@ -401,6 +458,7 @@ export default function DistributionGrid({
                     key={`disc-${dayData.day}`}
                     day={dayData.day}
                     platformName="Discord"
+                      session={session} // 👈 pass it
                     initialText={dayData.discord}
                     onPost={handlePostToDiscord}
                     postStatus={discordStatuses[dayData.day]}

@@ -9,10 +9,12 @@ export default function Header({
   session,
   onOpenHistory,
   onSignIn,
+  onOpenScheduled, // 👈 new prop
 }: {
   session: any;
   onOpenHistory: () => void;
   onSignIn: () => void;
+  onOpenScheduled: () => void; // 👈 add type
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -29,7 +31,6 @@ export default function Header({
     };
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -104,12 +105,20 @@ export default function Header({
                 </Link>
               ) : (
                 session && (
-                  <button
-                    onClick={onOpenHistory}
-                    className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors px-2 md:px-4 hidden sm:block"
-                  >
-                    History
-                  </button>
+                  <>
+                    <button
+                      onClick={onOpenHistory}
+                      className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors px-2 md:px-4 hidden sm:block"
+                    >
+                      History
+                    </button>
+                    <button
+                      onClick={onOpenScheduled} // 👈 new button
+                      className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors px-2 md:px-4 hidden sm:block"
+                    >
+                      Scheduled
+                    </button>
+                  </>
                 )
               )}
 

@@ -1,0 +1,12 @@
+name: Run Scheduler
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Every 5 minutes
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call publish endpoint
+        run: |
+          curl -X GET "https://your-app.com/api/cron/publish" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
