@@ -13,6 +13,10 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'; // for token auth
 import { getPlanStatus, incrementGenerationCount } from "@/lib/plan";
 
+console.log("🔑 ANON_KEY starts with:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10));
+console.log("🔑 ANON_KEY length:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length);
+console.log("🔑 URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
