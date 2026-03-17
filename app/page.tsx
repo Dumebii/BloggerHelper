@@ -54,6 +54,7 @@ export default function Home() {
         session={session}
         onSignIn={() => setIsAuthModalOpen(true)}
         onOpenHistory={() => {}}
+        onOpenScheduled={() => {}}
       />
 
       <main className="pt-28 md:pt-32 pb-8 flex-1">
