@@ -6,9 +6,12 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 
 // ZeptoMail configuration
-const ZEPTOMAIL_API_KEY = process.env.ZEPTOMAIL_API_KEY!;
+const ZEPTOMAIL_RAW_TOKEN = process.env.ZEPTOMAIL_API_KEY!;
 const ZEPTOMAIL_URL = "api.zeptomail.com/";
-const mailClient = new SendMailClient({ url: ZEPTOMAIL_URL, token: ZEPTOMAIL_API_KEY });
+const mailClient = new SendMailClient({ 
+  url: ZEPTOMAIL_URL, 
+  token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}` // 👈 prefix added here
+});
 
 const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'notifications@ozigi.app';
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi';
