@@ -50,7 +50,7 @@ export async function GET(req: Request) {
     // 3. Fetch user tokens (only needed for non‑X platforms)
     const { data: tokensData, error: tokensError } = await supabase
       .from("user_tokens")
-      .select("user_id, provider, access_token")  // removed access_secret
+      .select("user_id, provider, access_token")
       .in("user_id", userIds);
 
     if (tokensError) throw tokensError;
@@ -83,8 +83,10 @@ export async function GET(req: Request) {
           if (post.user_email && !post.reminder_sent) {
             const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`;
 
+            console.log(`Attempting to send email for post ${post.id} to ${post.user_email}`);
+
             try {
-              await mailClient.sendMail({
+              const emailResp = await mailClient.sendMail({
                 from: {
                   address: EMAIL_FROM_ADDRESS,
                   name: EMAIL_FROM_NAME
@@ -106,7 +108,7 @@ export async function GET(req: Request) {
                 `
               });
 
-              console.log(`Email sent for post ${post.id} via ZeptoMail`);
+              console.log(`Email sent successfully for post ${post.id}`, JSON.stringify(emailResp));
 
               await supabase
                 .from("scheduled_posts")
@@ -115,7 +117,12 @@ export async function GET(req: Request) {
 
               publishSuccess = true;
             } catch (emailError: any) {
-              console.error(`Failed to send email for post ${post.id}:`, emailError);
+              console.error(`❌ Failed to send email for post ${post.id}:`);
+              console.error("Error name:", emailError.name);
+              console.error("Error message:", emailError.message);
+              console.error("Error stack:", emailError.stack);
+              console.error("Full error object:", JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
+
               publishSuccess = false;
               publishError = emailError.message;
 
