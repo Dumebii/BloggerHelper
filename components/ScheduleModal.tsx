@@ -7,9 +7,9 @@ interface ScheduleModalProps {
   onSchedule: (scheduledFor: string) => Promise<void>;
   postText: string;
   platform: string;
-  day: number;
+  day: number;          // 👈 prop for the campaign day
   imageUrl?: string;
-  userEmail?: string | null; // 👈 add this
+  userEmail?: string | null;
 }
 
 export default function ScheduleModal({
@@ -20,7 +20,7 @@ export default function ScheduleModal({
   platform,
   day,
   imageUrl,
-  userEmail, // 👈 receive it
+  userEmail,
 }: ScheduleModalProps) {
   const [scheduledFor, setScheduledFor] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,12 @@ export default function ScheduleModal({
 
     setLoading(true);
     try {
-      await onSchedule(scheduledFor);
+      // Convert local datetime string to a Date object (interpreted as local time)
+      const localDate = new Date(scheduledFor + ":00"); // add seconds for reliable parsing
+      // Convert to UTC ISO string
+      const utcString = localDate.toISOString();
+
+      await onSchedule(utcString); // pass UTC time
       onClose();
     } catch (error) {
       console.error("Schedule failed:", error);
@@ -42,10 +47,14 @@ export default function ScheduleModal({
     }
   };
 
-  // Set minimum datetime to now
+  // Minimum datetime (local) for the picker – rename local variable to avoid conflict
   const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  const minDateTime = now.toISOString().slice(0, 16);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const dayOfMonth = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const minDateTime = `${year}-${month}-${dayOfMonth}T${hours}:${minutes}`;
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in">
