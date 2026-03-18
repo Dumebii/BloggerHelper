@@ -13,12 +13,11 @@ const mailClient = new SendMailClient({ url: ZEPTOMAIL_URL, token: ZEPTOMAIL_API
 const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'notifications@ozigi.app';
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi';
 
-// Define a type for the token object
+// Define a type for the token object (without access_secret)
 interface UserToken {
   user_id: string;
   provider: string;
   access_token: string;
-  access_secret?: string;
 }
 
 export async function GET(req: Request) {
@@ -35,7 +34,7 @@ export async function GET(req: Request) {
 
     const now = new Date().toISOString();
 
-    // 1. Fetch due posts (without joining to auth.users)
+    // 1. Fetch due posts
     const { data: duePosts, error: fetchError } = await supabase
       .from("scheduled_posts")
       .select("*")
@@ -48,15 +47,15 @@ export async function GET(req: Request) {
     // 2. Collect unique user IDs
     const userIds = [...new Set(duePosts?.map(p => p.user_id) || [])];
 
-    // 3. Fetch user tokens for those users (if needed for non‑X platforms)
+    // 3. Fetch user tokens (only needed for non‑X platforms)
     const { data: tokensData, error: tokensError } = await supabase
       .from("user_tokens")
-      .select("user_id, provider, access_token, access_secret")
+      .select("user_id, provider, access_token")  // removed access_secret
       .in("user_id", userIds);
 
     if (tokensError) throw tokensError;
 
-    // 4. Group tokens by user_id – with explicit typing
+    // 4. Group tokens by user_id
     const tokensByUser = new Map<string, UserToken[]>();
     tokensData?.forEach((token: UserToken) => {
       if (!tokensByUser.has(token.user_id)) {
@@ -135,7 +134,6 @@ export async function GET(req: Request) {
           }
         }
         else if (post.platform === 'linkedin') {
-          // Get tokens for this user
           const userTokens = tokensByUser.get(post.user_id) || [];
           const linkedInToken = userTokens.find(t => t.provider === 'linkedin_oidc')?.access_token;
 
@@ -150,7 +148,7 @@ export async function GET(req: Request) {
                 text: post.content,
                 userId: post.user_id,
                 imageUrl: post.media_url,
-                accessToken: linkedInToken // might need to pass token
+                accessToken: linkedInToken
               })
             });
             const data = await res.json();
@@ -159,8 +157,6 @@ export async function GET(req: Request) {
           }
         }
         else if (post.platform === 'discord') {
-          // For Discord, we need user metadata which is not in tokens
-          // Fetch user metadata separately
           const { data: user } = await supabase
             .from('users')
             .select('user_metadata')
