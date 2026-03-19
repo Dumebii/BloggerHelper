@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
+import Script from "next/script";
 import Hero from "../components/Hero";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -47,16 +48,59 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // --- SEO Structured Data ---
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Ozigi",
+    "applicationCategory": "BusinessApplication",
+    "description": "An AI content engine that turns raw notes, PDFs, and URLs into platform-ready social media posts for X, LinkedIn, and Discord — without sounding like AI wrote them.",
+    "url": "https://ozigi.app",
+    "operatingSystem": "Web",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "USD",
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro",
+        "price": "15",
+        "priceCurrency": "USD",
+        "billingDuration": "P1M",
+      },
+      {
+        "@type": "Offer",
+        "name": "Power",
+        "price": "39",
+        "priceCurrency": "USD",
+        "billingDuration": "P1M",
+      },
+    ],
+    "author": {
+      "@type": "Person",
+      "name": "Dumebi Okolo",
+      "url": "https://x.com/DumebiTheWriter",
+    },
+  };
+
   return (
     <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col overflow-hidden">
+      {/* Inject JSON-LD to the DOM */}
+      <Script
+        id="ozigi-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Header
         session={session}
         onSignIn={() => setIsAuthModalOpen(true)}
-        onOpenHistory={() => {}}
-        onOpenScheduled={() => {}}
       />
 
-      <main className="pt-28 md:pt-32 pb-8 flex-1">
+      <main className="pt-16 md:pt-32 pb-8 flex-1">
         
         {/* 1. HERO COMPONENT */}
         <Hero  />

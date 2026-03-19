@@ -1,12 +1,31 @@
 "use client";
-
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import PricingWaitlistModal from "@/components/PricingWaitlistModal";
+import AuthModal from "@/components/AuthModal";
 
 export default function PricingPage() {
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+  }, []);
+
+  const handleGetStarted = () => {
+    if (session) {
+      router.push('/dashboard');
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
 
   const tiers = [
     {
@@ -34,7 +53,7 @@ export default function PricingPage() {
         "Native image generation (2 per campaign)",
       ],
       cta: "Join Waitlist",
-      href: "#", // dummy – not used because we show a button
+      href: "#",
       popular: true,
     },
     {
@@ -51,7 +70,7 @@ export default function PricingPage() {
         "Early access to new features",
       ],
       cta: "Join Waitlist",
-      href: "#", // dummy
+      href: "#",
       popular: false,
     },
   ];
@@ -140,12 +159,12 @@ export default function PricingPage() {
               </ul>
 
               {tier.name === "Free" ? (
-                <Link
-                  href={tier.href}
+                <button
+                  onClick={handleGetStarted}
                   className="block w-full bg-slate-900 text-white text-center py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-slate-800 transition-colors"
                 >
                   {tier.cta}
-                </Link>
+                </button>
               ) : (
                 <button
                   onClick={() => setIsWaitlistOpen(true)}
@@ -173,6 +192,7 @@ export default function PricingPage() {
       </main>
 
       {isWaitlistOpen && <PricingWaitlistModal onClose={() => setIsWaitlistOpen(false)} />}
+      {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
     </div>
   );
 }

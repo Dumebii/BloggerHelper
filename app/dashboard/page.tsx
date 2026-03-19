@@ -12,6 +12,8 @@ import SkeletonGrid from "@/components/SkeletonGrid";
 import ScheduledPostsModal from "../../components/ScheduledPostsModal";
 import SettingsModal from "../../components/SettingsModal";
 import { supabase } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+
 
 export default function Dashboard() {
   // --- CORE DASHBOARD STATE ---
@@ -19,6 +21,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<CampaignDay[]>([]);
   const [personas, setPersonas] = useState<any[]>([]);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [isScheduledOpen, setIsScheduledOpen] = useState(false);
   const [inputs, setInputs] = useState({
     url: "",
@@ -74,16 +77,18 @@ export default function Dashboard() {
       window.history.replaceState(null, "", window.location.pathname);
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (isMounted.current) {
-        setSession(session);
-        if (session?.user) {
-          fetchHistory(session.user.id);
-          fetchPersonas(session.user.id);
-          if (!session.user.email) setNeedsEmail(true);
-        }
-      }
-    });
+    // Modify the initial session fetch to set sessionLoading false
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (isMounted.current) {
+    setSession(session);
+    setSessionLoading(false); // 👈 done loading
+    if (session?.user) {
+      fetchHistory(session.user.id);
+      fetchPersonas(session.user.id);
+      if (!session.user.email) setNeedsEmail(true);
+    }
+  }
+});
 
     const {
       data: { subscription },
@@ -130,6 +135,14 @@ export default function Dashboard() {
       window.removeEventListener("refreshPersonas", handlePersonaRefresh);
     };
   }, []);
+  // Add redirect effect
+const router = useRouter();
+
+useEffect(() => {
+  if (!sessionLoading && !session) {
+    router.push('/'); // redirect to home
+  }
+}, [sessionLoading, session, router]);
 
   // --- STATS FETCH (corrected: scheduledCount from pending posts) ---
   useEffect(() => {
@@ -361,6 +374,21 @@ setStats((prev) => ({ ...prev, scheduledCount: prev.scheduledCount + 1 }));
       onClick: () => setIsSettingsOpen(true),
     },
   ];
+
+  if (sessionLoading) {
+  return (
+    <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-sm font-medium text-slate-600">Loading dashboard...</p>
+      </div>
+    </div>
+  );
+}
+
+if (!session) {
+  return null; // will redirect, but prevent flash
+}
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">

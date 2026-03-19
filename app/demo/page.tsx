@@ -39,6 +39,7 @@ export default function DemoSandbox() {
   const [inputs, setInputs] = useState({
     url: "",
     text: "",
+    fileUrls: [],
     files: [],                      // must be an array
     platforms: ["x", "linkedin", "discord"], // default all platforms
     tweetFormat: "single" as const,
@@ -66,7 +67,7 @@ export default function DemoSandbox() {
 
   return (
     <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col">
-      <Header session={null} onSignIn={() => setIsAuthModalOpen(true)} onOpenHistory={() => {}} />
+      <Header session={null} onSignIn={() => setIsAuthModalOpen(true)} />
 
       <main className="pt-28 md:pt-32 pb-24 flex-1">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 w-full">

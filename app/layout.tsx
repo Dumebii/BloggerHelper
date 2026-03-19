@@ -15,28 +15,50 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ozigi | Agentic Social Media Manager",
-  description:
-    "An Agentic Content Engine for social media handlers, technical writers and developer educators.",
+  title: "Ozigi — Turn Raw Notes, PDFs & URLs Into Social Posts | AI Content Engine",
+  description: "Drop in raw notes, a PDF, or a URL. Ozigi generates platform-ready posts for X, LinkedIn, and Discord in your voice — without sounding like AI wrote them. Free to try.",
+  keywords: [
+    "AI content generator",
+    "social media posts from notes",
+    "AI content generator from PDF",
+    "generate LinkedIn posts from URL",
+    "AI writing tool for developers",
+    "content engine for technical creators",
+    "AI social media post generator",
+    "turn notes into social media posts",
+  ],
   openGraph: {
-    title: "Ozigi | The Agentic Content Engine",
-    description: "Docs as code? Meet content as code. Build multi-platform social campaigns directly from your raw notes, PDFs, and links.",
+    title: "Ozigi — AI Content Engine for Technical Creators",
+    description: "Drop in raw notes, a PDF, or a URL. Get platform-ready posts for X, LinkedIn, and Discord in your voice — not AI's.",
+    url: "https://ozigi.app",
     siteName: "Ozigi",
+    type: "website",
     images: [
       {
-        url: "/heropage.png", 
+        url: "https://ozigi.app/og-image.png", // Ensure this matches your actual deployed URL
         width: 1200,
         height: 630,
-        alt: "Ozigi Context Engine Interface",
+        alt: "Ozigi — Turn raw notes into social posts without sounding like AI",
       },
     ],
   },
-  
   twitter: {
     card: "summary_large_image",
-    title: "Ozigi | The Agentic Content Engine",
-    description: "Docs as code? Meet content as code. Build multi-platform social campaigns directly from your raw notes, PDFs, and links.",
-    images: ["/heropage.png"], 
+    title: "Ozigi — AI Content Engine for Technical Creators",
+    description: "Drop in raw notes, a PDF, or a URL. Get platform-ready posts for X, LinkedIn, and Discord in your voice — not AI's.",
+    images: ["https://ozigi.app/og-image.png"],
+    creator: "@DumebiTheWriter",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  alternates: {
+    canonical: "https://ozigi.app",
   },
 };
 

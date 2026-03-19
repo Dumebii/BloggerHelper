@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthModal from "../components/AuthModal";
 import { motion, Variants } from "framer-motion";
@@ -83,22 +82,17 @@ const staggerContainer: Variants = {
 
   return (
     <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col">
-      <Header
-        session={session}
-        onSignIn={() => setIsAuthModalOpen(true)}
-        onOpenHistory={() => {}}
-        onOpenScheduled={() => setIsScheduledOpen(true)} // 👈 new
-      />
 
       <main className="flex-1">
         
 {/* --- 1. HERO SECTION (Unified with Framer Motion) --- */}
-        <motion.section 
-          className="relative overflow-hidden pt-28 pb-10 md:pb-12 flex flex-col items-center justify-center selection:bg-slate-200 selection:text-slate-900 border-b border-slate-200/60"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
+<motion.section 
+  className="relative overflow-hidden pb-10 md:pb-12 flex flex-col items-center justify-center selection:bg-slate-200 selection:text-slate-900 border-b border-slate-200/60"
+  // remove pt-28 md:pt-32
+  initial="hidden"
+  animate="visible"
+  variants={staggerContainer}
+>
           {/* Background Elements */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-slate-400/10 blur-[120px] rounded-full pointer-events-none" />
@@ -115,9 +109,10 @@ const staggerContainer: Variants = {
 
             <motion.div variants={fadeUp} className="flex flex-col items-center justify-center mb-4 gap-1">
               <div className="overflow-hidden pb-1 px-4">
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-slate-900 leading-[0.9]">
-                  The Intelligent
-                </h1>
+<h1 className="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 mb-6 leading-[1.1]">
+            <span className="block">The intelligent</span>
+            <span className="block text-indigo-600">content engine for technical creators</span>
+          </h1>
               </div>
               <div className="overflow-hidden pt-1 pb-2 px-4">
                 <span className="inline-block text-5xl md:text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-slate-600 to-slate-900 leading-[0.9]">
@@ -133,9 +128,9 @@ const staggerContainer: Variants = {
                 <span className="flex items-center gap-1">✅ Generates X, LinkedIn, Discord drafts in your voice</span>
                 <span className="flex items-center gap-1">✅ Works with URLs, PDFs, images, and messy text</span>
               </div>
-              <p className="max-w-2xl mx-auto text-lg md:text-xl text-slate-600 font-medium leading-relaxed mb-6">
-                Stop fighting with generic AI tools. Feed Ozigi your raw material and get structured, multi‑platform content – without the AI‑speak.
-              </p>
+<p className="mt-6 text-lg md:text-xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
+            Drop in raw notes, a URL, or a PDF. Ozigi generates platform-ready posts for X, LinkedIn, and Discord in your voice — without the AI-speak. No prompt engineering required.
+          </p>
             </motion.div>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">

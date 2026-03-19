@@ -1,6 +1,11 @@
 import Link from "next/link";
 import Footer from "../../components/Footer";
 
+export const metadata = {
+  title: "Ozigi Docs — How the AI Content Engine Works",
+  description: "Learn how Ozigi's multimodal ingestion, Banned Lexicon, System Personas, and Human-in-the-Loop workflow turn raw context into platform-ready social posts.",
+  alternates: { canonical: "https://ozigi.app/docs" },
+};
 export default function DocsPage() {
   return (
     // Note: Added scroll-smooth here for graceful anchor jumping

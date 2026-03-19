@@ -17,6 +17,7 @@ import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
 import { supabase } from "@/lib/supabase/client";
 
+
 // Register ChartJS components
 ChartJS.register(
   CategoryScale,
@@ -146,8 +147,6 @@ export default function Architecture() {
       <Header 
         session={session} 
         onSignIn={() => setIsAuthModalOpen(true)} 
-        onOpenHistory={() => {}}
-        onOpenScheduled={() => {}}
       />
 
       <main className="flex-grow max-w-6xl mx-auto w-full px-6 pt-32 pb-16">
