@@ -15,6 +15,8 @@ export default function SettingsModal({
   const [persona, setPersona] = useState("");
   const [webhook, setWebhook] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [email, setEmail] = useState("");
+
 
   // --- Database Persona State ---
   const [newPersonaName, setNewPersonaName] = useState("");
@@ -35,6 +37,20 @@ export default function SettingsModal({
     }
     fetchConnections();
   }, [session]);
+
+  useEffect(() => {
+  if (session?.user?.id) {
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', session.user.id)
+        .single();
+      if (data?.email) setEmail(data.email);
+    };
+    fetchProfile();
+  }
+}, [session]);
 
   const fetchConnections = async () => {
     const { data } = await supabase
@@ -62,6 +78,10 @@ await supabase
     setIsSaving(false);
     if (!error) onClose();
     else console.error("Failed to update settings:", error.message);
+    const { error: profileError } = await supabase
+  .from('profiles')
+  .update({ email: email.trim() || null })
+  .eq('id', session.user.id);
   };
 
   const handleSaveDatabasePersona = async () => {
@@ -266,6 +286,19 @@ await supabase
                 </button>
               )}
             </div>
+            <div>
+  <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+    Email Address (for X reminders)
+  </label>
+  <input
+    id="email"
+    type="email"
+    className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
+    placeholder="your@email.com"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+  />
+</div>
           </div>
 
           {/* --- ✨ NEW: DANGER ZONE (ACCOUNT DELETION) --- */}

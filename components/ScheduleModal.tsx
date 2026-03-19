@@ -4,12 +4,14 @@ import { useState } from "react";
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSchedule: (scheduledFor: string) => Promise<void>;
+  onSchedule: (scheduledFor: string, email?: string | null) => Promise<void>; // 👈 added email
   postText: string;
   platform: string;
   day: number;          // 👈 prop for the campaign day
   imageUrl?: string;
   userEmail?: string | null;
+  profileEmail?: string | null;
+
 }
 
 export default function ScheduleModal({
@@ -21,24 +23,24 @@ export default function ScheduleModal({
   day,
   imageUrl,
   userEmail,
+  profileEmail,
+
 }: ScheduleModalProps) {
   const [scheduledFor, setScheduledFor] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
+  const emailToUse = userEmail || profileEmail;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!scheduledFor) return;
-
     setLoading(true);
     try {
-      // Convert local datetime string to a Date object (interpreted as local time)
-      const localDate = new Date(scheduledFor + ":00"); // add seconds for reliable parsing
-      // Convert to UTC ISO string
+      const localDate = new Date(scheduledFor + ":00");
       const utcString = localDate.toISOString();
-
-      await onSchedule(utcString); // pass UTC time
+      await onSchedule(utcString, emailToUse); // pass email to parent
       onClose();
     } catch (error) {
       console.error("Schedule failed:", error);
@@ -46,6 +48,7 @@ export default function ScheduleModal({
       setLoading(false);
     }
   };
+  
 
   // Minimum datetime (local) for the picker – rename local variable to avoid conflict
   const now = new Date();
@@ -94,28 +97,29 @@ export default function ScheduleModal({
             />
           </div>
 
-          {/* X‑specific email reminder info */}
-          {platform.toLowerCase() === "x" && (
-            <div className="space-y-3">
-              {!userEmail ? (
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-800 font-medium mb-2">
-                    ⚠️ Email reminders require a verified email address.
-                  </p>
-                  <a
-                    href="/dashboard?openSettings=true"
-                    className="text-xs font-black uppercase tracking-widest text-amber-700 hover:text-amber-900 underline"
-                  >
-                    Add your email in Settings
-                  </a>
-                </div>
-              ) : (
-                <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                  📧 Reminders will be sent to {userEmail}
-                </p>
-              )}
-            </div>
-          )}
+  // In the X-specific email reminder info:
+  {platform.toLowerCase() === "x" && (
+    <div className="space-y-3">
+      {!emailToUse ? (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-xs text-amber-800 font-medium mb-2">
+            ⚠️ Email reminders require an email address.
+          </p>
+          <a
+            href="/dashboard?openSettings=true"
+            className="text-xs font-black uppercase tracking-widest text-amber-700 hover:text-amber-900 underline"
+          >
+            Add your email in Settings
+          </a>
+        </div>
+      ) : (
+        <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+          📧 Reminders will be sent to {emailToUse}
+        </p>
+      )}
+    </div>
+  )}
+
 
           <button
             type="submit"

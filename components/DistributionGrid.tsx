@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { CampaignDay } from "../lib/types";
 import ScheduleModal from "./ScheduleModal";
+import { supabase } from "@/lib/supabase/client";
 
 // --- Framer Motion Variants ---
 const fadeUp: Variants = {
@@ -74,6 +75,22 @@ function SocialCard({
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [imageTitle, setImageTitle] = useState("");
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  // Add near other useState calls
+const [profileEmail, setProfileEmail] = useState<string | null>(null);
+
+useEffect(() => {
+  if (session?.user?.id) {
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', session.user.id)
+        .single();
+      if (data?.email) setProfileEmail(data.email);
+    };
+    fetchProfile();
+  }
+}, [session]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -115,38 +132,37 @@ function SocialCard({
     document.body.removeChild(link);
   };
 
-  const handleSchedule = async (scheduledFor: string) => {
-    // Get the user's access token from session
-    const token = session?.access_token;
-    if (!token) {
-      alert("You must be signed in to schedule posts.");
-      return;
-    }
+const handleSchedule = async (scheduledFor: string, email?: string | null) => {
+  const token = session?.access_token;
+  if (!token) {
+    alert("You must be signed in to schedule posts.");
+    return;
+  }
 
-    const response = await fetch("/api/schedule", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`, // 👈 send token
-      },
-      body: JSON.stringify({
-        posts: [{
-          platform: platformName.toLowerCase(),
-          content: text,
-          imageUrl: imageUrl || undefined,
-          day: day
-        }],
-        scheduledFor,
-        campaignId: null
-      })
-    });
+  const response = await fetch("/api/schedule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      posts: [{
+        platform: platformName.toLowerCase(),
+        content: text,
+        imageUrl: imageUrl || undefined,
+        day: day,
+        email: email, // 👈 pass email if provided
+      }],
+      scheduledFor,
+      campaignId: null
+    })
+  });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to schedule");
-    }
-  };
-
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to schedule");
+  }
+};
   return (
     <motion.div variants={fadeUp} className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col p-5 hover:border-slate-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
@@ -261,6 +277,8 @@ function SocialCard({
           day={day}
           imageUrl={imageUrl || undefined}
             userEmail={session?.user?.email}
+              profileEmail={profileEmail}  // 👈 new prop
+
         />
       )}
     </motion.div>

@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     // Insert scheduled posts
     const scheduledPosts = posts.map((post: any) => ({
       user_id: user.id,
-        user_email: userEmail, // store email (could be null)
+  user_email: post.email || userEmail, // 👈 use provided email or session email
       campaign_id: campaignId,
       platform: post.platform,
       content: post.content,
