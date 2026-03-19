@@ -54,6 +54,11 @@ export default function SettingsModal({
     const { error } = await supabase.auth.updateUser({
       data: { persona: persona.trim(), discord_webhook: webhook.trim() },
     });
+    // Save to profiles table
+await supabase
+  .from('profiles')
+  .update({ discord_webhook: webhook.trim() })
+  .eq('id', session.user.id);
     setIsSaving(false);
     if (!error) onClose();
     else console.error("Failed to update settings:", error.message);

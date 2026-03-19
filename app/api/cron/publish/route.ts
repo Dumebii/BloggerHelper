@@ -169,30 +169,30 @@ export async function GET(req: Request) {
           }
         }
         else if (post.platform === 'discord') {
-          const { data: user } = await supabase
-            .from('users')
-            .select('user_metadata')
-            .eq('id', post.user_id)
-            .single();
+  // Fetch webhook from profiles
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('discord_webhook')
+    .eq('id', post.user_id)
+    .single();
 
-          if (user?.user_metadata?.discord_webhook) {
-            const res = await fetch(`${APP_URL}/api/post-discord`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                content: post.content,
-                webhookUrl: user.user_metadata.discord_webhook
-              })
-            });
-            const data = await res.json();
-            publishSuccess = res.ok;
-            publishError = data.error || null;
-          } else {
-            publishSuccess = false;
-            publishError = "No Discord webhook configured";
-          }
-        }
-
+  if (profile?.discord_webhook) {
+    const res = await fetch(`${APP_URL}/api/post-discord`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: post.content,
+        webhookUrl: profile.discord_webhook
+      })
+    });
+    const data = await res.json();
+    publishSuccess = res.ok;
+    publishError = data.error || null;
+  } else {
+    publishSuccess = false;
+    publishError = "No Discord webhook configured";
+  }
+}
         // Update status for non‑X platforms
         if (post.platform !== 'x') {
           await supabase
