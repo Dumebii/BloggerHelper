@@ -97,7 +97,6 @@ export default function ScheduleModal({
             />
           </div>
 
-  // In the X-specific email reminder info:
   {platform.toLowerCase() === "x" && (
     <div className="space-y-3">
       {!emailToUse ? (

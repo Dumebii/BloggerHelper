@@ -216,6 +216,19 @@ await supabase
                 onChange={(e) => setWebhook(e.target.value)}
               />
             </div>
+                        <div>
+  <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+    Email Address (for X reminders)
+  </label>
+  <input
+    id="email"
+    type="email"
+    className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
+    placeholder="your@email.com"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+  />
+</div>
 
             <button
               onClick={handleSaveWorkspace}
@@ -286,19 +299,7 @@ await supabase
                 </button>
               )}
             </div>
-            <div>
-  <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-    Email Address (for X reminders)
-  </label>
-  <input
-    id="email"
-    type="email"
-    className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
-    placeholder="your@email.com"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-  />
-</div>
+
           </div>
 
           {/* --- ✨ NEW: DANGER ZONE (ACCOUNT DELETION) --- */}
