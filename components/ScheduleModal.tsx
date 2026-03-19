@@ -122,6 +122,14 @@ export default function ScheduleModal({
     </div>
   )}
 
+  {platform.toLowerCase() === "email" && (
+  <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+    <p className="text-xs text-indigo-800 font-medium">
+      📧 This email will be sent to all your active subscribers.
+    </p>
+  </div>
+)}
+
 
           <button
             type="submit"

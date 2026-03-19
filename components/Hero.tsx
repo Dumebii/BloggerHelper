@@ -109,16 +109,12 @@ const staggerContainer: Variants = {
 
             <motion.div variants={fadeUp} className="flex flex-col items-center justify-center mb-4 gap-1">
               <div className="overflow-hidden pb-1 px-4">
-<h1 className="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 mb-6 leading-[1.1]">
-            <span className="block">The intelligent</span>
-            <span className="block text-indigo-600">content engine for technical creators</span>
+<h1 className="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 mb-6 leading-[1.1] uppercase">
+            <span className="block uppercase">The intelligent</span>
+            <span className="block text-indigo-600 uppercase">content engine for technical creators</span>
           </h1>
               </div>
-              <div className="overflow-hidden pt-1 pb-2 px-4">
-                <span className="inline-block text-5xl md:text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-slate-600 to-slate-900 leading-[0.9]">
-                  Content Engine
-                </span>
-              </div>
+
             </motion.div>
 
             <motion.div variants={fadeUp}>
@@ -128,7 +124,7 @@ const staggerContainer: Variants = {
                 <span className="flex items-center gap-1">✅ Generates X, LinkedIn, Discord drafts in your voice</span>
                 <span className="flex items-center gap-1">✅ Works with URLs, PDFs, images, and messy text</span>
               </div>
-<p className="mt-6 text-lg md:text-xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
+<p className="mt-6 text-lg md:text-xl text-slate-600 pb-5 font-medium max-w-2xl mx-auto leading-relaxed">
             Drop in raw notes, a URL, or a PDF. Ozigi generates platform-ready posts for X, LinkedIn, and Discord in your voice — without the AI-speak. No prompt engineering required.
           </p>
             </motion.div>

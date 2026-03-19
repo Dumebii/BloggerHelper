@@ -229,7 +229,7 @@ const removeFile = (index: number) => {
     Target Platforms (click to exclude)
   </label>
   <div className="flex gap-2 flex-wrap">
-    {["x", "linkedin", "discord"].map((platform) => (
+    {["x", "linkedin", "discord", "email"].map((platform) => (
       <div key={platform} className="relative group">
         <button
           onClick={() => togglePlatform(platform)}
@@ -245,21 +245,10 @@ const removeFile = (index: number) => {
           {platform === "x" && "Opens tweet intent in new tab"}
           {platform === "linkedin" && "Direct OAuth post with image support"}
           {platform === "discord" && "Send via webhook (configure in Settings)"}
+          {platform === "email" && "Send newsletter to your subscribers"}
         </span>
       </div>
     ))}
-
-    <div className="relative group">
-      <button
-        disabled
-        className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white text-slate-300 border border-slate-200 cursor-not-allowed"
-      >
-        Email
-      </button>
-      <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50 shadow-lg">
-        included in Pro
-      </span>
-    </div>
   </div>
   <p className="text-[8px] text-slate-400 mt-2">
     Selected platforms will appear in the distribution grid. Uncheck any you don't need.

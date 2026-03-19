@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase/client";
 interface HeaderProps {
   session?: any;
   onSignIn?: () => void;
-  onOpenMobileSidebar?: () => void; // only used on dashboard
+  onOpenMobileSidebar?: () => void;
 }
 
 export default function Header({ session: propSession, onSignIn, onOpenMobileSidebar }: HeaderProps) {
@@ -39,7 +39,7 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
     return () => subscription.unsubscribe();
   }, [propSession]);
 
-  // Handle global settings modal trigger
+  // Handle global settings modal trigger (used by Distillery)
   useEffect(() => {
     const handleOpenSettings = () => setIsSettingsOpen(true);
     window.addEventListener("openSettingsModal", handleOpenSettings);
@@ -141,15 +141,7 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
                         Dashboard
                       </Link>
                     )}
-                    <button
-                      onClick={() => {
-                        setIsSettingsOpen(true);
-                        setIsDropdownOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                    >
-                      Settings
-                    </button>
+                    {/* Settings button removed – accessible via sidebar */}
                     
                     <div className="h-px bg-slate-100 my-1" />
                     
@@ -190,10 +182,10 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
       {isSettingsOpen && (
         <SettingsModal
           session={session}
-          onClose={() => setIsSettingsOpen(false)}
           onEmailAdded={() => {
-            // Handle email added logic here if needed
+            // Optionally show a success message or refresh user data
           }}
+          onClose={() => setIsSettingsOpen(false)}
         />
       )}
     </>

@@ -44,9 +44,10 @@ const distributionSchema = {
         },
         required: ["day", "x", "linkedin", "discord"]
       }
-    }
+    },
+    email: { type: SchemaType.STRING } // 👈 new optional email field
   },
-  required: ["campaign"]
+  required: ["campaign"] // email is optional
 };
 
 export async function POST(req: Request) {

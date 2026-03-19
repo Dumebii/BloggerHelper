@@ -1,5 +1,5 @@
 // components/DistributionGrid.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { CampaignDay } from "../lib/types";
 import ScheduleModal from "./ScheduleModal";
@@ -9,7 +9,9 @@ interface DistributionGridProps {
   campaign: CampaignDay[];
   session: any;
   selectedPlatforms: string[];
-  onStatsChange?: () => void; // 👈 new optional prop
+  emailContent?: string | null;           // 👈 new prop
+  setEmailContent?: (content: string | null) => void; // 👈 new prop
+  onStatsChange?: () => void;
 }
 
 // Framer Motion variants
@@ -51,7 +53,7 @@ function ExpandableText({ text }: { text: string }) {
   );
 }
 
-// Social Card Component
+// Social Card Component (unchanged, except we remove email‑specific code from here)
 function SocialCard({
   day,
   platformName,
@@ -60,7 +62,7 @@ function SocialCard({
   postStatus,
   session,
   actionButtonConfig,
-  onStatsChange, // 👈 receive callback
+  onStatsChange,
 }: {
   day: number;
   platformName: string;
@@ -74,7 +76,7 @@ function SocialCard({
     success: string;
     classes: string;
   };
-  onStatsChange?: () => void; // 👈 add to props
+  onStatsChange?: () => void;
 }) {
   const [text, setText] = useState(initialText);
   const [isEditing, setIsEditing] = useState(false);
@@ -155,7 +157,7 @@ function SocialCard({
       throw new Error(error.error || "Failed to schedule");
     }
 
-    if (onStatsChange) onStatsChange(); // 👈 refresh stats after schedule
+    if (onStatsChange) onStatsChange();
   };
 
   return (
@@ -279,11 +281,62 @@ export default function DistributionGrid({
   campaign,
   session,
   selectedPlatforms,
-  onStatsChange, // 👈 now properly typed
+  emailContent,
+  setEmailContent,
+  onStatsChange,
 }: DistributionGridProps) {
   const [xStatuses, setXStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
   const [discordStatuses, setDiscordStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
   const [liStatuses, setLiStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
+
+  // Email‑specific states
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [localEmailContent, setLocalEmailContent] = useState<string | null>(emailContent || null);
+
+  // Sync local state when prop changes
+  useEffect(() => {
+    setLocalEmailContent(emailContent || null);
+  }, [emailContent]);
+
+  const handleEmailCopy = () => {
+    if (localEmailContent) {
+      navigator.clipboard.writeText(localEmailContent);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    }
+  };
+
+  const handleEmailSchedule = async (scheduledFor: string) => {
+    if (!session?.access_token) return alert("Please sign in to schedule.");
+    setEmailStatus("loading");
+    try {
+      const res = await fetch("/api/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          posts: [{
+            platform: "email",
+            content: localEmailContent,
+            day: 0,
+          }],
+          scheduledFor,
+          campaignId: null,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to schedule");
+      setEmailStatus("success");
+      setTimeout(() => setEmailStatus("idle"), 3000);
+      if (onStatsChange) onStatsChange();
+    } catch (err: any) {
+      alert(err.message);
+      setEmailStatus("error");
+    }
+  };
 
   const handlePostToX = async (text: string, day: number) => {
     const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
@@ -341,6 +394,7 @@ export default function DistributionGrid({
   const hasX = campaign.some((d) => d.x) && selectedPlatforms.includes('x');
   const hasLinkedIn = campaign.some((d) => d.linkedin) && selectedPlatforms.includes('linkedin');
   const hasDiscord = campaign.some((d) => d.discord) && selectedPlatforms.includes('discord');
+  const hasEmail = !!localEmailContent && selectedPlatforms.includes('email');
 
   return (
     <div className="space-y-12">
@@ -371,7 +425,7 @@ export default function DistributionGrid({
                     success: "✅ Published!",
                     classes: "bg-black text-white hover:bg-slate-800 active:scale-95",
                   }}
-                  onStatsChange={onStatsChange} // 👈 pass callback
+                  onStatsChange={onStatsChange}
                 />
               )
             )}
@@ -405,7 +459,7 @@ export default function DistributionGrid({
                     success: "✅ Published!",
                     classes: "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95",
                   }}
-                  onStatsChange={onStatsChange} // 👈 pass callback
+                  onStatsChange={onStatsChange}
                 />
               )
             )}
@@ -439,10 +493,99 @@ export default function DistributionGrid({
                     success: "✅ Sent!",
                     classes: "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95",
                   }}
-                  onStatsChange={onStatsChange} // 👈 pass callback
+                  onStatsChange={onStatsChange}
                 />
               )
             )}
+          </motion.div>
+        </section>
+      )}
+
+      {/* EMAIL NEWSLETTER SECTION */}
+      {hasEmail && (
+        <section className="mt-12 pt-8 border-t-2 border-slate-100">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
+            <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              Email Newsletter
+            </h3>
+          </motion.div>
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="max-w-2xl">
+            <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5">
+              <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <span className="text-xs font-black uppercase tracking-widest text-slate-900">
+                  Campaign Summary
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsEditingEmail(!isEditingEmail)}
+                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    {isEditingEmail ? "Save" : "Edit"}
+                  </button>
+                  <button
+                    onClick={handleEmailCopy}
+                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    {emailCopied ? "Copied!" : "Copy"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      // We'll open schedule modal for email – we need to integrate ScheduleModal properly.
+                      // For now, we can use a simple prompt for the date, or we can create a small modal.
+                      const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time");
+                      if (dateStr) {
+                        const localDate = new Date(dateStr);
+                        if (!isNaN(localDate.getTime())) {
+                          handleEmailSchedule(localDate.toISOString());
+                        } else {
+                          alert("Invalid date format. Use YYYY-MM-DD HH:MM");
+                        }
+                      }
+                    }}
+                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Schedule
+                  </button>
+                </div>
+              </div>
+
+              {isEditingEmail ? (
+                <textarea
+                  value={localEmailContent || ""}
+                  onChange={(e) => {
+                    setLocalEmailContent(e.target.value);
+                    if (setEmailContent) setEmailContent(e.target.value);
+                  }}
+                  className="w-full text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 min-h-[200px] resize-y focus:outline-none focus:border-red-400"
+                />
+              ) : (
+                <div className="mb-4 whitespace-pre-wrap text-sm font-medium text-slate-700 leading-relaxed">
+                  {localEmailContent}
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  // Immediate send (for testing) – you might want to use a proper schedule UI later
+                  const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time to schedule");
+                  if (dateStr) {
+                    const localDate = new Date(dateStr);
+                    if (!isNaN(localDate.getTime())) {
+                      handleEmailSchedule(localDate.toISOString());
+                    } else {
+                      alert("Invalid date format. Use YYYY-MM-DD HH:MM");
+                    }
+                  }
+                }}
+                disabled={emailStatus === "loading"}
+                className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
+              >
+                {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
+              </button>
+            </div>
           </motion.div>
         </section>
       )}

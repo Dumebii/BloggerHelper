@@ -307,41 +307,7 @@ export default function SettingsModal({
             </button>
           </div>
 
-          {/* DATABASE PERSONAS FORM */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
-              🗣️ Create Persona
-            </h3>
-            <div>
-              <label htmlFor="newPersonaName" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 mt-4">Persona Name</label>
-              <input
-                id="newPersonaName"
-                type="text"
-                placeholder="e.g., Snarky DevRel"
-                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
-                value={newPersonaName}
-                onChange={(e) => setNewPersonaName(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="newPersonaPrompt" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">System Prompt</label>
-              <textarea
-                id="newPersonaPrompt"
-                placeholder="You are a developer educator who hates corporate buzzwords..."
-                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium min-h-[100px] resize-y text-slate-900"
-                value={newPersonaPrompt}
-                onChange={(e) => setNewPersonaPrompt(e.target.value)}
-              />
-            </div>
-            <button
-              disabled={!newPersonaName.trim() || !newPersonaPrompt.trim() || isSavingPersona}
-              onClick={handleSaveDatabasePersona}
-              className="w-full bg-red-700 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-red-800 transition-all disabled:opacity-50 disabled:bg-slate-300 text-[10px] sm:text-xs shadow-lg"
-            >
-              {isSavingPersona ? "Saving..." : "Save Persona"}
-            </button>
-          </div>
-
+          
           {/* CONNECTED ACCOUNTS */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
@@ -365,72 +331,7 @@ export default function SettingsModal({
             </div>
           </div>
 
-          {/* 📧 EMAIL SUBSCRIBERS (new section) */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
-              📧 Email Subscribers
-            </h3>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Manage your email list. Subscribers will receive your generated newsletters. We'll handle unsubscribes automatically.
-            </p>
-
-            <div>
-              <label htmlFor="newEmails" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                Add emails (one per line)
-              </label>
-              <textarea
-                id="newEmails"
-                rows={4}
-                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
-                placeholder="user@example.com&#10;friend@domain.com"
-                value={newEmails}
-                onChange={(e) => setNewEmails(e.target.value)}
-              />
-              <button
-                onClick={handleAddSubscribers}
-                disabled={isAddingSubscribers || !newEmails.trim()}
-                className="w-full mt-3 bg-indigo-600 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all disabled:opacity-50 text-[10px] sm:text-xs shadow-lg"
-              >
-                {isAddingSubscribers ? "Adding..." : "Add Emails"}
-              </button>
-            </div>
-
-            <div className="mt-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-slate-600">Your Subscribers</span>
-                <span className="text-[10px] text-slate-400">{subscribers.length} total</span>
-              </div>
-              {isLoadingSubscribers ? (
-                <div className="text-center py-4 text-slate-400 text-sm">Loading...</div>
-              ) : subscribers.length === 0 ? (
-                <div className="text-center py-4 text-slate-400 text-sm border border-dashed border-slate-200 rounded-xl">
-                  No subscribers yet. Add some above.
-                </div>
-              ) : (
-                <ul className="space-y-2 max-h-48 overflow-y-auto">
-                  {subscribers.map((sub) => (
-                    <li
-                      key={sub.id}
-                      className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200"
-                    >
-                      <div className="truncate flex-1">
-                        <p className="text-sm font-medium text-slate-800 truncate">{sub.email}</p>
-                        <p className="text-[10px] text-slate-400 capitalize">{sub.status}</p>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteSubscriber(sub.id)}
-                        className="ml-2 text-red-500 hover:text-red-700 text-xs font-black px-2 py-1"
-                        title="Remove"
-                      >
-                        ✕
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-
+          
           {/* DANGER ZONE */}
           <div className="space-y-4 mt-12 pt-8 border-t-2 border-red-100">
             <h3 className="text-xs font-black uppercase tracking-widest text-red-700 pb-2">

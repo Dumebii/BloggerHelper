@@ -127,7 +127,20 @@ Discord posts should be formatted with clear markdown:
 - Include line breaks between sections
 - Write conversationally, as if speaking directly to community members
 
-## 9. SAFETY & COMPLIANCE GUIDELINES
+## 9. EMAIL NEWSLETTER FORMAT
+Generate a single newsletter email that summarizes the entire 3-day campaign. This email should:
+- Have a compelling subject line (use "Subject: ..." at the beginning)
+- Include a brief personal intro (1-2 sentences)
+- Summarize each day's key takeaway (one short paragraph per day)
+- End with a call-to-action (e.g., "Follow me on X for daily insights" or "Reply to this email with your thoughts")
+- Keep total length around 300-500 words
+- Use a warm, professional tone
+- Avoid salesy language
+- Include placeholders for the user's sender name (we'll handle that separately)
+
+Format the email as plain text with line breaks between sections. Do not use HTML.
+
+## 10. SAFETY & COMPLIANCE GUIDELINES
 Do NOT generate content that:
 - Promotes hate speech, harassment, or discrimination based on protected characteristics
 - Contains sexually explicit material outside educational/medical contexts

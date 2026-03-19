@@ -47,7 +47,6 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
   Sign in to Ozigi
 </h2>
 
-// Update the subtitle
 <p className="text-slate-500 text-sm font-medium mb-8 text-center px-4">
   Choose your preferred provider to continue. New here? You'll be signed up automatically.
 </p>
