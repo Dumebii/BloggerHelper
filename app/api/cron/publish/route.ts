@@ -1,6 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { SendMailClient } from "zeptomail";
+import nodemailer from 'nodemailer';
+
+const USE_SMTP = !!process.env.SMTP_HOST;   
 
 const CRON_SECRET = process.env.CRON_SECRET;
 const APP_URL = process.env.APP_URL || 'http://localhost:3000';
@@ -90,7 +93,24 @@ export async function GET(req: Request) {
             console.log(`Attempting to send email for post ${post.id} to ${post.user_email}`);
 
             try {
-              const emailResp = await mailClient.sendMail({
+              if (USE_SMTP) {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+  await transporter.sendMail({
+    from: `"${EMAIL_FROM_NAME}" <${process.env.SMTP_USER}>`,
+    to: post.user_email,
+    subject: 'Your scheduled X post is ready',
+    html: `...`,
+  });
+} else {
+const emailResp = await mailClient.sendMail({
                 from: {
                   address: EMAIL_FROM_ADDRESS,
                   name: EMAIL_FROM_NAME
@@ -111,8 +131,9 @@ export async function GET(req: Request) {
                   <p>Or log in to Ozigi to manage all scheduled posts.</p>
                 `
               });
+}
 
-              console.log(`Email sent successfully for post ${post.id}`, JSON.stringify(emailResp));
+              //console.log(`Email sent successfully for post ${post.id}`, JSON.stringify(emailResp));
 
               await supabase
                 .from("scheduled_posts")
@@ -168,31 +189,27 @@ export async function GET(req: Request) {
           }
         }
         else if (post.platform === 'discord') {
-          // Fetch webhook from profiles
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('discord_webhook')
-            .eq('id', post.user_id)
-            .single();
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('discord_webhook, display_name, avatar_url')
+    .eq('id', post.user_id)
+    .single();
 
-          if (profile?.discord_webhook) {
-            const res = await fetch(`${APP_URL}/api/post-discord`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                content: post.content,
-                webhookUrl: profile.discord_webhook,
-                userId: post.user_id
-              })
-            });
-            const data = await res.json();
-            publishSuccess = res.ok;
-            publishError = data.error || null;
-          } else {
-            publishSuccess = false;
-            publishError = "No Discord webhook configured";
-          }
-        }
+  if (profile?.discord_webhook) {
+    const res = await fetch(`${APP_URL}/api/post-discord`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: post.content,
+        webhookUrl: profile.discord_webhook,
+        userId: post.user_id,
+        username: profile.display_name || 'Ozigi Bot',   // 👈 use user's name or default
+        avatar_url: profile.avatar_url || 'https://ozigi.app/icon.png' // 👈 use user's avatar or default
+      })
+    });
+    // ... rest
+  }
+}
 
         // Update status for non‑X platforms
         if (post.platform !== 'x') {

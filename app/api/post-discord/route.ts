@@ -4,7 +4,8 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
   try {
-    const { content, webhookUrl: providedWebhook, userId: providedUserId } = await req.json();
+    // Destructure all expected fields
+    const { content, webhookUrl: providedWebhook, userId: providedUserId, username, avatar_url } = await req.json();
 
     // Determine webhook URL
     let webhookUrl = providedWebhook;
@@ -50,11 +51,16 @@ export async function POST(req: Request) {
       );
     }
 
+    // Prepare payload with optional name/avatar
+    const payload: any = { content };
+    if (username) payload.username = username;
+    if (avatar_url) payload.avatar_url = avatar_url;
+
     // Send to Discord
     const response = await fetch(parsedUrl.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
