@@ -294,6 +294,8 @@ export default function DistributionGrid({
   const [emailCopied, setEmailCopied] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [localEmailContent, setLocalEmailContent] = useState<string | null>(emailContent || null);
+  const [emailImageUrl, setEmailImageUrl] = useState<string | null>(null);
+const [isGeneratingEmailImage, setIsGeneratingEmailImage] = useState(false);
 
   // Sync local state when prop changes
   useEffect(() => {
@@ -308,35 +310,36 @@ export default function DistributionGrid({
     }
   };
 
-  const handleEmailSchedule = async (scheduledFor: string) => {
-    if (!session?.access_token) return alert("Please sign in to schedule.");
-    setEmailStatus("loading");
-    try {
-      const res = await fetch("/api/schedule", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          posts: [{
-            platform: "email",
-            content: localEmailContent,
-            day: 0,
-          }],
-          scheduledFor,
-          campaignId: null,
-        }),
-      });
-      if (!res.ok) throw new Error("Failed to schedule");
-      setEmailStatus("success");
-      setTimeout(() => setEmailStatus("idle"), 3000);
-      if (onStatsChange) onStatsChange();
-    } catch (err: any) {
-      alert(err.message);
-      setEmailStatus("error");
-    }
-  };
+  const handleEmailSchedule = async (scheduledFor: string, imageUrl?: string) => {
+  if (!session?.access_token) return alert("Please sign in to schedule.");
+  setEmailStatus("loading");
+  try {
+    const res = await fetch("/api/schedule", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        posts: [{
+          platform: "email",
+          content: localEmailContent,
+          imageUrl: imageUrl,
+          day: 0,
+        }],
+        scheduledFor,
+        campaignId: null,
+      }),
+    });
+    if (!res.ok) throw new Error("Failed to schedule");
+    setEmailStatus("success");
+    setTimeout(() => setEmailStatus("idle"), 3000);
+    if (onStatsChange) onStatsChange();
+  } catch (err: any) {
+    alert(err.message);
+    setEmailStatus("error");
+  }
+};
 
   const handlePostToX = async (text: string, day: number) => {
     const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
@@ -390,6 +393,8 @@ export default function DistributionGrid({
       alert(`Failed to post: ${error.message}`);
     }
   };
+
+  
 
   const hasX = campaign.some((d) => d.x) && selectedPlatforms.includes('x');
   const hasLinkedIn = campaign.some((d) => d.linkedin) && selectedPlatforms.includes('linkedin');
@@ -502,93 +507,161 @@ export default function DistributionGrid({
       )}
 
       {/* EMAIL NEWSLETTER SECTION */}
-      {hasEmail && (
-        <section className="mt-12 pt-8 border-t-2 border-slate-100">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
-            <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
-              Email Newsletter
-            </h3>
-          </motion.div>
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="max-w-2xl">
-            <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5">
-              <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-900">
-                  Campaign Summary
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsEditingEmail(!isEditingEmail)}
-                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    {isEditingEmail ? "Save" : "Edit"}
-                  </button>
-                  <button
-                    onClick={handleEmailCopy}
-                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    {emailCopied ? "Copied!" : "Copy"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      // We'll open schedule modal for email – we need to integrate ScheduleModal properly.
-                      // For now, we can use a simple prompt for the date, or we can create a small modal.
-                      const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time");
-                      if (dateStr) {
-                        const localDate = new Date(dateStr);
-                        if (!isNaN(localDate.getTime())) {
-                          handleEmailSchedule(localDate.toISOString());
-                        } else {
-                          alert("Invalid date format. Use YYYY-MM-DD HH:MM");
-                        }
-                      }
-                    }}
-                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Schedule
-                  </button>
-                </div>
-              </div>
-
-              {isEditingEmail ? (
-                <textarea
-                  value={localEmailContent || ""}
-                  onChange={(e) => {
-                    setLocalEmailContent(e.target.value);
-                    if (setEmailContent) setEmailContent(e.target.value);
-                  }}
-                  className="w-full text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 min-h-[200px] resize-y focus:outline-none focus:border-red-400"
-                />
-              ) : (
-                <div className="mb-4 whitespace-pre-wrap text-sm font-medium text-slate-700 leading-relaxed">
-                  {localEmailContent}
-                </div>
-              )}
-
-              <button
-                onClick={() => {
-                  // Immediate send (for testing) – you might want to use a proper schedule UI later
-                  const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time to schedule");
-                  if (dateStr) {
-                    const localDate = new Date(dateStr);
-                    if (!isNaN(localDate.getTime())) {
-                      handleEmailSchedule(localDate.toISOString());
-                    } else {
-                      alert("Invalid date format. Use YYYY-MM-DD HH:MM");
-                    }
+{hasEmail && (
+  <section className="mt-12 pt-8 border-t-2 border-slate-100">
+    <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
+      <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+      <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+        Email Newsletter
+      </h3>
+    </motion.div>
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="max-w-2xl">
+      <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5">
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+          <span className="text-xs font-black uppercase tracking-widest text-slate-900">
+            Campaign Summary
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsEditingEmail(!isEditingEmail)}
+              className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              {isEditingEmail ? "Save" : "Edit"}
+            </button>
+            <button
+              onClick={handleEmailCopy}
+              className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              {emailCopied ? "Copied!" : "Copy"}
+            </button>
+            <button
+              onClick={() => {
+                const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time");
+                if (dateStr) {
+                  const localDate = new Date(dateStr);
+                  if (!isNaN(localDate.getTime())) {
+                    handleEmailSchedule(localDate.toISOString(), emailImageUrl || undefined);
+                  } else {
+                    alert("Invalid date format. Use YYYY-MM-DD HH:MM");
                   }
-                }}
-                disabled={emailStatus === "loading"}
-                className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
-              >
-                {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
-              </button>
+                }
+              }}
+              className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Schedule
+            </button>
+          </div>
+        </div>
+
+        {/* Image area */}
+        <div className="mb-4">
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              placeholder="Image URL (optional)"
+              value={emailImageUrl || ""}
+              onChange={(e) => setEmailImageUrl(e.target.value)}
+              className="flex-1 text-[10px] font-bold tracking-wide text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:border-slate-400 transition-colors placeholder:font-medium placeholder:text-slate-400"
+            />
+            <button
+              onClick={async () => {
+                setIsGeneratingEmailImage(true);
+                try {
+                  const res = await fetch("/api/generate-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      text: localEmailContent,
+                      platform: "email",
+                      graphicTitle: "", // no text overlay for email
+                    }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error);
+                  setEmailImageUrl(data.imageUrl);
+                } catch (err: any) {
+                  alert(`Image Generation Error: ${err.message}`);
+                } finally {
+                  setIsGeneratingEmailImage(false);
+                }
+              }}
+              disabled={isGeneratingEmailImage}
+              className="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-200 transition-colors disabled:opacity-50"
+            >
+              {isGeneratingEmailImage ? "🎨 Generating..." : "🎨 Generate Image"}
+            </button>
+          </div>
+          {emailImageUrl && (
+            <div className="relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm mt-2">
+              <img
+                src={emailImageUrl}
+                alt="Generated newsletter image"
+                className="w-full h-auto object-cover max-h-48"
+              />
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = emailImageUrl;
+                    link.download = "ozigi-newsletter-image.jpg";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors shadow-lg"
+                >
+                  ⬇️ Download
+                </button>
+                <button
+                  onClick={() => setEmailImageUrl(null)}
+                  className="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-          </motion.div>
-        </section>
-      )}
+          )}
+        </div>
+
+        {/* Email text editor */}
+        {isEditingEmail ? (
+          <textarea
+            value={localEmailContent || ""}
+            onChange={(e) => {
+              setLocalEmailContent(e.target.value);
+              if (setEmailContent) setEmailContent(e.target.value);
+            }}
+            className="w-full text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 min-h-[200px] resize-y focus:outline-none focus:border-red-400"
+          />
+        ) : (
+          <div className="mb-4 whitespace-pre-wrap text-sm font-medium text-slate-700 leading-relaxed">
+            {localEmailContent}
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time");
+            if (dateStr) {
+              const localDate = new Date(dateStr);
+              if (!isNaN(localDate.getTime())) {
+                handleEmailSchedule(localDate.toISOString(), emailImageUrl || undefined);
+              } else {
+                alert("Invalid date format. Use YYYY-MM-DD HH:MM");
+              }
+            }
+          }}
+          disabled={emailStatus === "loading"}
+          className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
+        >
+          {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
+        </button>
+      </div>
+    </motion.div>
+  </section>
+)}
     </div>
   );
 }

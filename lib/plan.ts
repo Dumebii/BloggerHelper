@@ -107,7 +107,7 @@ export async function incrementGenerationCount(userId: string): Promise<void> {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { error } = await supabaseAdmin.rpc("increment_generations", { user_id_input: userId });
+  const { error } = await supabaseAdmin.rpc("increment_generations", { user_id: userId });
   if (error) {
     console.warn("RPC increment failed, using manual update:", error);
     const { data: profile } = await supabaseAdmin
