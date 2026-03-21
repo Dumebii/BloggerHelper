@@ -3,6 +3,7 @@ import { motion, Variants } from "framer-motion";
 import { CampaignDay } from "../lib/types";
 import ScheduleModal from "./ScheduleModal";
 import RichTextEditor from "./RichTextEditor";
+import { uploadLargeAsset } from "@/lib/utils";
 
 //props interface
 interface DistributionGridProps {
@@ -296,6 +297,7 @@ export default function DistributionGrid({
   const [localEmailContent, setLocalEmailContent] = useState<string | null>(emailContent || null);
   const [emailImageUrl, setEmailImageUrl] = useState<string | null>(null);
 const [isGeneratingEmailImage, setIsGeneratingEmailImage] = useState(false);
+const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Sync local state when prop changes
   useEffect(() => {
@@ -621,6 +623,69 @@ const [isGeneratingEmailImage, setIsGeneratingEmailImage] = useState(false);
                   Remove
                 </button>
               </div>
+              <div className="flex gap-2 mb-2">
+  <input
+    type="text"
+    placeholder="Image URL (optional)"
+    value={emailImageUrl || ""}
+    onChange={(e) => setEmailImageUrl(e.target.value)}
+    className="flex-1 text-[10px] font-bold tracking-wide text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:border-slate-400 transition-colors placeholder:font-medium placeholder:text-slate-400"
+  />
+  <button
+    onClick={() => document.getElementById("email-image-upload")?.click()}
+    disabled={isUploadingImage}
+    className="bg-slate-100 text-slate-700 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-colors disabled:opacity-50"
+  >
+    {isUploadingImage ? "Uploading..." : "📁 Upload"}
+  </button>
+  <input
+    type="file"
+    id="email-image-upload"
+    className="hidden"
+    accept="image/*"
+    onChange={async (e) => {
+      if (!e.target.files?.length) return;
+      const file = e.target.files[0];
+      setIsUploadingImage(true);
+      try {
+        const url = await uploadLargeAsset(file);
+        setEmailImageUrl(url);
+      } catch (err) {
+        alert("Upload failed: " + (err as Error).message);
+      } finally {
+        setIsUploadingImage(false);
+        e.target.value = "";
+      }
+    }}
+  />
+  <button
+    onClick={async () => {
+      setIsGeneratingEmailImage(true);
+      try {
+        const res = await fetch("/api/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: localEmailContent,
+            platform: "email",
+            graphicTitle: "",
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        setEmailImageUrl(data.imageUrl);
+      } catch (err: any) {
+        alert(`Image Generation Error: ${err.message}`);
+      } finally {
+        setIsGeneratingEmailImage(false);
+      }
+    }}
+    disabled={isGeneratingEmailImage}
+    className="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-200 transition-colors disabled:opacity-50"
+  >
+    {isGeneratingEmailImage ? "🎨 Generating..." : "🎨 Generate"}
+  </button>
+</div>
             </div>
           )}
         </div>

@@ -5,24 +5,28 @@ import { ExternalAccountClient } from 'google-auth-library';
 import path from "path";
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-
-export const runtime = 'nodejs'; // Force Node.js
+import { searchWeb } from "@/lib/search";
 
 export async function POST(req: Request) {
   try {
-    // Auth user (same as before)
+    // 1. Authenticate the user
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll() { return cookieStore.getAll(); }, setAll() {} } }
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll(); },
+          setAll() { /* ignored */ },
+        },
+      }
     );
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch user context (optional)
+    // 2. Fetch user context
     const { data: profile } = await supabase
       .from('profiles')
       .select('copilot_context')
@@ -30,11 +34,31 @@ export async function POST(req: Request) {
       .single();
     const userContext = profile?.copilot_context?.trim() || "";
 
-    // Parse messages
-    const { messages } = await req.json();
+    // 3. Parse incoming messages and search flag
+    const { messages, search = false } = await req.json();
 
-    // Build contents
-    const systemMessage = userContext ? { role: "user", parts: [{ text: userContext }] } : null;
+    // 4. If search is enabled, get results for the last user message
+    let searchResults = "";
+    if (search) {
+      const lastUserMsg = messages.filter((m: any) => m.role === "user").pop()?.content;
+      if (lastUserMsg) {
+        try {
+          const results = await searchWeb(lastUserMsg);
+          // Format the search results as a readable summary
+          searchResults = `\n\nWeb Search Results:\n${JSON.stringify(results, null, 2)}`;
+        } catch (err) {
+          console.error("Search error:", err);
+          searchResults = "\n\nSearch failed. Please try again later.";
+        }
+      }
+    }
+
+    // 5. Build the contents array with system context first
+    const fullContext = userContext + searchResults;
+    const systemMessage = fullContext.trim() 
+      ? { role: "user", parts: [{ text: fullContext }] }
+      : null;
+
     const contents = [
       ...(systemMessage ? [systemMessage] : []),
       ...messages.map((msg: any) => ({
@@ -43,12 +67,11 @@ export async function POST(req: Request) {
       })),
     ];
 
-    // ---------- AUTHENTICATION (EXACTLY LIKE GENERATE) ----------
+    // 6. Vertex AI authentication (same as generate route)
     const projectId = process.env.GCP_PROJECT_ID || "ozigi-489021";
     let authOptions: any;
 
     if (process.env.VERCEL) {
-      // Production on Vercel
       const projectNumber = process.env.GCP_PROJECT_NUMBER?.trim();
       const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID?.trim();
       const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID?.trim();
@@ -66,11 +89,9 @@ export async function POST(req: Request) {
       });
       authOptions = { authClient, projectId };
     } else {
-      // Development – use local file (same as generate)
       authOptions = { keyFilename: path.join(process.cwd(), "gcp-service-account.json") };
     }
 
-    // Initialize Vertex AI
     const vertex_ai = new VertexAI({
       project: projectId,
       location: "us-central1",
@@ -81,8 +102,9 @@ export async function POST(req: Request) {
       model: "gemini-2.5-flash",
     });
 
-    // Stream response
+    // 7. Stream response
     const streamingResult = await model.generateContentStream({ contents });
+
     const stream = new ReadableStream({
       async start(controller) {
         for await (const chunk of streamingResult.stream) {
