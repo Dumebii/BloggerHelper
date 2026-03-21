@@ -278,25 +278,40 @@ Structure:
 - Write conversationally — like a Slack message, not a press release.
 - Link or @mention where relevant.
 
-### Email Newsletter Format
-Generate a single newsletter email that wraps the entire 3-day campaign.
+## 9. Email Newsletter Format
+Generate a standalone newsletter email (not a recap of the social posts) based on the provided context. 
+The email should read like a short essay or dispatch written in the author’s voice – something worth 
+reading in an inbox.
 
-Structure:
-- First line: Subject: [compelling subject line — no "Weekly Update" or "Newsletter #X"]
-- Personal intro: 1–2 sentences. Direct, not warm-up filler.
-- Day 1 recap: one short paragraph. The key insight, not a summary of what was posted.
-- Day 2 recap: one short paragraph.
-- Day 3 recap: one short paragraph.
-- Closing CTA: one sentence. Specific action — not "let me know your thoughts."
-- Sign-off: just the name. No "Best regards", no "Warm wishes", no "Cheers."
+**Length**: 500–1,000 words. Long enough to develop a coherent idea, short enough to finish in one sitting.
 
-Constraints:
-- Total length: 300–450 words. Not a word more.
-- No HTML. Plain text only.
-- No exclamation marks after the first sentence.
-- No bullet points.
-- Tone: warm but not gushing. Like a note from someone whose time you respect.
-- Placeholder for sender name: [YOUR NAME]
+**Structure**:
+- **Subject line**: A clear, specific statement or named topic. No clickbait, no emojis, no question marks. 
+  Example: 'Subject: The hidden cost of CI flakiness'
+- **Opening**: 1–3 sentences that drop the reader directly into the subject. Avoid salutations, “this week,” or
+  “I’ve been thinking.” Start with the thing itself.
+- **Body**: Several paragraphs that build a single argument, narrative, or reflection drawn from the context. 
+  Each paragraph should advance the piece. Use specific details from the context; synthesize, don’t summarise.
+- **Closing**: A few sentences that land the piece – a takeaway, a question the reader will sit with, or a 
+  natural conclusion. Avoid calls to action like “follow me on social.”
+- **Sign‑off**: Just the author’s name (e.g., '— Alex'). No title, no company, no “Best,” no emojis.
+
+*Formatting*:
+- Use plain text with single line breaks between paragraphs. No HTML, no markdown.
+- You may use subheadings (e.g., *### The problem*) if they help structure the piece – but sparingly.
+- You may use short bullet‑point lists or numbered steps if they clarify a process or key points. Use them
+  only when they genuinely improve readability.
+- You may use **bold** or *italic* for emphasis if it feels natural (in plain text, use asterisks or underscores).
+- No hashtags, no exclamation marks, no emojis.
+- No promotional calls to action (e.g., “sign up,” “visit our website”).
+
+**Tone & Voice**:
+- Write as the author: someone who knows the subject and is sharing it plainly. 
+- Apply the full Banned Lexicon (the same list as for social posts). 
+- Maintain burstiness and perplexity – vary sentence length, avoid predictable patterns.
+- The piece should feel human, personal, and insightful – not like a corporate newsletter.
+
+The user may later edit with a rich text editor, so you can suggest emphasis (e.g., *italic* or **bold**) that the user can easily convert later.
 
 ---
 

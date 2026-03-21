@@ -3,7 +3,8 @@ import { motion, Variants } from "framer-motion";
 import { CampaignDay } from "../lib/types";
 import ScheduleModal from "./ScheduleModal";
 import RichTextEditor from "./RichTextEditor";
-import { uploadLargeAsset } from "@/lib/utils";
+import ScheduleEmailModal from "./ScheduleEmailModal";
+
 
 //props interface
 interface DistributionGridProps {
@@ -295,9 +296,10 @@ export default function DistributionGrid({
   const [emailCopied, setEmailCopied] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [localEmailContent, setLocalEmailContent] = useState<string | null>(emailContent || null);
-  const [emailImageUrl, setEmailImageUrl] = useState<string | null>(null);
-const [isGeneratingEmailImage, setIsGeneratingEmailImage] = useState(false);
-const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [emailImageUrl, setEmailImageUrl] = useState<string | null>(null);
+
+  
 
   // Sync local state when prop changes
   useEffect(() => {
@@ -539,120 +541,16 @@ const [isUploadingImage, setIsUploadingImage] = useState(false);
               {emailCopied ? "Copied!" : "Copy"}
             </button>
             <button
-              onClick={() => {
-                const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time");
-                if (dateStr) {
-                  const localDate = new Date(dateStr);
-                  if (!isNaN(localDate.getTime())) {
-                    handleEmailSchedule(localDate.toISOString(), emailImageUrl || undefined);
-                  } else {
-                    alert("Invalid date format. Use YYYY-MM-DD HH:MM");
-                  }
-                }
-              }}
-              className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              Schedule
-            </button>
+  onClick={() => setIsScheduleModalOpen(true)}
+  disabled={emailStatus === "loading"}
+  className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
+>
+  {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
+</button>
           </div>
         </div>
 
-        {/* Image area */}
-        <div className="mb-4">
-  <div className="flex gap-2 mb-2">
-    <input
-      type="text"
-      placeholder="Image URL (optional)"
-      value={emailImageUrl || ""}
-      onChange={(e) => setEmailImageUrl(e.target.value)}
-      className="flex-1 text-[10px] font-bold tracking-wide text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:border-slate-400 transition-colors placeholder:font-medium placeholder:text-slate-400"
-    />
-    <button
-      onClick={() => document.getElementById("email-image-upload")?.click()}
-      disabled={isUploadingImage}
-      className="bg-slate-100 text-slate-700 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-colors disabled:opacity-50"
-    >
-      {isUploadingImage ? "Uploading..." : "📁 Upload"}
-    </button>
-    <input
-      type="file"
-      id="email-image-upload"
-      className="hidden"
-      accept="image/*"
-      onChange={async (e) => {
-        if (!e.target.files?.length) return;
-        const file = e.target.files[0];
-        setIsUploadingImage(true);
-        try {
-          const url = await uploadLargeAsset(file);
-          setEmailImageUrl(url);
-        } catch (err) {
-          alert("Upload failed: " + (err as Error).message);
-        } finally {
-          setIsUploadingImage(false);
-          e.target.value = "";
-        }
-      }}
-    />
-    <button
-      onClick={async () => {
-        setIsGeneratingEmailImage(true);
-        try {
-          const res = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              text: localEmailContent,
-              platform: "email",
-              graphicTitle: "",
-            }),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          setEmailImageUrl(data.imageUrl);
-        } catch (err: any) {
-          alert(`Image Generation Error: ${err.message}`);
-        } finally {
-          setIsGeneratingEmailImage(false);
-        }
-      }}
-      disabled={isGeneratingEmailImage}
-      className="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-200 transition-colors disabled:opacity-50"
-    >
-      {isGeneratingEmailImage ? "🎨 Generating..." : "🎨 Generate"}
-    </button>
-  </div>
-  {emailImageUrl && (
-    <div className="relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm mt-2">
-      <img
-        src={emailImageUrl}
-        alt="Generated newsletter image"
-        className="w-full h-auto object-cover max-h-48"
-      />
-      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-        <button
-          onClick={() => {
-            const link = document.createElement("a");
-            link.href = emailImageUrl;
-            link.download = "ozigi-newsletter-image.jpg";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }}
-          className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors shadow-lg"
-        >
-          ⬇️ Download
-        </button>
-        <button
-          onClick={() => setEmailImageUrl(null)}
-          className="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
-        >
-          Remove
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+        
         {/* Email text editor */}
         {isEditingEmail ? (
   <RichTextEditor
@@ -671,26 +569,26 @@ const [isUploadingImage, setIsUploadingImage] = useState(false);
 )}
 
         <button
-          onClick={() => {
-            const dateStr = prompt("Enter date and time (YYYY-MM-DD HH:MM) in your local time");
-            if (dateStr) {
-              const localDate = new Date(dateStr);
-              if (!isNaN(localDate.getTime())) {
-                handleEmailSchedule(localDate.toISOString(), emailImageUrl || undefined);
-              } else {
-                alert("Invalid date format. Use YYYY-MM-DD HH:MM");
-              }
-            }
-          }}
-          disabled={emailStatus === "loading"}
-          className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
-        >
-          {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
-        </button>
+  onClick={() => setIsScheduleModalOpen(true)}
+  disabled={emailStatus === "loading"}
+  className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
+>
+  {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
+</button>
       </div>
     </motion.div>
   </section>
+
 )}
+    {isScheduleModalOpen && (
+  <ScheduleEmailModal
+    isOpen={isScheduleModalOpen}
+    onClose={() => setIsScheduleModalOpen(false)}
+    onSchedule={(isoString) => {
+      handleEmailSchedule(isoString, emailImageUrl || undefined);
+    }}
+  />
+)};
     </div>
-  );
-}
+    
+  )}

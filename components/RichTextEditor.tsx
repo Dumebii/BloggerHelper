@@ -1,7 +1,10 @@
 "use client";
+import { useState, useRef, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
+import ImageInsertModal from "./ImageInsertModal";
 
 interface RichTextEditorProps {
   content: string;
@@ -10,10 +13,19 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ content, onChange, placeholder = "Write your newsletter content..." }: RichTextEditorProps) {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: "max-w-full h-auto rounded-lg my-2",
+        },
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -22,7 +34,7 @@ export default function RichTextEditor({ content, onChange, placeholder = "Write
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 text-slate-900 bg-white", // added bg-white and text color
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 text-slate-900 bg-white",
       },
     },
   });
@@ -96,10 +108,26 @@ export default function RichTextEditor({ content, onChange, placeholder = "Write
         >
           ↻
         </button>
+        {/* Image button */}
+        <button
+          onClick={() => setIsImageModalOpen(true)}
+          className="p-2 rounded hover:bg-slate-200"
+          type="button"
+          title="Insert image"
+        >
+          🖼️
+        </button>
       </div>
       <div className="bg-white">
         <EditorContent editor={editor} />
       </div>
+      <ImageInsertModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onInsert={(url) => {
+          editor.chain().focus().setImage({ src: url }).run();
+        }}
+      />
     </div>
   );
 }
