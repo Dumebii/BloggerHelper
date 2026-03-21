@@ -85,7 +85,7 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
 
             {/* Show Brand ONLY when NOT on Dashboard (sidebar handles dashboard logo) */}
             {!isDashboard && (
-              <Link href="/" className="text-2xl font-black text-slate-800 tracking-tighter">
+              <Link href="/" className="text-2xl font-black text-slate-800 tracking-tighter navbar-brand brand-image">
                 Ozigi.
               </Link>
             )}

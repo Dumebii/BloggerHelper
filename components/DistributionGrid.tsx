@@ -540,13 +540,7 @@ export default function DistributionGrid({
             >
               {emailCopied ? "Copied!" : "Copy"}
             </button>
-            <button
-  onClick={() => setIsScheduleModalOpen(true)}
-  disabled={emailStatus === "loading"}
-  className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
->
-  {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
-</button>
+         
           </div>
         </div>
 

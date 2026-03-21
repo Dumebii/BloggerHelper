@@ -288,13 +288,7 @@ const handleGenerate = async () => {
             onSignIn={() => setIsAuthModalOpen(true)}
             onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           />
-          {/* Add this near the profile button in the sticky header */}
-          <button
-  onClick={() => setIsCopilotOpen(true)}
-  className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors"
->
-  <span>✨</span> Copilot
-</button>
+
 
         </div>
 

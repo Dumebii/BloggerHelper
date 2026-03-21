@@ -7,6 +7,7 @@ import AuthModal from "../components/AuthModal";
 import { motion, Variants } from "framer-motion";
 import PricingWaitlistModal from "./PricingWaitlistModal";
 import { supabase } from "@/lib/supabase/client";
+import CompetitorCompare from "./CompetitorCompare";
 
 
 export default function Hero() {
@@ -144,7 +145,7 @@ const staggerContainer: Variants = {
               </button>
             </motion.div>
 
-            {/* 🔥 Social proof - made more prominent */}
+            {/* 🔥 Social proof */}
             <motion.div variants={fadeUp} className="mt-10 flex justify-center">
                <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md py-4 px-8 rounded-full border border-slate-200 shadow-lg">
                    <div className="flex -space-x-3">
@@ -154,7 +155,7 @@ const staggerContainer: Variants = {
                       <div className="w-10 h-10 rounded-full bg-slate-900 border-2 border-white flex items-center justify-center text-xs text-white font-black tracking-tighter shadow-sm">140+</div>
                    </div>
                    <div className="text-left flex flex-col justify-center">
-                       <p className="text-sm font-black text-slate-900 tracking-tight leading-none mb-1">140+ Campaigns</p>
+                       <p className="text-sm font-black text-slate-900 tracking-tight leading-none mb-1">300+ Campaigns</p>
                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Successfully generated</p>
                    </div>
                </div>
@@ -162,7 +163,7 @@ const staggerContainer: Variants = {
 
           </div>
         </motion.section>
-
+<CompetitorCompare />
         
         {/* --- 2. HOW IT WORKS --- */}
         <section id="how-it-works" className="py-16 md:py-24 bg-white border-b border-slate-200/60 relative">
