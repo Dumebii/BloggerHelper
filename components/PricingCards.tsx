@@ -35,7 +35,7 @@ const tiers: PricingTier[] = [
   {
     name: "Team",
     priceMonthly: 15,
-    priceYearly: 150,
+    priceYearly: 144,
     description: "For serious creators",
     features: [
       "30 campaigns/month",
@@ -55,7 +55,7 @@ const tiers: PricingTier[] = [
   {
     name: "Organization",
     priceMonthly: 39,
-    priceYearly: 390,
+    priceYearly: 374.40,
     description: "Full power, no limits",
     features: [
       "Unlimited campaigns",
@@ -152,7 +152,7 @@ export default function PricingCards() {
             }`}
           >
             Yearly
-            <span className="ml-1 text-xs font-normal text-green-600">Save 15%</span>
+            <span className="ml-1 text-xs font-normal text-green-600">Save 20%</span>
           </button>
         </div>
       </div>

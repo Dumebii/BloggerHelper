@@ -47,12 +47,19 @@ const COPILOT_ACCESS: Record<Plan, boolean> = {
   enterprise: true,
 };
 
+
+
 export async function getPlanStatus(userId: string): Promise<PlanStatus> {
+  
+const ADMIN_EMAILS = ['okolodumebi@gmail.com']; 
+
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+
+  
   const now = new Date();
 
   // Fetch profile
@@ -114,6 +121,23 @@ export async function getPlanStatus(userId: string): Promise<PlanStatus> {
     .select("campaigns_generated, image_generations_this_month, email_sends_this_month")
     .eq("user_id", userId)
     .single();
+    const userEmail = profile?.email;
+if (ADMIN_EMAILS.includes(userEmail)) {   return {
+    plan: 'organization',
+    isTrialActive: false,
+    isTrialExpired: false,
+    trialEndsAt: null,
+    canGenerate: true,
+    generationsUsed: 0,
+    generationsLimit: -1,
+    imageGenUsed: 0,
+    imageGenLimit: -1,
+    emailSendsUsed: 0,
+    emailSendsLimit: -1,
+    hasCopilot: true,
+    isEnterprise: false,
+  };
+ }
 
   if (statsError && statsError.code === 'PGRST116') {
     // Create stats row

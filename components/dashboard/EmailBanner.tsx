@@ -26,7 +26,7 @@ export default function EmailBanner({ needsEmail, onDismiss, onGoToSettings }: E
       </div>
       <button
         onClick={onGoToSettings}
-        className="shrink-0 bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 transition"
+        className="shrink-0 bg-orange-600 text-white px-2 py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 transition"
       >
         Go to Settings
       </button>

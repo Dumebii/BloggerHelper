@@ -24,6 +24,11 @@ import { useEmailBanner } from "@/components/hooks/useEmailBanner";
 import { supabase } from "@/lib/supabase/client";
 import CopilotPanel from "@/components/CopilotPannel";
 import CopilotSettingsModal from "@/components/CopilotSettingsModal";
+import { getPlanStatus, PlanStatus } from "@/lib/plan";
+import TrialBanner from "@/components/TrialBanner";
+import { usePlanStatus } from "@/components/hooks/usePlanStatus";
+import PricingCards from "@/components/PricingCards"; // or your upgrade modal content
+
 
 
 export default function Dashboard() {
@@ -32,6 +37,8 @@ export default function Dashboard() {
 
   // --- CORE STATE ---
   const [loading, setLoading] = useState(false);
+  const { planStatus, loading: planLoading } = usePlanStatus();
+const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [campaign, setCampaign] = useState<any[]>([]);
   const [inputs, setInputs] = useState({
     url: "",
@@ -298,6 +305,30 @@ const handleGenerate = async () => {
             onDismiss={dismissBanner}
             onGoToSettings={() => setIsSettingsOpen(true)}
           />
+
+          {planStatus?.isTrialActive && planStatus.trialEndsAt && (
+  <div className="mb-6">
+    <TrialBanner
+      trialEndsAt={planStatus.trialEndsAt}
+      onUpgradeClick={() => setIsUpgradeModalOpen(true)}
+    />
+  </div>
+)}
+
+{isUpgradeModalOpen && (
+  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+    <div className="bg-white w-full max-w-4xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto relative">
+      <button
+        onClick={() => setIsUpgradeModalOpen(false)}
+        className="absolute top-4 right-4 text-slate-400 hover:text-red-600 font-black text-xl"
+      >
+        ✕
+      </button>
+      <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4">Upgrade Your Plan</h2>
+      <PricingCards />
+    </div>
+  </div>
+)}
 
           {!session && <GuestModeBanner onSignIn={() => setIsAuthModalOpen(true)} />}
 
