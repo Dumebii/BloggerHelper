@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+type Plan = 'team' | 'organization';
+type Interval = 'monthly' | 'yearly';
+
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
@@ -21,28 +24,30 @@ export async function POST(req: Request) {
     }
 
     const { plan, interval = 'monthly', successUrl, cancelUrl } = await req.json();
-
-    // Map plan name + interval to Dodo product IDs
-    const productIds = {
-      team: {
-        monthly: 'pdt_0Nb2mk6p1FU3JGdzuNUzt',      // replace with actual Dodo product ID
-        yearly: 'pdt_0Nb2varb5A2JQeOENmlfH',
-      },
-      organization: {
-        monthly: 'pdt_0Nb2wrZKVoi4PDNwOMbbw',
-        yearly: 'pdt_0Nb2ydRec1WCRdZdQS6QW',
-      },
-    };
-    const productId = productIds[plan as keyof typeof productIds]?.[interval as 'monthly' | 'yearly'];
-    if (!productId) {
-      return NextResponse.json({ error: 'Invalid plan or interval' }, { status: 400 });
+    if (!plan || !['team', 'organization'].includes(plan)) {
+      return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-   console.log('Dodo API Key present:', !!process.env.DODO_API_KEY);
-    console.log('Product ID:', productId);
-    console.log('User email:', user.email);
+    // Map plan + interval to product IDs (use your actual product IDs from Dodo)
+    const productIds: Record<Plan, Record<Interval, string>> = {
+      team: {
+        monthly: 'pdt_0Nb2mk6p1FU3JGdzuNUzt', // replace with your team monthly product ID
+        yearly: 'pdt_xxx', // replace
+      },
+      organization: {
+        monthly: 'pdt_xxx', // replace
+        yearly: 'pdt_xxx', // replace
+      },
+    };
 
-    // Dodo API expects `mode` to be 'subscription' for recurring plans
+    const productId = productIds[plan as Plan][interval as Interval];
+    if (!productId) {
+      return NextResponse.json({ error: 'Product not configured' }, { status: 500 });
+    }
+
+    const customerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer';
+
+    // Use Dodo API (REST)
     const response = await fetch('https://api.dodopayments.com/v1/checkout', {
       method: 'POST',
       headers: {
@@ -50,11 +55,13 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${process.env.DODO_API_KEY}`,
       },
       body: JSON.stringify({
-        product_id: productId,
-        mode: 'subscription',
-        success_url: successUrl || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
+        product_cart: [{ product_id: productId, quantity: 1 }],
+        customer: {
+          email: user.email,
+          name: customerName,
+        },
+        return_url: successUrl || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
         cancel_url: cancelUrl || `${process.env.NEXT_PUBLIC_APP_URL}/pricing?checkout=cancel`,
-        customer_email: user.email,
         metadata: {
           user_id: user.id,
           plan,
@@ -63,8 +70,23 @@ export async function POST(req: Request) {
       }),
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to create checkout');
+    const responseText = await response.text();
+    if (!response.ok) {
+      console.error('Dodo API error:', response.status, responseText);
+      return NextResponse.json({ error: `Payment service error: ${response.status}` }, { status: 500 });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      return NextResponse.json({ error: 'Invalid response from payment provider' }, { status: 500 });
+    }
+
+    // The docs show `checkout_url` is returned
+    if (!data.checkout_url) {
+      return NextResponse.json({ error: 'No checkout URL returned' }, { status: 500 });
+    }
 
     return NextResponse.json({ checkoutUrl: data.checkout_url });
   } catch (error: any) {

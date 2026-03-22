@@ -11,7 +11,7 @@ import { PostHog } from 'posthog-node';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'; // for token auth
-import { getPlanStatus, incrementGenerationCount } from "@/lib/plan";
+import { getPlanStatus, incrementCampaignGeneration } from "@/lib/plan";
 
 console.log("🔑 ANON_KEY starts with:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10));
 console.log("🔑 ANON_KEY length:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length);
@@ -239,7 +239,7 @@ export async function POST(req: Request) {
 
     const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    await incrementGenerationCount(user.id);
+    await incrementCampaignGeneration(user.id);
 
     const durationMs = Date.now() - startTime;
     posthog.capture({
