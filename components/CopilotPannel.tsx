@@ -156,9 +156,7 @@ useEffect(() => {
       {/* Input area */}
       <div className="border-t border-slate-200 p-4 bg-white">
         <div className="flex gap-2">
-          import TextareaAutosize from 'react-textarea-autosize';
 
-// Inside the component, replace the textarea with:
 <TextareaAutosize
   minRows={2}
   maxRows={10}

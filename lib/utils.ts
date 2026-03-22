@@ -1,6 +1,8 @@
 export const uploadLargeAsset = async (file: File): Promise<string> => {
   const safeContentType = file.type || 'application/octet-stream';
 
+  
+
   const presignedRes = await fetch('/api/upload/presigned', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
