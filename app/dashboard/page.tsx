@@ -124,8 +124,111 @@ export default function Dashboard() {
 
   // --- HANDLERS ---
   const handleGenerate = async () => {
-    // (keep your existing generate logic – it's fine)
-  };
+const handleGenerate = async () => {
+  setLoading(true);
+  setErrorMessage("");
+  console.log("Session in generate:", session);
+  if (!session?.access_token) {
+    setErrorMessage("Your session expired. Please log in again.");
+    setLoading(false);
+    return;
+  }
+  setCampaign([]);
+
+  try {
+    let selectedVoice =
+      "Expert Social Media Copywriter who adapts perfectly to the provided context";
+    if (inputs.personaId && inputs.personaId !== "default") {
+      const found = personas.find((p: any) => p.id === inputs.personaId);
+      if (found && found.prompt) {
+        selectedVoice = found.prompt;
+      }
+    }
+
+    const payload = {
+      sourceMaterial: {
+        url: inputs.url,
+        rawText: inputs.text,
+        assetUrls: inputs.fileUrls,
+      },
+      campaignDirectives: {
+        platforms: inputs.platforms,
+        tweetFormat: inputs.tweetFormat,
+        additionalContext: inputs.additionalInfo,
+        personaVoice: selectedVoice,
+      },
+    };
+
+    console.log("🚀 Firing payload to AI:", payload);
+
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      let errorMsg =
+        "We encountered a hiccup connecting to the AI engine. Please try again.";
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMsg = errorData.error;
+        }
+      } catch (parseError) {
+        console.error("Failed to parse error response");
+      }
+      setErrorMessage(errorMsg);
+      setLoading(false);
+      return;
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      setErrorMessage(data.error);
+      setLoading(false);
+      return;
+    }
+
+    const cleanJson = data.output.replace(/```json/gi, "").replace(/```/gi, "");
+    const finalResponse = JSON.parse(cleanJson);
+    const finalCampaign = finalResponse.campaign || [];
+    const finalEmail = finalResponse.email || null;
+
+    if (finalCampaign.length > 0) {
+      setCampaign(finalCampaign);
+      setEmailContent(finalEmail);
+      setTimeout(() => {
+        campaignRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
+      if (session?.user) {
+        await supabase.from("campaigns").insert({
+          user_id: session.user.id,
+          source_url: inputs.url,
+          source_notes: inputs.text || inputs.fileUrls.join(", "),
+          generated_content: finalCampaign,
+        });
+        fetchHistory(session.user.id); // from useCampaignHistory
+        refreshStats(); // from useStats
+      }
+    }
+  } catch (err) {
+    console.error("Context error:", err);
+    setErrorMessage(
+      "The AI returned an unexpected format. Please try tweaking your context and generating again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};  
+};
 
   const handleEmailAdded = async () => {
     const { data: { session } } = await supabase.auth.getSession();
