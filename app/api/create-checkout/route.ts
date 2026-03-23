@@ -31,12 +31,12 @@ export async function POST(req: Request) {
     // Map plan + interval to product IDs (use your actual product IDs from Dodo)
     const productIds: Record<Plan, Record<Interval, string>> = {
       team: {
-        monthly: 'pdt_0Nb2mk6p1FU3JGdzuNUzt', // replace with your team monthly product ID
-        yearly: 'pdt_xxx', // replace
+        monthly: 'pdt_0Nb2mk6p1FU3JGdzuNUzt', 
+        yearly: 'pdt_0Nb2varb5A2JQeOENmlfH', 
       },
       organization: {
-        monthly: 'pdt_xxx', // replace
-        yearly: 'pdt_xxx', // replace
+        monthly: 'pdt_0Nb2wrZKVoi4PDNwOMbbw', 
+        yearly: 'pdt_0Nb2ydRec1WCRdZdQS6QW', 
       },
     };
 
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     const customerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer';
 
     // Use Dodo API (REST)
-    const response = await fetch('https://api.dodopayments.com/v1/checkout', {
+    const response = await fetch('https://live.dodopayments.com', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
