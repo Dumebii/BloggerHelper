@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { CampaignDay } from "../lib/types";
@@ -7,10 +8,11 @@ import ScheduleEmailModal from "./ScheduleEmailModal";
 import { uploadBase64Image } from "@/lib/utils";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 
+// Props interface (allow undefined for campaign and selectedPlatforms)
 interface DistributionGridProps {
-  campaign: CampaignDay[];
-  session: any;
-  selectedPlatforms: string[];
+  campaign?: CampaignDay[];
+  session?: any;
+  selectedPlatforms?: string[];
   emailContent?: string | null;
   setEmailContent?: (content: string | null) => void;
   onStatsChange?: () => void;
@@ -19,21 +21,22 @@ interface DistributionGridProps {
 // Framer Motion variants
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } 
-  }
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+  },
 };
 
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+    transition: { staggerChildren: 0.1 },
+  },
 };
 
+// Expandable Text Component
 function ExpandableText({ text }: { text: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const isLong = text.length > 250;
@@ -54,7 +57,7 @@ function ExpandableText({ text }: { text: string }) {
   );
 }
 
-// Social Card Component
+// Social Card Component (receives planStatus and image count as props)
 function SocialCard({
   day,
   platformName,
@@ -100,9 +103,12 @@ function SocialCard({
   };
 
   const handleGenerateImage = async () => {
+    if (!planStatus) return;
     // Check per‑campaign limit (if limit is not unlimited)
-    if (planStatus?.imageGenLimit !== -1 && imagesGeneratedCount >= planStatus.imageGenLimit) {
-      alert(`You've reached your image generation limit (${planStatus.imageGenLimit} per campaign). Upgrade to generate more.`);
+    if (planStatus.imageGenLimit !== -1 && imagesGeneratedCount >= planStatus.imageGenLimit) {
+      alert(
+        `You've reached your image generation limit (${planStatus.imageGenLimit} per campaign). Upgrade to generate more.`
+      );
       return;
     }
 
@@ -126,7 +132,8 @@ function SocialCard({
       console.error(err);
       let errorMsg = `Image Error: ${err.message}`;
       if (err.message.includes("Quota exceeded")) {
-        errorMsg = "Image generation quota exceeded. Please try again later or upgrade your plan.";
+        errorMsg =
+          "Image generation quota exceeded. Please try again later or upgrade your plan.";
       }
       alert(errorMsg);
     } finally {
@@ -159,13 +166,15 @@ function SocialCard({
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        posts: [{
-          platform: platformName.toLowerCase(),
-          content: text,
-          imageUrl: imageUrl || undefined,
-          day: day,
-          email: email,
-        }],
+        posts: [
+          {
+            platform: platformName.toLowerCase(),
+            content: text,
+            imageUrl: imageUrl || undefined,
+            day: day,
+            email: email,
+          },
+        ],
         scheduledFor,
         campaignId: null,
       }),
@@ -179,30 +188,34 @@ function SocialCard({
     if (onStatsChange) onStatsChange();
   };
 
-  const imageGenButton = planStatus?.imageGenLimit !== 0 ? (
-    <button
-      onClick={handleGenerateImage}
-      disabled={isGeneratingImg}
-      className="w-full mb-5 py-3 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:border-slate-400 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-    >
-      {isGeneratingImg ? "🎨 Painting pixels..." : "🎨 Generate Graphic"}
-    </button>
-  ) : (
-    <div className="relative group w-full mb-5">
+  const imageGenButton =
+    planStatus?.imageGenLimit !== 0 ? (
       <button
-        disabled
-        className="w-full py-3 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 cursor-not-allowed flex items-center justify-center gap-2"
+        onClick={handleGenerateImage}
+        disabled={isGeneratingImg}
+        className="w-full mb-5 py-3 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:border-slate-400 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
       >
-        🔒 Upgrade to Generate
+        {isGeneratingImg ? "🎨 Painting pixels..." : "🎨 Generate Graphic"}
       </button>
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
-        Upgrade to Team for image generation
+    ) : (
+      <div className="relative group w-full mb-5">
+        <button
+          disabled
+          className="w-full py-3 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          🔒 Upgrade to Generate
+        </button>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
+          Upgrade to Team for image generation
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
-    <motion.div variants={fadeUp} className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col p-5 hover:border-slate-300 hover:shadow-md transition-all">
+    <motion.div
+      variants={fadeUp}
+      className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col p-5 hover:border-slate-300 hover:shadow-md transition-all"
+    >
       <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
         <span className="text-xs font-black uppercase tracking-widest text-slate-900">
           Day {day}
@@ -238,7 +251,7 @@ function SocialCard({
           className="w-full text-[10px] font-bold tracking-wide text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:border-slate-400 transition-colors placeholder:font-medium placeholder:text-slate-400"
         />
       </div>
-      
+
       {imageUrl ? (
         <div className="mb-5 flex flex-col gap-2 relative z-10">
           <div className="relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm">
@@ -247,7 +260,7 @@ function SocialCard({
               alt="Generated graphic"
               className="w-full h-auto object-cover aspect-video"
             />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               {imageGenButton}
             </div>
           </div>
@@ -307,9 +320,9 @@ function SocialCard({
 
 // Main DistributionGrid Component
 export default function DistributionGrid({
-  campaign,
+  campaign = [],           // default empty array
   session,
-  selectedPlatforms,
+  selectedPlatforms = [],  // default empty array
   emailContent,
   setEmailContent,
   onStatsChange,
@@ -319,7 +332,7 @@ export default function DistributionGrid({
   const [discordStatuses, setDiscordStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
   const [liStatuses, setLiStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
 
-  // Email-specific states
+  // Email‑specific states
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -329,7 +342,7 @@ export default function DistributionGrid({
 
   // Image count tracking (per campaign)
   const [imagesGeneratedCount, setImagesGeneratedCount] = useState(0);
-  const incrementImageCount = () => setImagesGeneratedCount(prev => prev + 1);
+  const incrementImageCount = () => setImagesGeneratedCount((prev) => prev + 1);
 
   useEffect(() => {
     setLocalEmailContent(emailContent || null);
@@ -354,12 +367,14 @@ export default function DistributionGrid({
           Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          posts: [{
-            platform: "email",
-            content: localEmailContent,
-            imageUrl: imageUrl,
-            day: 0,
-          }],
+          posts: [
+            {
+              platform: "email",
+              content: localEmailContent,
+              imageUrl: imageUrl,
+              day: 0,
+            },
+          ],
           scheduledFor,
           campaignId: null,
         }),
@@ -427,24 +442,40 @@ export default function DistributionGrid({
     }
   };
 
-  const hasX = campaign.some((d) => d.x) && selectedPlatforms.includes('x');
-  const hasLinkedIn = campaign.some((d) => d.linkedin) && selectedPlatforms.includes('linkedin');
-  const hasDiscord = campaign.some((d) => d.discord) && selectedPlatforms.includes('discord');
-  const hasEmail = !!localEmailContent && selectedPlatforms.includes('email');
+  // SAFE CHECKS – ensure we're working with arrays
+  const safeCampaign = campaign ?? [];
+  const safePlatforms = selectedPlatforms ?? [];
+
+  const hasX = safeCampaign.some((d) => d.x) && safePlatforms.includes("x");
+  const hasLinkedIn = safeCampaign.some((d) => d.linkedin) && safePlatforms.includes("linkedin");
+  const hasDiscord = safeCampaign.some((d) => d.discord) && safePlatforms.includes("discord");
+  const hasEmail = !!localEmailContent && safePlatforms.includes("email");
 
   return (
     <div className="space-y-12">
       {/* X ROW */}
       {hasX && (
         <section>
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="flex items-center gap-3 mb-5"
+          >
             <svg className="w-5 h-5" viewBox="0 0 1200 1227" fill="currentColor">
               <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
             </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">X Strategy</h3>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              X Strategy
+            </h3>
           </motion.div>
-          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start" variants={staggerContainer} initial="hidden" animate="visible">
-            {campaign.map((dayData) =>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {safeCampaign.map((dayData) =>
               dayData.x && (
                 <SocialCard
                   key={`x-${dayData.day}`}
@@ -474,14 +505,26 @@ export default function DistributionGrid({
       {/* LINKEDIN ROW */}
       {hasLinkedIn && (
         <section>
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="flex items-center gap-3 mb-5"
+          >
             <svg className="w-5 h-5 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
             </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">LinkedIn Strategy</h3>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              LinkedIn Strategy
+            </h3>
           </motion.div>
-          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start" variants={staggerContainer} initial="hidden" animate="visible">
-            {campaign.map((dayData) =>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {safeCampaign.map((dayData) =>
               dayData.linkedin && (
                 <SocialCard
                   key={`li-${dayData.day}`}
@@ -511,14 +554,26 @@ export default function DistributionGrid({
       {/* DISCORD ROW */}
       {hasDiscord && (
         <section>
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="flex items-center gap-3 mb-5"
+          >
             <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 127.14 96.36" fill="currentColor">
               <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77.7,77.7,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z" />
             </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">Discord Strategy</h3>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
+              Discord Strategy
+            </h3>
           </motion.div>
-          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start" variants={staggerContainer} initial="hidden" animate="visible">
-            {campaign.map((dayData) =>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {safeCampaign.map((dayData) =>
               dayData.discord && (
                 <SocialCard
                   key={`disc-${dayData.day}`}
@@ -548,15 +603,35 @@ export default function DistributionGrid({
       {/* EMAIL NEWSLETTER SECTION */}
       {hasEmail && (
         <section className="mt-12 pt-8 border-t-2 border-slate-100">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex items-center gap-3 mb-5">
-            <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="flex items-center gap-3 mb-5"
+          >
+            <svg
+              className="w-5 h-5 text-slate-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
             </svg>
             <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
               Email Newsletter
             </h3>
           </motion.div>
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="max-w-2xl">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="max-w-2xl"
+          >
             <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5">
               <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
                 <span className="text-xs font-black uppercase tracking-widest text-slate-900">
@@ -590,7 +665,9 @@ export default function DistributionGrid({
               ) : (
                 <div
                   className="mb-4 prose prose-sm max-w-none text-sm font-medium text-slate-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: localEmailContent || "" }}
+                  dangerouslySetInnerHTML={{
+                    __html: localEmailContent || "",
+                  }}
                 />
               )}
 
@@ -600,7 +677,9 @@ export default function DistributionGrid({
                   disabled={emailStatus === "loading"}
                   className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
                 >
-                  {emailStatus === "loading" ? "Scheduling..." : "📧 Schedule Newsletter"}
+                  {emailStatus === "loading"
+                    ? "Scheduling..."
+                    : "📧 Schedule Newsletter"}
                 </button>
               ) : (
                 <div className="relative group">

@@ -1,712 +1,450 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion, Variants } from "framer-motion";
-import { CampaignDay } from "@/lib/types";
-import ScheduleModal from "@/components/ScheduleModal";
-import RichTextEditor from "@/components/RichTextEditor";
-import ScheduleEmailModal from "@/components/ScheduleEmailModal";
-import { uploadBase64Image } from "@/lib/utils";
+import { useState, useRef, useEffect } from "react";
+import { Mail, Sparkles, User } from "lucide-react";
+import Distillery from "@/components/ContextEngine";
+import DistributionGrid from "@/components/DistributionGrid";
+import GuestModeBanner from "@/components/GuestModeBanner";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import AuthModal from "@/components/AuthModal";
+import SkeletonGrid from "@/components/SkeletonGrid";
+import ScheduledPostsModal from "@/components/ScheduledPostsModal";
+import SettingsModal from "@/components/SettingsModal";
+import Sidebar from "@/components/dashboard/Sidebar";
+import StatsWidget from "@/components/dashboard/StatsWidget";
+import EmailBanner from "@/components/dashboard/EmailBanner";
+import HistoryModal from "@/components/dashboard/HistoryModal";
+import SubscribersModal from "@/components/dashboard/SubscribersModal";
+import PersonasModal from "@/components/dashboard/PersonasModal";
+import { useSession } from "@/components/hooks/useSession";
+import { usePersonas } from "@/components/hooks/usePersonas";
+import { useCampaignHistory } from "@/components/hooks/useCampaignHistory";
+import { useStats } from "@/components/hooks/useStats";
+import { useEmailBanner } from "@/components/hooks/useEmailBanner";
+import { supabase } from "@/lib/supabase/client";
+import CopilotPanel from "@/components/CopilotPannel";
+import CopilotSettingsModal from "@/components/CopilotSettingsModal";
+import type { PlanStatus } from "@/lib/plan";
+import TrialBanner from "@/components/TrialBanner";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
+import PricingCards from "@/components/PricingCards"; 
+import UpgradeModal from "@/components/UpgradeModal";
+import router from "next/dist/shared/lib/router/router";
+import { useRouter } from "next/dist/client/components/navigation";
 
-// Props interface (allow undefined for campaign and selectedPlatforms)
-interface DistributionGridProps {
-  campaign?: CampaignDay[];
-  session?: any;
-  selectedPlatforms?: string[];
-  emailContent?: string | null;
-  setEmailContent?: (content: string | null) => void;
-  onStatsChange?: () => void;
-}
 
-// Framer Motion variants
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-  },
-};
 
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
+export default function Dashboard() {
+  // --- SESSION ---
+  const { session, sessionLoading } = useSession();
 
-// Expandable Text Component
-function ExpandableText({ text }: { text: string }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const isLong = text.length > 250;
-  return (
-    <div className="flex-1 flex flex-col mb-4">
-      <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap flex-1 leading-relaxed">
-        {isExpanded || !isLong ? text : `${text.slice(0, 250)}...`}
-      </p>
-      {isLong && (
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-2 text-[10px] font-black uppercase tracking-widest text-red-700 hover:text-red-900 transition-colors self-start"
-        >
-          {isExpanded ? "Show Less" : "Read More"}
-        </button>
-      )}
-    </div>
-  );
-}
+  // --- CORE STATE ---
+  const [loading, setLoading] = useState(false);
+  const { planStatus, loading: planLoading } = usePlanStatus();
+  const [campaign, setCampaign] = useState<any[]>([]);
+  const [inputs, setInputs] = useState({
+    url: "",
+    text: "",
+    files: [],
+    fileUrls: [],
+    platforms: ["x", "linkedin", "discord", "email"],
+    tweetFormat: "single" as const,
+    additionalInfo: "",
+    personaId: "default",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [emailContent, setEmailContent] = useState<string | null>(null);
+  const campaignRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(true);
 
-// Social Card Component (receives planStatus and image count as props)
-function SocialCard({
-  day,
-  platformName,
-  initialText,
-  onPost,
-  postStatus,
-  session,
-  actionButtonConfig,
-  onStatsChange,
-  imagesGeneratedCount,
-  incrementImageCount,
-  planStatus,
-}: {
-  day: number;
-  platformName: string;
-  initialText: string;
-  session: any;
-  onPost?: (text: string, day: number, imageUrl?: string) => void;
-  postStatus?: "idle" | "loading" | "success" | "error";
-  actionButtonConfig?: {
-    idle: string;
-    loading: string;
-    success: string;
-    classes: string;
-  };
-  onStatsChange?: () => void;
-  imagesGeneratedCount: number;
-  incrementImageCount: () => void;
-  planStatus: any;
-}) {
-  const [text, setText] = useState(initialText);
-  const [isEditing, setIsEditing] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [isGeneratingImg, setIsGeneratingImg] = useState(false);
-  const [imageTitle, setImageTitle] = useState("");
-  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  // --- DATA HOOKS ---
+  const { personas, refreshPersonas } = usePersonas(session?.user?.id);
+  const { pastCampaigns, fetchHistory, restoreCampaign } = useCampaignHistory(session?.user?.id);
+  const { stats, isLoadingStats, refreshStats } = useStats(session?.user?.id);
+  const { needsEmail, setNeedsEmail, dismissBanner } = useEmailBanner(!session?.user?.email);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // --- MODAL STATES ---
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isScheduledOpen, setIsScheduledOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isSubscribersOpen, setIsSubscribersOpen] = useState(false);
+  const [isPersonasOpen, setIsPersonasOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
-  const handleGenerateImage = async () => {
-    if (!planStatus) return;
-    // Check per‑campaign limit (if limit is not unlimited)
-    if (planStatus.imageGenLimit !== -1 && imagesGeneratedCount >= planStatus.imageGenLimit) {
-      alert(
-        `You've reached your image generation limit (${planStatus.imageGenLimit} per campaign). Upgrade to generate more.`
-      );
-      return;
-    }
 
-    setIsGeneratingImg(true);
-    try {
-      const res = await fetch("/api/generate-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text,
-          platform: platformName,
-          graphicTitle: imageTitle,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      const publicUrl = await uploadBase64Image(data.imageUrl);
-      setImageUrl(publicUrl);
-      incrementImageCount(); // increment the global count
-    } catch (err: any) {
-      console.error(err);
-      let errorMsg = `Image Error: ${err.message}`;
-      if (err.message.includes("Quota exceeded")) {
-        errorMsg =
-          "Image generation quota exceeded. Please try again later or upgrade your plan.";
+  // --- SIDEBAR STATES ---
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  //copilot states
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [isCopilotSettingsOpen, setIsCopilotSettingsOpen] = useState(false);
+  
+
+  // --- NAVIGATION ITEMS ---
+  const navItems = [
+    {
+      label: "Generation History",
+      icon: <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>,
+      onClick: () => setIsHistoryOpen(true),
+    },
+    {
+      label: "Scheduled Posts",
+      icon: <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>,
+      onClick: () => setIsScheduledOpen(true),
+    },
+    {
+      label: "Subscribers",
+      icon: <Mail className="w-5 h-5 opacity-70" />,
+      onClick: () => setIsSubscribersOpen(true),
+    },
+    {
+      label: "Personas",
+      icon: <User className="w-5 h-5 opacity-70" />,
+      onClick: () => setIsPersonasOpen(true),
+    },
+    {
+      label: "Settings & Integrations",
+      icon: <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>,
+      onClick: () => setIsSettingsOpen(true),
+    },
+    {
+  label: "Copilot Settings",
+  icon: <Sparkles className="w-5 h-5 opacity-70" />, // import Sparkles from lucide-react
+  onClick: () => setIsCopilotSettingsOpen(true),
+},
+  ];
+
+  // --- HANDLERS ---
+const handleGenerate = async () => {
+  setLoading(true);
+  setErrorMessage("");
+  console.log("Session in generate:", session);
+  if (!session?.access_token) {
+    setErrorMessage("Your session expired. Please log in again.");
+    setLoading(false);
+    return;
+  }
+  setCampaign([]);
+
+  try {
+    let selectedVoice =
+      "Expert Social Media Copywriter who adapts perfectly to the provided context";
+    if (inputs.personaId && inputs.personaId !== "default") {
+      const found = personas.find((p: any) => p.id === inputs.personaId);
+      if (found && found.prompt) {
+        selectedVoice = found.prompt;
       }
-      alert(errorMsg);
-    } finally {
-      setIsGeneratingImg(false);
-    }
-  };
-
-  const handleDownloadImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!imageUrl) return;
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = `ozigi-campaign-day-${day}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleSchedule = async (scheduledFor: string, email?: string | null) => {
-    const token = session?.access_token;
-    if (!token) {
-      alert("You must be signed in to schedule posts.");
-      return;
     }
 
-    const response = await fetch("/api/schedule", {
+    const payload = {
+      sourceMaterial: {
+        url: inputs.url,
+        rawText: inputs.text,
+        assetUrls: inputs.fileUrls,
+      },
+      campaignDirectives: {
+        platforms: inputs.platforms,
+        tweetFormat: inputs.tweetFormat,
+        additionalContext: inputs.additionalInfo,
+        personaVoice: selectedVoice,
+      },
+    };
+
+    console.log("🚀 Firing payload to AI:", payload);
+
+    const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${session?.access_token}`,
       },
-      body: JSON.stringify({
-        posts: [
-          {
-            platform: platformName.toLowerCase(),
-            content: text,
-            imageUrl: imageUrl || undefined,
-            day: day,
-            email: email,
-          },
-        ],
-        scheduledFor,
-        campaignId: null,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to schedule");
+      let errorMsg =
+        "We encountered a hiccup connecting to the AI engine. Please try again.";
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMsg = errorData.error;
+        }
+      } catch (parseError) {
+        console.error("Failed to parse error response");
+      }
+      setErrorMessage(errorMsg);
+      setLoading(false);
+      return;
     }
 
-    if (onStatsChange) onStatsChange();
+    const data = await response.json();
+    if (data.error) {
+      setErrorMessage(data.error);
+      setLoading(false);
+      return;
+    }
+
+    const cleanJson = data.output.replace(/```json/gi, "").replace(/```/gi, "");
+    const finalResponse = JSON.parse(cleanJson);
+    const finalCampaign = finalResponse.campaign || [];
+    const finalEmail = finalResponse.email || null;
+
+    if (finalCampaign.length > 0) {
+      setCampaign(finalCampaign);
+      setEmailContent(finalEmail);
+      setTimeout(() => {
+        campaignRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
+      if (session?.user) {
+        await supabase.from("campaigns").insert({
+          user_id: session.user.id,
+          source_url: inputs.url,
+          source_notes: inputs.text || inputs.fileUrls.join(", "),
+          generated_content: finalCampaign,
+        });
+        fetchHistory(session.user.id); // from useCampaignHistory
+        refreshStats(); // from useStats
+      }
+    }
+  } catch (err) {
+    console.error("Context error:", err);
+    setErrorMessage(
+      "The AI returned an unexpected format. Please try tweaking your context and generating again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleEmailAdded = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.email) setNeedsEmail(false);
   };
 
-  const imageGenButton =
-    planStatus?.imageGenLimit !== 0 ? (
-      <button
-        onClick={handleGenerateImage}
-        disabled={isGeneratingImg}
-        className="w-full mb-5 py-3 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:border-slate-400 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-      >
-        {isGeneratingImg ? "🎨 Painting pixels..." : "🎨 Generate Graphic"}
-      </button>
-    ) : (
-      <div className="relative group w-full mb-5">
-        <button
-          disabled
-          className="w-full py-3 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          🔒 Upgrade to Generate
-        </button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
-          Upgrade to Team for image generation
+  const MyComponent = () => {
+  const router = useRouter(); // Assign the return value of the hook
+
+  const navigateToP = () => {
+    router.push('/pricing'); // Now 'push' exists on the 'router' instance
+  };
+
+  // --- EFFECTS ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("openSettings") === "true") {
+      window.dispatchEvent(new Event("openSettingsModal"));
+      window.history.replaceState({}, "", "/dashboard");
+    }
+  }, []);
+  useEffect(() => {
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const searchParams = new URLSearchParams(window.location.search);
+  const errorDesc = hashParams.get("error_description") || searchParams.get("error_description");
+
+  if (errorDesc) {
+    setErrorMessage(decodeURIComponent(errorDesc).replace(/\+/g, " "));
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+}, []);
+
+  if (sessionLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm font-medium text-slate-600">Loading dashboard...</p>
         </div>
       </div>
     );
+  }
+
+  if (!session) return null;
 
   return (
-    <motion.div
-      variants={fadeUp}
-      className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col p-5 hover:border-slate-300 hover:shadow-md transition-all"
-    >
-      <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-        <span className="text-xs font-black uppercase tracking-widest text-slate-900">
-          Day {day}
-        </span>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            {isEditing ? "Save" : "Edit"}
-          </button>
-          <button
-            onClick={handleCopy}
-            className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
-          <button
-            onClick={() => setIsScheduleModalOpen(true)}
-            className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            Schedule
-          </button>
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+      <Sidebar
+        isMobileSidebarOpen={isMobileSidebarOpen}
+        setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+        navItems={navItems}
+        stats={
+          <StatsWidget
+            stats={stats}
+            isLoadingStats={isLoadingStats}
+            isSidebarCollapsed={isSidebarCollapsed}
+          />
+        }
+      />
+
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 z-40 md:hidden" onClick={() => setIsMobileSidebarOpen(false)} />
+      )}
+
+      <main className="flex-1 h-full overflow-y-auto relative bg-slate-50">
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200">
+          <Header
+            session={session}
+            onSignIn={() => setIsAuthModalOpen(true)}
+            onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          />
+
+
         </div>
-      </div>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Optional: Text overlay for graphic"
-          value={imageTitle}
-          onChange={(e) => setImageTitle(e.target.value)}
-          className="w-full text-[10px] font-bold tracking-wide text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:border-slate-400 transition-colors placeholder:font-medium placeholder:text-slate-400"
-        />
-      </div>
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+          <EmailBanner
+            needsEmail={needsEmail}
+            onDismiss={dismissBanner}
+            onGoToSettings={() => setIsSettingsOpen(true)}
+          />
 
-      {imageUrl ? (
-        <div className="mb-5 flex flex-col gap-2 relative z-10">
-          <div className="relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-            <img
-              src={imageUrl}
-              alt="Generated graphic"
-              className="w-full h-auto object-cover aspect-video"
-            />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              {imageGenButton}
+          {planStatus?.isTrialActive && planStatus.trialEndsAt && (
+  <div className="mb-6">
+<TrialBanner
+  trialEndsAt={planStatus.trialEndsAt}
+  onUpgradeClick={() => router.push('/pricing')}
+/>
+  </div>
+)}
+
+{isUpgradeModalOpen && (
+  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+    <div className="bg-white w-full max-w-4xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto relative">
+      <button
+        onClick={() => setIsUpgradeModalOpen(false)}
+        className="absolute top-4 right-4 text-slate-400 hover:text-red-600 font-black text-xl"
+      >
+        ✕
+      </button>
+      <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4">Upgrade Your Plan</h2>
+      <PricingCards />
+    </div>
+  </div>
+)}
+
+          {!session && <GuestModeBanner onSignIn={() => setIsAuthModalOpen(true)} />}
+
+          {errorMessage && (
+            <div className="mb-8 p-5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm font-bold flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-4">
+              <span className="text-xl">⚠️</span> {errorMessage}
             </div>
-          </div>
-          <button
-            onClick={handleDownloadImage}
-            type="button"
-            className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
-          >
-            ⬇️ Download
-          </button>
-        </div>
-      ) : (
-        imageGenButton
-      )}
+          )}
 
-      {isEditing ? (
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="flex-1 w-full text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 min-h-[150px] resize-y focus:outline-none focus:border-red-400"
-        />
-      ) : (
-        <ExpandableText text={text} />
-      )}
-
-      {onPost && actionButtonConfig && (
-        <button
-          onClick={() => onPost(text, day, imageUrl || undefined)}
-          disabled={postStatus === "loading" || postStatus === "success"}
-          className={`w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 mt-auto ${
-            postStatus === "success"
-              ? "bg-green-100 text-green-700 border border-green-200"
-              : actionButtonConfig.classes
-          }`}
-        >
-          {postStatus === "loading" && actionButtonConfig.loading}
-          {postStatus === "success" && actionButtonConfig.success}
-          {postStatus !== "loading" && postStatus !== "success" && actionButtonConfig.idle}
-        </button>
-      )}
-
-      {isScheduleModalOpen && (
-        <ScheduleModal
-          isOpen={isScheduleModalOpen}
-          onClose={() => setIsScheduleModalOpen(false)}
-          onSchedule={handleSchedule}
-          postText={text}
-          platform={platformName}
-          day={day}
-          imageUrl={imageUrl || undefined}
-          userEmail={session?.user?.email}
-        />
-      )}
-    </motion.div>
-  );
-}
-
-// Main DistributionGrid Component
-export default function DistributionGrid({
-  campaign = [],           // default empty array
-  session,
-  selectedPlatforms = [],  // default empty array
-  emailContent,
-  setEmailContent,
-  onStatsChange,
-}: DistributionGridProps) {
-  const { planStatus, loading: planLoading } = usePlanStatus();
-  const [xStatuses, setXStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
-  const [discordStatuses, setDiscordStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
-  const [liStatuses, setLiStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
-
-  // Email‑specific states
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [emailCopied, setEmailCopied] = useState(false);
-  const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [localEmailContent, setLocalEmailContent] = useState<string | null>(emailContent || null);
-  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  const [emailImageUrl, setEmailImageUrl] = useState<string | null>(null);
-
-  // Image count tracking (per campaign)
-  const [imagesGeneratedCount, setImagesGeneratedCount] = useState(0);
-  const incrementImageCount = () => setImagesGeneratedCount((prev) => prev + 1);
-
-  useEffect(() => {
-    setLocalEmailContent(emailContent || null);
-  }, [emailContent]);
-
-  const handleEmailCopy = () => {
-    if (localEmailContent) {
-      navigator.clipboard.writeText(localEmailContent);
-      setEmailCopied(true);
-      setTimeout(() => setEmailCopied(false), 2000);
-    }
-  };
-
-  const handleEmailSchedule = async (scheduledFor: string, imageUrl?: string) => {
-    if (!session?.access_token) return alert("Please sign in to schedule.");
-    setEmailStatus("loading");
-    try {
-      const res = await fetch("/api/schedule", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          posts: [
-            {
-              platform: "email",
-              content: localEmailContent,
-              imageUrl: imageUrl,
-              day: 0,
-            },
-          ],
-          scheduledFor,
-          campaignId: null,
-        }),
-      });
-      if (!res.ok) throw new Error("Failed to schedule");
-      setEmailStatus("success");
-      setTimeout(() => setEmailStatus("idle"), 3000);
-      if (onStatsChange) onStatsChange();
-    } catch (err: any) {
-      alert(err.message);
-      setEmailStatus("error");
-    }
-  };
-
-  const handlePostToX = async (text: string, day: number) => {
-    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(intentUrl, "_blank", "noopener,noreferrer");
-    setXStatuses((prev) => ({ ...prev, [day]: "success" }));
-    setTimeout(() => setXStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
-  };
-
-  const handlePostToDiscord = async (text: string, day: number) => {
-    const webhookUrl = session?.user?.user_metadata?.discord_webhook;
-    if (!webhookUrl) {
-      alert("No Discord Webhook found. Please add one in Settings ⚙️");
-      return;
-    }
-    setDiscordStatuses((prev) => ({ ...prev, [day]: "loading" }));
-    try {
-      const res = await fetch("/api/post-discord", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text, webhookUrl }),
-      });
-      if (!res.ok) throw new Error("Discord rejected the webhook payload.");
-      setDiscordStatuses((prev) => ({ ...prev, [day]: "success" }));
-      setTimeout(() => setDiscordStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
-    } catch (error: any) {
-      console.error("Discord Error:", error);
-      setDiscordStatuses((prev) => ({ ...prev, [day]: "error" }));
-      alert(`Failed to post to Discord: ${error.message}`);
-    }
-  };
-
-  const handlePostToLinkedIn = async (text: string, day: number, imageUrl?: string) => {
-    if (!session?.access_token) return alert("You must be signed in to post!");
-    setLiStatuses((prev) => ({ ...prev, [day]: "loading" }));
-    try {
-      const res = await fetch("/api/publish/linkedin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ text, userId: session.user.id, imageUrl }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to post to LinkedIn");
-      setLiStatuses((prev) => ({ ...prev, [day]: "success" }));
-      setTimeout(() => setLiStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
-    } catch (error: any) {
-      console.error("LinkedIn Posting Error:", error);
-      setLiStatuses((prev) => ({ ...prev, [day]: "error" }));
-      alert(`Failed to post: ${error.message}`);
-    }
-  };
-
-  // SAFE CHECKS – ensure we're working with arrays
-  const safeCampaign = campaign ?? [];
-  const safePlatforms = selectedPlatforms ?? [];
-
-  const hasX = safeCampaign.some((d) => d.x) && safePlatforms.includes("x");
-  const hasLinkedIn = safeCampaign.some((d) => d.linkedin) && safePlatforms.includes("linkedin");
-  const hasDiscord = safeCampaign.some((d) => d.discord) && safePlatforms.includes("discord");
-  const hasEmail = !!localEmailContent && safePlatforms.includes("email");
-
-  return (
-    <div className="space-y-12">
-      {/* X ROW */}
-      {hasX && (
-        <section>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            className="flex items-center gap-3 mb-5"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 1200 1227" fill="currentColor">
-              <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
-            </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
-              X Strategy
-            </h3>
-          </motion.div>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {safeCampaign.map((dayData) =>
-              dayData.x && (
-                <SocialCard
-                  key={`x-${dayData.day}`}
-                  day={dayData.day}
-                  platformName="X"
-                  session={session}
-                  initialText={dayData.x}
-                  imagesGeneratedCount={imagesGeneratedCount}
-                  incrementImageCount={incrementImageCount}
-                  planStatus={planStatus}
-                  onPost={handlePostToX}
-                  postStatus={xStatuses[dayData.day]}
-                  actionButtonConfig={{
-                    idle: "🚀 Post to X",
-                    loading: "Posting...",
-                    success: "✅ Published!",
-                    classes: "bg-black text-white hover:bg-slate-800 active:scale-95",
-                  }}
-                  onStatsChange={onStatsChange}
-                />
-              )
-            )}
-          </motion.div>
-        </section>
-      )}
-
-      {/* LINKEDIN ROW */}
-      {hasLinkedIn && (
-        <section>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            className="flex items-center gap-3 mb-5"
-          >
-            <svg className="w-5 h-5 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-            </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
-              LinkedIn Strategy
-            </h3>
-          </motion.div>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {safeCampaign.map((dayData) =>
-              dayData.linkedin && (
-                <SocialCard
-                  key={`li-${dayData.day}`}
-                  day={dayData.day}
-                  platformName="LinkedIn"
-                  session={session}
-                  initialText={dayData.linkedin}
-                  imagesGeneratedCount={imagesGeneratedCount}
-                  incrementImageCount={incrementImageCount}
-                  planStatus={planStatus}
-                  onPost={handlePostToLinkedIn}
-                  postStatus={liStatuses[dayData.day]}
-                  actionButtonConfig={{
-                    idle: "💼 Post to LinkedIn",
-                    loading: "Posting...",
-                    success: "✅ Published!",
-                    classes: "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95",
-                  }}
-                  onStatsChange={onStatsChange}
-                />
-              )
-            )}
-          </motion.div>
-        </section>
-      )}
-
-      {/* DISCORD ROW */}
-      {hasDiscord && (
-        <section>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            className="flex items-center gap-3 mb-5"
-          >
-            <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 127.14 96.36" fill="currentColor">
-              <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77.7,77.7,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-            </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
-              Discord Strategy
-            </h3>
-          </motion.div>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {safeCampaign.map((dayData) =>
-              dayData.discord && (
-                <SocialCard
-                  key={`disc-${dayData.day}`}
-                  day={dayData.day}
-                  platformName="Discord"
-                  session={session}
-                  initialText={dayData.discord}
-                  imagesGeneratedCount={imagesGeneratedCount}
-                  incrementImageCount={incrementImageCount}
-                  planStatus={planStatus}
-                  onPost={handlePostToDiscord}
-                  postStatus={discordStatuses[dayData.day]}
-                  actionButtonConfig={{
-                    idle: "👾 Send to Discord",
-                    loading: "Posting...",
-                    success: "✅ Sent!",
-                    classes: "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95",
-                  }}
-                  onStatsChange={onStatsChange}
-                />
-              )
-            )}
-          </motion.div>
-        </section>
-      )}
-
-      {/* EMAIL NEWSLETTER SECTION */}
-      {hasEmail && (
-        <section className="mt-12 pt-8 border-t-2 border-slate-100">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            className="flex items-center gap-3 mb-5"
-          >
-            <svg
-              className="w-5 h-5 text-slate-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 mt-6">
+            {!loading && campaign.length === 0 && (
+              <Distillery
+                session={session}
+                userPersonas={personas}
+                inputs={inputs}
+                setInputs={setInputs}
+                loading={loading}
+                onOpenSettings={() => {
+                  window.dispatchEvent(new Event("openSettingsModal"));
+                  setIsSettingsOpen(true);
+                }}
+                onGenerate={handleGenerate}
               />
-            </svg>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
-              Email Newsletter
-            </h3>
-          </motion.div>
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="max-w-2xl"
-          >
-            <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-5">
-              <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-900">
-                  Campaign Summary
-                </span>
-                <div className="flex gap-2">
+            )}
+
+            {loading && (
+              <div className="mt-8 flex justify-center">
+                <SkeletonGrid />
+              </div>
+            )}
+
+            {!loading && campaign.length > 0 && (
+              <div className="mt-4 animate-in fade-in slide-in-from-bottom-8">
+                <div className="flex justify-between items-center mb-8">
                   <button
-                    onClick={() => setIsEditingEmail(!isEditingEmail)}
-                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+                    onClick={() => setCampaign([])}
+                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-red-700 transition-colors bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm hover:shadow-md active:scale-95"
                   >
-                    {isEditingEmail ? "Save" : "Edit"}
+                    ← Architect New Campaign
                   </button>
-                  <button
-                    onClick={handleEmailCopy}
-                    className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    {emailCopied ? "Copied!" : "Copy"}
-                  </button>
+                </div>
+                <div className="scroll-mt-32" ref={campaignRef}>
+                  <DistributionGrid
+                    campaign={campaign}
+                    selectedPlatforms={inputs.platforms}
+                    session={session}
+                    emailContent={emailContent}
+                    setEmailContent={setEmailContent}
+                    onStatsChange={refreshStats}
+                  />
                 </div>
               </div>
+            )}
+          </div>
+        </div>
+        {/* Floating Copilot Button */}
+<button
+  onClick={() => setIsCopilotOpen(true)}
+  className="fixed bottom-6 right-6 z-40 bg-indigo-600 text-white p-4 rounded-full shadow-2xl hover:bg-indigo-700 transition-all hover:scale-110 active:scale-95 flex items-center justify-center"
+  aria-label="Open Copilot"
+>
+  <span className="text-2xl">✨</span>
+</button>
+        <Footer />
+      </main>
 
-              {isEditingEmail ? (
-                <RichTextEditor
-                  content={localEmailContent || ""}
-                  onChange={(html) => {
-                    setLocalEmailContent(html);
-                    if (setEmailContent) setEmailContent(html);
-                  }}
-                  placeholder="Write your newsletter content..."
-                />
-              ) : (
-                <div
-                  className="mb-4 prose prose-sm max-w-none text-sm font-medium text-slate-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: localEmailContent || "",
-                  }}
-                />
-              )}
+      {/* MODALS */}
+      {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
+      {isScheduledOpen && <ScheduledPostsModal onClose={() => setIsScheduledOpen(false)} onStatsChange={refreshStats} />}
+      {isSettingsOpen && <SettingsModal session={session} onClose={() => setIsSettingsOpen(false)} onEmailAdded={handleEmailAdded} />}
+      <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} pastCampaigns={pastCampaigns} onRestore={(rec) => restoreCampaign(rec, setInputs, setCampaign)} />
+      <SubscribersModal isOpen={isSubscribersOpen} onClose={() => setIsSubscribersOpen(false)} session={session}   onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)} />
+      <PersonasModal isOpen={isPersonasOpen} onClose={() => setIsPersonasOpen(false)} session={session} />
+        <CopilotSettingsModal
+  isOpen={isCopilotSettingsOpen}
+  onClose={() => setIsCopilotSettingsOpen(false)}
+  session={session}
+/>
+<UpgradeModal
+  isOpen={isUpgradeModalOpen}
+  onClose={() => setIsUpgradeModalOpen(false)}
+  onOpenAuthModal={() => setIsAuthModalOpen(true)}
+/>
+{planStatus?.hasCopilot ? (
+  <button
+    onClick={() => setIsCopilotOpen(true)}
+    className="fixed bottom-6 right-6 z-40 bg-indigo-600 text-white p-4 rounded-full shadow-2xl hover:bg-indigo-700 transition-all hover:scale-110 active:scale-95 flex items-center justify-center"
+    aria-label="Open Copilot"
+  >
+    <span className="text-2xl">✨</span>
+  </button>
+) : (
+  <div className="fixed bottom-6 right-6 z-40 group">
+    <button
+      disabled
+      className="bg-slate-400 text-white p-4 rounded-full shadow-2xl cursor-not-allowed flex items-center justify-center opacity-50"
+      aria-label="Copilot unavailable"
+    >
+      <span className="text-2xl">✨</span>
+    </button>
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
+      Upgrade to Organization to use Copilot
+    </div>
+  </div>
+)}
 
-              {planStatus?.emailSendsLimit !== 0 ? (
-                <button
-                  onClick={() => setIsScheduleModalOpen(true)}
-                  disabled={emailStatus === "loading"}
-                  className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 flex items-center justify-center gap-2"
-                >
-                  {emailStatus === "loading"
-                    ? "Scheduling..."
-                    : "📧 Schedule Newsletter"}
-                </button>
-              ) : (
-                <div className="relative group">
-                  <button
-                    disabled
-                    className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] bg-slate-200 text-slate-500 cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    🔒 Upgrade to Send
-                  </button>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                    Upgrade to Team to send newsletters
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </section>
-      )}
-      {isScheduleModalOpen && (
-        <ScheduleEmailModal
-          isOpen={isScheduleModalOpen}
-          onClose={() => setIsScheduleModalOpen(false)}
-          onSchedule={(isoString) => {
-            handleEmailSchedule(isoString, emailImageUrl || undefined);
-          }}
-        />
-      )}
     </div>
   );
-}
+}}
