@@ -1,17 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
-import { CampaignDay } from "../../lib/types";
-import { uploadBase64Image } from "@/lib/utils";
-import { usePlanStatus } from "@/components/hooks/usePlanStatus";
-import ScheduleEmailModal from "@/components/ScheduleEmailModal";
+import { CampaignDay } from "@/lib/types";
 import ScheduleModal from "@/components/ScheduleModal";
 import RichTextEditor from "@/components/RichTextEditor";
+import ScheduleEmailModal from "@/components/ScheduleEmailModal";
+import { uploadBase64Image } from "@/lib/utils";
+import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 
+// Props interface (allow undefined for campaign and selectedPlatforms)
 interface DistributionGridProps {
-  campaign: CampaignDay[];
-  session: any;
-  selectedPlatforms: string[];
+  campaign?: CampaignDay[];
+  session?: any;
+  selectedPlatforms?: string[];
   emailContent?: string | null;
   setEmailContent?: (content: string | null) => void;
   onStatsChange?: () => void;
@@ -56,7 +57,7 @@ function ExpandableText({ text }: { text: string }) {
   );
 }
 
-// Social Card Component – now receives planStatus as prop
+// Social Card Component (receives planStatus and image count as props)
 function SocialCard({
   day,
   platformName,
@@ -85,7 +86,7 @@ function SocialCard({
   onStatsChange?: () => void;
   imagesGeneratedCount: number;
   incrementImageCount: () => void;
-  planStatus: any; // from parent
+  planStatus: any;
 }) {
   const [text, setText] = useState(initialText);
   const [isEditing, setIsEditing] = useState(false);
@@ -327,35 +328,21 @@ export default function DistributionGrid({
   onStatsChange,
 }: DistributionGridProps) {
   const { planStatus, loading: planLoading } = usePlanStatus();
-  const [xStatuses, setXStatuses] = useState<
-    { [day: number]: "idle" | "loading" | "success" | "error" }
-  >({});
-  const [discordStatuses, setDiscordStatuses] = useState<
-    { [day: number]: "idle" | "loading" | "success" | "error" }
-  >({});
-  const [liStatuses, setLiStatuses] = useState<
-    { [day: number]: "idle" | "loading" | "success" | "error" }
-  >({});
-    const hasX = campaign.some((d) => d.x) && selectedPlatforms.includes('x');
-  const hasLinkedIn = campaign.some((d) => d.linkedin) && selectedPlatforms.includes('linkedin');
-  const hasDiscord = campaign.some((d) => d.discord) && selectedPlatforms.includes('discord');
+  const [xStatuses, setXStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
+  const [discordStatuses, setDiscordStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
+  const [liStatuses, setLiStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
 
   // Email‑specific states
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
-  const [emailStatus, setEmailStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [localEmailContent, setLocalEmailContent] = useState<string | null>(
-    emailContent || null
-  );
+  const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [localEmailContent, setLocalEmailContent] = useState<string | null>(emailContent || null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [emailImageUrl, setEmailImageUrl] = useState<string | null>(null);
 
   // Image count tracking (per campaign)
   const [imagesGeneratedCount, setImagesGeneratedCount] = useState(0);
-  const incrementImageCount = () =>
-    setImagesGeneratedCount((prev) => prev + 1);
+  const incrementImageCount = () => setImagesGeneratedCount((prev) => prev + 1);
 
   useEffect(() => {
     setLocalEmailContent(emailContent || null);
@@ -403,15 +390,10 @@ export default function DistributionGrid({
   };
 
   const handlePostToX = async (text: string, day: number) => {
-    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      text
-    )}`;
+    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(intentUrl, "_blank", "noopener,noreferrer");
     setXStatuses((prev) => ({ ...prev, [day]: "success" }));
-    setTimeout(
-      () => setXStatuses((prev) => ({ ...prev, [day]: "idle" })),
-      3000
-    );
+    setTimeout(() => setXStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
   };
 
   const handlePostToDiscord = async (text: string, day: number) => {
@@ -429,10 +411,7 @@ export default function DistributionGrid({
       });
       if (!res.ok) throw new Error("Discord rejected the webhook payload.");
       setDiscordStatuses((prev) => ({ ...prev, [day]: "success" }));
-      setTimeout(
-        () => setDiscordStatuses((prev) => ({ ...prev, [day]: "idle" })),
-        3000
-      );
+      setTimeout(() => setDiscordStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
     } catch (error: any) {
       console.error("Discord Error:", error);
       setDiscordStatuses((prev) => ({ ...prev, [day]: "error" }));
@@ -440,11 +419,7 @@ export default function DistributionGrid({
     }
   };
 
-  const handlePostToLinkedIn = async (
-    text: string,
-    day: number,
-    imageUrl?: string
-  ) => {
+  const handlePostToLinkedIn = async (text: string, day: number, imageUrl?: string) => {
     if (!session?.access_token) return alert("You must be signed in to post!");
     setLiStatuses((prev) => ({ ...prev, [day]: "loading" }));
     try {
@@ -459,10 +434,7 @@ export default function DistributionGrid({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to post to LinkedIn");
       setLiStatuses((prev) => ({ ...prev, [day]: "success" }));
-      setTimeout(
-        () => setLiStatuses((prev) => ({ ...prev, [day]: "idle" })),
-        3000
-      );
+      setTimeout(() => setLiStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
     } catch (error: any) {
       console.error("LinkedIn Posting Error:", error);
       setLiStatuses((prev) => ({ ...prev, [day]: "error" }));
@@ -470,13 +442,14 @@ export default function DistributionGrid({
     }
   };
 
-  // const hasX = campaign.some((d) => d.x) && selectedPlatforms.includes("x");
-  // const hasLinkedIn =
-  //   campaign.some((d) => d.linkedin) && selectedPlatforms.includes("linkedin");
-  // const hasDiscord =
-  //   campaign.some((d) => d.discord) && selectedPlatforms.includes("discord");
-  const hasEmail =
-    !!localEmailContent && selectedPlatforms.includes("email");
+  // SAFE CHECKS – ensure we're working with arrays
+  const safeCampaign = campaign ?? [];
+  const safePlatforms = selectedPlatforms ?? [];
+
+  const hasX = safeCampaign.some((d) => d.x) && safePlatforms.includes("x");
+  const hasLinkedIn = safeCampaign.some((d) => d.linkedin) && safePlatforms.includes("linkedin");
+  const hasDiscord = safeCampaign.some((d) => d.discord) && safePlatforms.includes("discord");
+  const hasEmail = !!localEmailContent && safePlatforms.includes("email");
 
   return (
     <div className="space-y-12">
@@ -489,11 +462,7 @@ export default function DistributionGrid({
             variants={fadeUp}
             className="flex items-center gap-3 mb-5"
           >
-            <svg
-              className="w-5 h-5"
-              viewBox="0 0 1200 1227"
-              fill="currentColor"
-            >
+            <svg className="w-5 h-5" viewBox="0 0 1200 1227" fill="currentColor">
               <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
             </svg>
             <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
@@ -506,30 +475,28 @@ export default function DistributionGrid({
             initial="hidden"
             animate="visible"
           >
-            {campaign.map(
-              (dayData) =>
-                dayData.x && (
-                  <SocialCard
-                    key={`x-${dayData.day}`}
-                    day={dayData.day}
-                    platformName="X"
-                    session={session}
-                    initialText={dayData.x}
-                    imagesGeneratedCount={imagesGeneratedCount}
-                    incrementImageCount={incrementImageCount}
-                    planStatus={planStatus}
-                    onPost={handlePostToX}
-                    postStatus={xStatuses[dayData.day]}
-                    actionButtonConfig={{
-                      idle: "🚀 Post to X",
-                      loading: "Posting...",
-                      success: "✅ Published!",
-                      classes:
-                        "bg-black text-white hover:bg-slate-800 active:scale-95",
-                    }}
-                    onStatsChange={onStatsChange}
-                  />
-                )
+            {safeCampaign.map((dayData) =>
+              dayData.x && (
+                <SocialCard
+                  key={`x-${dayData.day}`}
+                  day={dayData.day}
+                  platformName="X"
+                  session={session}
+                  initialText={dayData.x}
+                  imagesGeneratedCount={imagesGeneratedCount}
+                  incrementImageCount={incrementImageCount}
+                  planStatus={planStatus}
+                  onPost={handlePostToX}
+                  postStatus={xStatuses[dayData.day]}
+                  actionButtonConfig={{
+                    idle: "🚀 Post to X",
+                    loading: "Posting...",
+                    success: "✅ Published!",
+                    classes: "bg-black text-white hover:bg-slate-800 active:scale-95",
+                  }}
+                  onStatsChange={onStatsChange}
+                />
+              )
             )}
           </motion.div>
         </section>
@@ -544,11 +511,7 @@ export default function DistributionGrid({
             variants={fadeUp}
             className="flex items-center gap-3 mb-5"
           >
-            <svg
-              className="w-5 h-5 text-[#0A66C2]"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
+            <svg className="w-5 h-5 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
             </svg>
             <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
@@ -561,30 +524,28 @@ export default function DistributionGrid({
             initial="hidden"
             animate="visible"
           >
-            {campaign.map(
-              (dayData) =>
-                dayData.linkedin && (
-                  <SocialCard
-                    key={`li-${dayData.day}`}
-                    day={dayData.day}
-                    platformName="LinkedIn"
-                    session={session}
-                    initialText={dayData.linkedin}
-                    imagesGeneratedCount={imagesGeneratedCount}
-                    incrementImageCount={incrementImageCount}
-                    planStatus={planStatus}
-                    onPost={handlePostToLinkedIn}
-                    postStatus={liStatuses[dayData.day]}
-                    actionButtonConfig={{
-                      idle: "💼 Post to LinkedIn",
-                      loading: "Posting...",
-                      success: "✅ Published!",
-                      classes:
-                        "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95",
-                    }}
-                    onStatsChange={onStatsChange}
-                  />
-                )
+            {safeCampaign.map((dayData) =>
+              dayData.linkedin && (
+                <SocialCard
+                  key={`li-${dayData.day}`}
+                  day={dayData.day}
+                  platformName="LinkedIn"
+                  session={session}
+                  initialText={dayData.linkedin}
+                  imagesGeneratedCount={imagesGeneratedCount}
+                  incrementImageCount={incrementImageCount}
+                  planStatus={planStatus}
+                  onPost={handlePostToLinkedIn}
+                  postStatus={liStatuses[dayData.day]}
+                  actionButtonConfig={{
+                    idle: "💼 Post to LinkedIn",
+                    loading: "Posting...",
+                    success: "✅ Published!",
+                    classes: "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95",
+                  }}
+                  onStatsChange={onStatsChange}
+                />
+              )
             )}
           </motion.div>
         </section>
@@ -599,11 +560,7 @@ export default function DistributionGrid({
             variants={fadeUp}
             className="flex items-center gap-3 mb-5"
           >
-            <svg
-              className="w-5 h-5 text-[#5865F2]"
-              viewBox="0 0 127.14 96.36"
-              fill="currentColor"
-            >
+            <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 127.14 96.36" fill="currentColor">
               <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77.7,77.7,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z" />
             </svg>
             <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">
@@ -616,30 +573,28 @@ export default function DistributionGrid({
             initial="hidden"
             animate="visible"
           >
-            {campaign.map(
-              (dayData) =>
-                dayData.discord && (
-                  <SocialCard
-                    key={`disc-${dayData.day}`}
-                    day={dayData.day}
-                    platformName="Discord"
-                    session={session}
-                    initialText={dayData.discord}
-                    imagesGeneratedCount={imagesGeneratedCount}
-                    incrementImageCount={incrementImageCount}
-                    planStatus={planStatus}
-                    onPost={handlePostToDiscord}
-                    postStatus={discordStatuses[dayData.day]}
-                    actionButtonConfig={{
-                      idle: "👾 Send to Discord",
-                      loading: "Posting...",
-                      success: "✅ Sent!",
-                      classes:
-                        "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95",
-                    }}
-                    onStatsChange={onStatsChange}
-                  />
-                )
+            {safeCampaign.map((dayData) =>
+              dayData.discord && (
+                <SocialCard
+                  key={`disc-${dayData.day}`}
+                  day={dayData.day}
+                  platformName="Discord"
+                  session={session}
+                  initialText={dayData.discord}
+                  imagesGeneratedCount={imagesGeneratedCount}
+                  incrementImageCount={incrementImageCount}
+                  planStatus={planStatus}
+                  onPost={handlePostToDiscord}
+                  postStatus={discordStatuses[dayData.day]}
+                  actionButtonConfig={{
+                    idle: "👾 Send to Discord",
+                    loading: "Posting...",
+                    success: "✅ Sent!",
+                    classes: "bg-[#5865F2] text-white hover:bg-[#4752C4] active:scale-95",
+                  }}
+                  onStatsChange={onStatsChange}
+                />
+              )
             )}
           </motion.div>
         </section>
