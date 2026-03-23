@@ -69,6 +69,21 @@ export default function DocsPage() {
                     6. Publishing & Integrations
                   </a>
                 </li>
+                <li>
+  <a href="#email" className="hover:text-slate-900 transition-colors block">
+    7. Email Newsletters
+  </a>
+</li>
+<li>
+  <a href="#copilot" className="hover:text-slate-900 transition-colors block">
+    8. Ozigi Copilot
+  </a>
+</li>
+<li>
+  <a href="#pricing" className="hover:text-slate-900 transition-colors block">
+    9. Pricing & Gating
+  </a>
+</li>
 
               </ul>
             </nav>
@@ -281,7 +296,122 @@ export default function DocsPage() {
               </div>
             </section>
 
-            {/* Section 6 */}
+            {/* Section 6: Email Newsletters */}
+<section id="email" className="scroll-mt-28">
+  <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+    7. Email Newsletters
+  </h2>
+  <p className="text-slate-600 font-medium leading-relaxed mb-4">
+    Turn your campaign into a single, well‑crafted email newsletter. Ozigi generates a standalone piece that summarizes your key insights, written in your voice. You can then edit it with a rich text editor, add images, and schedule it for later delivery.
+  </p>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div className="bg-white border-2 border-slate-200 p-6 rounded-[2rem] shadow-sm">
+      <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-3">📧 Subscriber Management</h3>
+      <p className="text-sm text-slate-600 font-medium leading-relaxed">
+        Manage your subscriber list directly from the dashboard. Add emails manually or import a CSV. Unsubscribes are handled automatically, with a one‑click link in every email.
+      </p>
+    </div>
+    <div className="bg-slate-900 border-2 border-slate-900 p-6 rounded-[2rem] shadow-sm">
+      <h3 className="text-sm font-black uppercase tracking-widest text-white mb-3">🎨 Rich Editing</h3>
+      <p className="text-sm text-slate-400 font-medium leading-relaxed">
+        The email editor supports headings, bold/italic, bullet lists, and images. You can upload images directly to our storage or paste a URL. Every email can be fully customised before sending.
+      </p>
+    </div>
+  </div>
+  <div className="mt-6">
+    <Link
+      href="/docs/email-newsletters"
+      className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-5 py-3 rounded-full text-sm font-bold hover:bg-indigo-100 transition-colors"
+    >
+      Learn more about email distribution <span>→</span>
+    </Link>
+  </div>
+</section>
+
+{/* Section 7: Ozigi Copilot */}
+<section id="copilot" className="scroll-mt-28">
+  <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+    8. Ozigi Copilot
+  </h2>
+  <p className="text-slate-600 font-medium leading-relaxed mb-4">
+    Your personal AI assistant inside the dashboard. Brainstorm ideas, refine drafts, or ask for strategic advice – all while keeping your own context. The Copilot remembers your business goals and can optionally search the web for real‑time information.
+  </p>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div className="bg-white border-2 border-slate-200 p-6 rounded-[2rem] shadow-sm">
+      <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-3">✨ Streaming Responses</h3>
+      <p className="text-sm text-slate-600 font-medium leading-relaxed">
+        Watch the Copilot type out its answers in real time, so you never wait for a full response to appear.
+      </p>
+    </div>
+    <div className="bg-slate-900 border-2 border-slate-900 p-6 rounded-[2rem] shadow-sm">
+      <h3 className="text-sm font-black uppercase tracking-widest text-white mb-3">🔍 Web Search (Pro+)</h3>
+      <p className="text-sm text-slate-400 font-medium leading-relaxed">
+        Toggle web search on to get up‑to‑date information. Perfect for researching trends, finding links, or validating ideas.
+      </p>
+    </div>
+  </div>
+  <div className="mt-6">
+    <Link
+      href="/docs/copilot"
+      className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-5 py-3 rounded-full text-sm font-bold hover:bg-indigo-100 transition-colors"
+    >
+      Dive into Copilot features <span>→</span>
+    </Link>
+  </div>
+</section>
+
+{/* Section 8: Pricing & Gating */}
+<section id="pricing" className="scroll-mt-28">
+  <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+    9. Pricing & Gating
+  </h2>
+  <p className="text-slate-600 font-medium leading-relaxed mb-4">
+    Ozigi offers a free tier to get started, with paid plans that unlock more features. All new users get a 7‑day trial of the Team plan – no credit card required.
+  </p>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+    <div className="bg-white border-2 border-slate-200 p-6 rounded-[2rem] shadow-sm">
+      <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">Free</h3>
+      <p className="text-sm text-slate-500 mt-2">$0 forever</p>
+      <ul className="mt-4 space-y-2 text-sm text-slate-600">
+        <li>✓ 5 campaigns/month</li>
+        <li>✓ X, LinkedIn, Discord</li>
+        <li>✓ 1 saved persona</li>
+        <li className="text-slate-400">✗ Image generation</li>
+        <li className="text-slate-400">✗ Email newsletter</li>
+        <li className="text-slate-400">✗ Copilot</li>
+      </ul>
+    </div>
+    <div className="bg-slate-900 p-6 rounded-[2rem] shadow-lg text-white">
+      <h3 className="text-xl font-black italic uppercase tracking-tighter">Team</h3>
+      <p className="text-sm text-slate-300 mt-2">$15/month</p>
+      <ul className="mt-4 space-y-2 text-sm text-slate-200">
+        <li>✓ 30 campaigns/month</li>
+        <li>✓ All platforms + Slack</li>
+        <li>✓ Unlimited personas</li>
+        <li>✓ Image generation (2/campaign)</li>
+        <li>✓ Email newsletter (500 sends/mo)</li>
+        <li className="text-slate-400">✗ Full Copilot</li>
+      </ul>
+    </div>
+    <div className="bg-white border-2 border-slate-200 p-6 rounded-[2rem] shadow-sm">
+      <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">Organization</h3>
+      <p className="text-sm text-slate-500 mt-2">$39/month</p>
+      <ul className="mt-4 space-y-2 text-sm text-slate-600">
+        <li>✓ Unlimited campaigns</li>
+        <li>✓ Unlimited image generation</li>
+        <li>✓ Unlimited email sends</li>
+        <li>✓ Full Copilot (with web search)</li>
+        <li>✓ Priority model access</li>
+        <li>✓ Campaign analytics</li>
+      </ul>
+    </div>
+  </div>
+  <p className="mt-6 text-sm text-slate-500">
+    Enterprise plans available for custom volume, white‑labeling, and dedicated support. <Link href="/pricing" className="text-indigo-600 hover:underline">Compare all features</Link>.
+  </p>
+</section>
+
+            {/* Section 9 */}
             <section id="publishing" className="scroll-mt-28">
               <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
                 6. Publishing Integrations
@@ -368,7 +498,6 @@ export default function DocsPage() {
 
 
           </div>
-          {/* Insert this right above the closing </main> tag in app/docs/page.tsx */}
 <div className="mt-20 border-t-2 border-slate-100 pt-16">
   <div className="bg-slate-900 rounded-[3rem] p-10 md:p-16 text-center relative overflow-hidden shadow-2xl">
     {/* Abstract background blobs */}

@@ -1,3 +1,4 @@
+"use client";
 import { createClient } from "@/lib/supabase/server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
