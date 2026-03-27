@@ -19,21 +19,22 @@ export default function HistoryModal({ isOpen, onClose, pastCampaigns, onRestore
         >
           ×
         </button>
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-6">Strategy History</h2>
+        <h2 className="text-2xl font-black text-brand-red italic uppercase tracking-tighter mb-6">Strategy History</h2>
         <div className="overflow-y-auto space-y-4">
           {pastCampaigns.map((record) => (
-            <div
-              key={record.id}
-              className="border border-slate-200 p-4 rounded-xl flex justify-between items-center group hover:bg-red-50/20"
-            >
-              <div className="truncate pr-4">
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">
-                  {new Date(record.created_at).toLocaleDateString()}
-                </p>
-                <p className="text-sm font-semibold text-slate-800 truncate">
-                  {record.source_url || "Custom Text Strategy"}
-                </p>
-              </div>
+            <div className="border border-slate-200 p-4 rounded-xl flex justify-between items-center group hover:bg-red-50/20">
+  <div className="truncate pr-4">
+    <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">
+      {new Date(record.created_at).toLocaleDateString()}
+    </p>
+    {record.name ? (
+      <p className="text-sm font-bold text-slate-800 truncate">{record.name}</p>
+    ) : (
+      <p className="text-sm font-semibold text-slate-800 truncate">
+        {record.source_url || record.source_notes?.substring(0, 50) || "Untitled"}
+      </p>
+    )}
+  </div>
               <button
                 onClick={() => { onRestore(record); onClose(); }}
                 className="bg-slate-900 text-white text-[10px] font-black uppercase px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"

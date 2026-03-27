@@ -15,10 +15,12 @@ export default function SettingsModal({
 }: SettingsModalProps) {
   // --- Workspace State ---
   const [persona, setPersona] = useState("");
-  const [webhook, setWebhook] = useState("");
+  const [discordWebhook, setDiscordWebhook] = useState("");
+  const [slackWebhook, setSlackWebhook] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [email, setEmail] = useState("");
-  const [emailSenderName, setEmailSenderName] = useState(""); // 👈 new
+  const [emailSenderName, setEmailSenderName] = useState("");
+  const [replyToEmail, setReplyToEmail] = useState(""); // 👈 new
 
   // --- Database Persona State ---
   const [newPersonaName, setNewPersonaName] = useState("");
@@ -36,7 +38,8 @@ export default function SettingsModal({
   useEffect(() => {
     if (session?.user?.user_metadata) {
       setPersona(session.user.user_metadata.persona || "");
-      setWebhook(session.user.user_metadata.discord_webhook || "");
+      setDiscordWebhook(session.user.user_metadata.discord_webhook || "");
+      setSlackWebhook(session.user.user_metadata.slack_webhook || "");
     }
     fetchConnections();
   }, [session]);
@@ -46,11 +49,12 @@ export default function SettingsModal({
       const fetchProfile = async () => {
         const { data } = await supabase
           .from('profiles')
-          .select('email, email_sender_name')
+          .select('email, email_sender_name, reply_to_email')
           .eq('id', session.user.id)
           .single();
         if (data?.email) setEmail(data.email);
         if (data?.email_sender_name) setEmailSenderName(data.email_sender_name);
+        if (data?.reply_to_email) setReplyToEmail(data.reply_to_email);
       };
       fetchProfile();
     }
@@ -74,16 +78,18 @@ export default function SettingsModal({
 
     // Update user metadata (persona, discord webhook)
     const { error: metadataError } = await supabase.auth.updateUser({
-      data: { persona: persona.trim(), discord_webhook: webhook.trim() },
+      data: { persona: persona.trim(), discord_webhook: discordWebhook.trim(), slack_webhook: slackWebhook.trim() },
     });
 
-    // Update profiles table (email, email_sender_name, discord_webhook)
+    // Update profiles table (email, email_sender_name, discord_webhook, slack_webhook, reply_to_email)
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
         email: email.trim() || null,
         email_sender_name: emailSenderName.trim() || null,
-        discord_webhook: webhook.trim() || null,
+        reply_to_email: replyToEmail.trim() || null,
+        discord_webhook: discordWebhook.trim() || null,
+        slack_webhook: slackWebhook.trim() || null,
       })
       .eq('id', session.user.id);
 
@@ -188,7 +194,7 @@ export default function SettingsModal({
           ×
         </button>
 
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-6 text-slate-900">
+        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-6 text-brand-red">
           Settings
         </h2>
 
@@ -220,9 +226,38 @@ export default function SettingsModal({
                 type="url"
                 className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
                 placeholder="https://discord.com/api/webhooks/..."
-                value={webhook}
-                onChange={(e) => setWebhook(e.target.value)}
+                value={discordWebhook}
+                onChange={(e) => setDiscordWebhook(e.target.value)}
               />
+                <a
+    href="/docs/webhooks"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-[10px] text-slate-400 hover:text-brand-red mt-1 inline-block"
+  >
+    How to create a Discord webhook?
+  </a>
+            </div>
+            <div>
+              <label htmlFor="slackWebhook" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                Slack Webhook URL
+              </label>
+              <input
+                id="slackWebhook"
+                type="url"
+                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
+                placeholder="https://hooks.slack.com/services/..."
+                value={slackWebhook}
+                onChange={(e) => setSlackWebhook(e.target.value)}
+              />
+                <a
+    href="/docs/webhooks"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-[10px] text-slate-400 hover:text-brand-red mt-1 inline-block"
+  >
+    How to create a Slack webhook?
+  </a>
             </div>
 
             <div>
@@ -239,7 +274,7 @@ export default function SettingsModal({
               />
             </div>
 
-            {/* 👇 NEW: Newsletter Sender Name */}
+            {/* Newsletter Sender Name */}
             <div>
               <label htmlFor="emailSenderName" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                 Newsletter Sender Name
@@ -257,6 +292,24 @@ export default function SettingsModal({
               </p>
             </div>
 
+            {/* Reply-to Email */}
+            <div>
+              <label htmlFor="replyToEmail" className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                Reply-to Email
+              </label>
+              <input
+                id="replyToEmail"
+                type="email"
+                className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-red-500/50 text-sm font-medium text-slate-900"
+                placeholder="your@email.com"
+                value={replyToEmail}
+                onChange={(e) => setReplyToEmail(e.target.value)}
+              />
+              <p className="text-[8px] text-slate-400 mt-1">
+                Where replies to your newsletter will go. If empty, your account email will be used.
+              </p>
+            </div>
+
             <button
               onClick={handleSaveWorkspace}
               disabled={isSaving}
@@ -266,7 +319,6 @@ export default function SettingsModal({
             </button>
           </div>
 
-          
           {/* CONNECTED ACCOUNTS */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">

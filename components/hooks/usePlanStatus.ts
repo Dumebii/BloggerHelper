@@ -18,6 +18,9 @@ export interface PlanStatus {
   isEnterprise: boolean;
 }
 
+const CACHE_KEY = "ozigi_plan_status";
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export function usePlanStatus() {
   const [planStatus, setPlanStatus] = useState<PlanStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,33 +34,35 @@ export function usePlanStatus() {
         return;
       }
       try {
-        const res = await fetch('/api/user/stats', {
+        const res = await fetch("/api/user/stats", {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (res.ok) {
           const data = await res.json();
-          setPlanStatus({
-            plan: data.plan,
-            isTrialActive: data.isTrialActive,
-            isTrialExpired: data.isTrialExpired,
-            trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : null,
-            canGenerate: data.canGenerate,
-            generationsUsed: data.generationsUsed,
-            generationsLimit: data.generationsLimit,
-            imageGenUsed: data.imageGenUsed,
-            imageGenLimit: data.imageGenLimit,
-            emailSendsUsed: data.emailSendsUsed,
-            emailSendsLimit: data.emailSendsLimit,
-            hasCopilot: data.hasCopilot,
-            isEnterprise: data.isEnterprise,
-          });
+          setPlanStatus(data);
+          // Store in cache with timestamp
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         }
       } catch (err) {
-        console.error('Failed to fetch plan status', err);
+        console.error("Failed to fetch plan status", err);
       } finally {
         setLoading(false);
       }
     };
+
+    // Check cache first
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL) {
+          setPlanStatus(data);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {}
+    }
+
     fetchPlanStatus();
   }, []);
 

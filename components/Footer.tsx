@@ -11,9 +11,9 @@ export default function Footer() {
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
                 <img
-                  src="/icon.svg"
+                  src="/logo.png"
                   alt="Ozigi Logo"
-                  className="w-9 h-9 object-contain"
+                  className="h-8 w-auto logo-spin"
                 />
               </div>
               <span className="text-lg font-black italic uppercase tracking-tighter text-white">
@@ -26,22 +26,25 @@ export default function Footer() {
           </div>
 
           {/* Product */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-5">
-              Product
-            </h4>
-            <div className="flex flex-col gap-3">
-              <Link href="/docs" className="text-sm text-slate-500 hover:text-white transition-colors">
-                Documentation
-              </Link>
-              <Link href="/architecture" className="text-sm text-slate-500 hover:text-white transition-colors">
-                Architecture
-              </Link>
-              <Link href="/dashboard" className="text-sm text-slate-500 hover:text-white transition-colors">
-                Dashboard
-              </Link>
-            </div>
-          </div>
+<div>
+  <h4 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-5">
+    Features
+  </h4>
+  <div className="flex flex-col gap-3">
+    <Link href="/docs/multimodal-pipeline" className="text-sm text-slate-500 hover:text-white transition-colors">
+      Multimodal Ingestion
+    </Link>
+    <Link href="/docs/the-banned-lexicon" className="text-sm text-slate-500 hover:text-white transition-colors">
+      Banned Lexicon
+    </Link>
+    <Link href="/docs/system-personas" className="text-sm text-slate-500 hover:text-white transition-colors">
+      System Personas
+    </Link>
+    <Link href="/docs/human-in-the-loop" className="text-sm text-slate-500 hover:text-white transition-colors">
+      Human‑in‑the‑Loop
+    </Link>
+  </div>
+</div>
 
           {/* Community */}
           <div>
@@ -91,6 +94,13 @@ export default function Footer() {
               <Link href="/demo" className="text-sm text-slate-500 hover:text-white transition-colors">
                 Live Demo
               </Link>
+<a
+  href={process.env.NEXT_PUBLIC_CALENDLY_URL || "mailto:hello@ozigi.app"}
+  target="_blank"
+  rel="noopener noreferrer"
+className="text-sm text-slate-500 hover:text-white transition-colors">
+  Contact Sales
+</a>
             </div>
           </div>
         </div>

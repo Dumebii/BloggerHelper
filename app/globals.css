@@ -5,7 +5,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-navy: #0A1628;
+  --brand-red: #E8320A;
+  --brand-offwhite: #FAFAFA;
+  --brand-slate: #1E293B;
+  --brand-grey: #94A3B8;
 }
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -18,4 +24,36 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+@keyframes gentleSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.logo-spin {
+  animation: gentleSpin 8s linear infinite;
+}
+
+.logo-spin:hover {
+  animation: gentleSpin 1s ease-in-out;
+}
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 8s ease infinite;
+}
+/* Hero card tweet styling */
+.hero-card .tweet {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.hero-card .tweet:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }

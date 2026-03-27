@@ -43,7 +43,7 @@ export default function ImageInsertModal({ isOpen, onClose, onInsert }: ImageIns
         >
           ✕
         </button>
-        <h3 className="text-lg font-black mb-4">Insert Image</h3>
+        <h3 className="text-lg text-brand-red font-black mb-4">Insert Image</h3>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-bold uppercase text-slate-400 mb-2">

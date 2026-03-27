@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://ozigi.app/og-image.png", // Ensure this matches your actual deployed URL
+        url: "https://ozigi.app/opengraph-image.png", // Ensure this matches your actual deployed URL
         width: 1200,
         height: 630,
         alt: "Ozigi — Turn raw notes into social posts without sounding like AI",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ozigi — AI Content Engine for Technical Creators",
     description: "Drop in raw notes, a PDF, or a URL. Get platform-ready posts for X, LinkedIn, and Discord in your voice — not AI's.",
-    images: ["https://ozigi.app/og-image.png"],
+    images: ["https://ozigi.app/opengraph-image.png"],
     creator: "@DumebiTheWriter",
   },
   robots: {
@@ -69,6 +69,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+            <head>
+        {/* Favicon links */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+      </head>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

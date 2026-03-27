@@ -106,7 +106,6 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
   const router = useRouter();
 
   const handleUpgrade = async (plan: string, interval: "monthly" | "yearly") => {
-    // Check login status
     const { data: { session } } = await supabase.auth.getSession();
 
     if (plan === "free") {
@@ -123,7 +122,6 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
       return;
     }
 
-    // Paid plans – require login
     if (!session) {
       onOpenAuthModal?.();
       return;
@@ -149,14 +147,13 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
 
   return (
     <div>
-      {/* Billing toggle */}
       <div className="flex justify-center mb-12">
         <div className="inline-flex bg-white border border-slate-200 rounded-full p-1 shadow-sm">
           <button
             onClick={() => setBillingInterval("monthly")}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
               billingInterval === "monthly"
-                ? "bg-slate-900 text-white"
+                ? "bg-brand-navy text-white"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -166,7 +163,7 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
             onClick={() => setBillingInterval("yearly")}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
               billingInterval === "yearly"
-                ? "bg-slate-900 text-white"
+                ? "bg-brand-navy text-white"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -190,12 +187,12 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
               key={tier.name}
               className={`rounded-2xl p-6 flex flex-col h-full ${
                 tier.popular
-                  ? "bg-slate-900 text-white ring-4 ring-slate-900 shadow-xl scale-105 md:scale-110"
+                  ? "bg-brand-navy text-white ring-4 ring-brand-red shadow-xl scale-105 md:scale-110"
                   : "bg-white border-2 border-slate-200 shadow-sm hover:shadow-lg transition-shadow"
               }`}
             >
               {tier.badge && (
-                <span className="inline-block text-xs font-bold uppercase tracking-widest bg-indigo-600 text-white px-3 py-1 rounded-full self-start mb-4">
+                <span className="inline-block text-xs font-bold uppercase tracking-widest bg-brand-red text-white px-3 py-1 rounded-full self-start mb-4">
                   {tier.badge}
                 </span>
               )}
@@ -217,7 +214,7 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
               <ul className="space-y-3 flex-1">
                 {tier.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm">
-                    <Check size={18} className={tier.popular ? "text-green-400 shrink-0 mt-0.5" : "text-green-600 shrink-0 mt-0.5"} />
+                    <Check size={18} className={tier.popular ? "text-brand-red shrink-0 mt-0.5" : "text-brand-red shrink-0 mt-0.5"} />
                     <span className={tier.popular ? "text-slate-200" : "text-slate-600"}>
                       {feature}
                     </span>
@@ -228,10 +225,10 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
                 onClick={() => handleUpgrade(tier.planId, billingInterval)}
                 className={`mt-8 w-full py-3 rounded-xl font-black uppercase tracking-widest text-sm transition-all ${
                   tier.popular
-                    ? "bg-white text-slate-900 hover:bg-slate-100"
+                    ? "bg-white text-brand-navy hover:bg-slate-100"
                     : isFree || isEnterprise
                     ? "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
+                    : "bg-brand-navy text-white hover:bg-opacity-90"
                 }`}
               >
                 {tier.buttonText}

@@ -47,19 +47,46 @@ const COPILOT_ACCESS: Record<Plan, boolean> = {
   enterprise: true,
 };
 
-
-
 export async function getPlanStatus(userId: string): Promise<PlanStatus> {
-  
-const ADMIN_EMAILS = ['okolodumebi@gmail.com']; 
-
+  const ADMIN_EMAILS = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',') : [];
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+  // 1. Fetch user email from auth
+  let userEmail: string | undefined;
+  try {
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (userError) {
+      console.error('Error fetching user email:', userError);
+    } else {
+      userEmail = userData.user.email;
+    }
+  } catch (err) {
+    console.error('Unexpected error fetching user:', err);
+  }
 
-  
+  // 2. Admin override – return unlimited access
+  if (userEmail && ADMIN_EMAILS.includes(userEmail)) {
+    return {
+      plan: 'organization',
+      isTrialActive: false,
+      isTrialExpired: false,
+      trialEndsAt: null,
+      canGenerate: true,
+      generationsUsed: 0,
+      generationsLimit: -1,
+      imageGenUsed: 0,
+      imageGenLimit: -1,
+      emailSendsUsed: 0,
+      emailSendsLimit: -1,
+      hasCopilot: true,
+      isEnterprise: false,
+    };
+  }
+
+  // 3. Normal flow (for non-admin users)
   const now = new Date();
 
   // Fetch profile
@@ -67,12 +94,12 @@ const ADMIN_EMAILS = ['okolodumebi@gmail.com'];
     .from("profiles")
     .select("plan, trial_started_at, trial_ends_at")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
   let profile: any;
 
   // If no profile exists, create one with trial
-  if (profileError && profileError.code === 'PGRST116') {
+  if (!existingProfile) {
     const newProfile = {
       id: userId,
       plan: "team",
@@ -81,8 +108,6 @@ const ADMIN_EMAILS = ['okolodumebi@gmail.com'];
     };
     await supabaseAdmin.from("profiles").insert(newProfile);
     profile = newProfile;
-  } else if (profileError) {
-    throw new Error("Could not fetch user profile.");
   } else {
     profile = existingProfile;
   }
@@ -120,27 +145,9 @@ const ADMIN_EMAILS = ['okolodumebi@gmail.com'];
     .from("user_stats")
     .select("campaigns_generated, image_generations_this_month, email_sends_this_month")
     .eq("user_id", userId)
-    .single();
-    const userEmail = profile?.email;
-if (ADMIN_EMAILS.includes(userEmail)) {   return {
-    plan: 'organization',
-    isTrialActive: false,
-    isTrialExpired: false,
-    trialEndsAt: null,
-    canGenerate: true,
-    generationsUsed: 0,
-    generationsLimit: -1,
-    imageGenUsed: 0,
-    imageGenLimit: -1,
-    emailSendsUsed: 0,
-    emailSendsLimit: -1,
-    hasCopilot: true,
-    isEnterprise: false,
-  };
- }
+    .maybeSingle();
 
-  if (statsError && statsError.code === 'PGRST116') {
-    // Create stats row
+  if (!existingStats) {
     const nowDate = new Date();
     const newStats = {
       user_id: userId,
@@ -155,11 +162,8 @@ if (ADMIN_EMAILS.includes(userEmail)) {   return {
       image_generations_this_month: 0,
       email_sends_this_month: 0,
     };
-  } else if (statsError) {
-    console.error("Stats error:", statsError);
-    stats = { campaigns_generated: 0, image_generations_this_month: 0, email_sends_this_month: 0 };
   } else {
-    stats = existingStats!;
+    stats = existingStats;
   }
 
   return {
@@ -179,64 +183,33 @@ if (ADMIN_EMAILS.includes(userEmail)) {   return {
   };
 }
 
-// Increment functions (unchanged)
 export async function incrementCampaignGeneration(userId: string): Promise<void> {
-  await incrementStat(userId, "campaigns_generated");
-}
-
-export async function incrementImageGeneration(userId: string): Promise<void> {
-  await incrementStat(userId, "image_generations_this_month");
-}
-
-export async function incrementEmailSend(userId: string): Promise<void> {
-  await incrementStat(userId, "email_sends_this_month");
-}
-
-async function incrementStat(userId: string, column: string) {
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-
-  // Fetch the full record
-  const { data: current, error: fetchError } = await supabaseAdmin
-    .from("user_stats")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-
-  if (fetchError && fetchError.code !== 'PGRST116') {
-    console.error("Error fetching stats for increment:", fetchError);
-    return;
-  }
-
-  const newStats: any = current ? { ...current } : { user_id: userId };
-
-  // Increment the correct column
-  if (column === 'campaigns_generated') {
-    newStats.campaigns_generated = (newStats.campaigns_generated || 0) + 1;
-  } else if (column === 'image_generations_this_month') {
-    newStats.image_generations_this_month = (newStats.image_generations_this_month || 0) + 1;
-  } else if (column === 'email_sends_this_month') {
-    newStats.email_sends_this_month = (newStats.email_sends_this_month || 0) + 1;
+  const { error } = await supabaseAdmin.rpc('increment_campaigns_generated', { user_id_param: userId });
+  if (error) {
+    console.error('RPC increment_campaigns_generated error:', error);
   } else {
-    console.error("Invalid column for incrementStat:", column);
-    return;
+    console.log('Campaign increment RPC called successfully for user', userId);
   }
+}
 
-  // If the record didn't exist, set sensible defaults for other columns
-  if (!current) {
-    newStats.campaigns_generated = newStats.campaigns_generated || 0;
-    newStats.image_generations_this_month = newStats.image_generations_this_month || 0;
-    newStats.email_sends_this_month = newStats.email_sends_this_month || 0;
-    newStats.generation_reset_at = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString();
-  }
+export async function incrementImageGeneration(userId: string): Promise<void> {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { error } = await supabaseAdmin.rpc('increment_image_generations', { user_id_param: userId });
+  if (error) console.error('Error incrementing image generations:', error);
+}
 
-  const { error: updateError } = await supabaseAdmin
-    .from("user_stats")
-    .upsert(newStats, { onConflict: 'user_id' });
-
-  if (updateError) {
-    console.error("Error updating stats:", updateError);
-  }
+export async function incrementEmailSend(userId: string): Promise<void> {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { error } = await supabaseAdmin.rpc('increment_email_sends', { user_id_param: userId });
+  if (error) console.error('Error incrementing email sends:', error);
 }

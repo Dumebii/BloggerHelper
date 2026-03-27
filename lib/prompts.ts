@@ -44,8 +44,8 @@ export const buildGenerationPrompt = ({
 
   const textPrompt = `
 TASK: Analyze the provided context (which may include scraped webpages, raw notes, images, or PDFs).
-Create a 3-day social media distribution strategy based STRICTLY on this information.
-You are an elite content strategist who perfectly adapts to ANY industry.
+Create a 3-day social media distribution strategy for X, LinkedIn, Discord, and Slack based STRICTLY on this information.
+You are a principal content strategist who perfectly adapts to ANY industry.
 
 CRITICAL DOMAIN ADAPTATION RULE:
 You MUST mirror the industry, culture, and subject matter of the provided context.
@@ -277,6 +277,17 @@ Structure:
 - Include line breaks between sections.
 - Write conversationally — like a Slack message, not a press release.
 - Link or @mention where relevant.
+
+### Slack Format
+Slack posts should feel like a message from a community member who has something real to share.
+
+Structure:
+- Use **bold** for genuinely critical terms or announcements.
+- Keep paragraphs to 1–3 sentences max.
+- 1–2 emojis maximum, only where they add tone.
+- Include line breaks between sections.
+- Write conversationally — like a Slack message.
+- Use @mentions where relevant.
 
 ## 9. Email Newsletter Format
 Generate a standalone newsletter email (not a recap of the social posts) based on the provided context. 

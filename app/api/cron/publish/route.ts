@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { SendMailClient } from "zeptomail";
 import nodemailer from 'nodemailer';
+import { buildXReminderEmail, buildNewsletterEmail } from "@/lib/email-templates";
 
 const USE_SMTP = !!process.env.SMTP_HOST;
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -15,8 +16,10 @@ const mailClient = new SendMailClient({
   token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`
 });
 
-const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'notifications@ozigi.app';
-const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi';
+const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'reminders@ozigi.app';
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi Reminders';
+const NEWSLETTER_FROM_ADDRESS = process.env.NEWSLETTER_FROM_ADDRESS || 'newsletters@ozigi.app';
+const NEWSLETTER_FROM_NAME = process.env.NEWSLETTER_FROM_NAME || 'Ozigi Newsletter';
 
 interface UserToken {
   user_id: string;
@@ -47,6 +50,8 @@ export async function GET(req: Request) {
       .limit(50);
 
     if (fetchError) throw fetchError;
+
+    console.log(`[CRON] Found ${duePosts?.length || 0} due posts`);
 
     // Collect unique user IDs
     const userIds = [...new Set(duePosts?.map(p => p.user_id) || [])];
@@ -83,113 +88,132 @@ export async function GET(req: Request) {
         let publishError: string | null = null;
 
         // ---------- EMAIL PLATFORM ----------
-        if (post.platform === 'email') {
-          // Fetch user profile for sender name and reply-to
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('email, email_sender_name')
-            .eq('id', post.user_id)
-            .single();
+if (post.platform === 'email') {
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('email, email_sender_name, reply_to_email')
+    .eq('id', post.user_id)
+    .single();
 
-          const senderName = profile?.email_sender_name || 'Ozigi User';
-          const replyTo = profile?.email || 'support@ozigi.app';
-          
+  const senderName = profile?.email_sender_name?.trim() || NEWSLETTER_FROM_NAME;
+  const fromAddress = NEWSLETTER_FROM_ADDRESS;
 
-          // Fetch active subscribers for this user
-          const { data: subscribers, error: subsError } = await supabase
-            .from('subscribers')
-            .select('email, token')
-            .eq('user_id', post.user_id)
-            .eq('status', 'active');
+  const { data: subscribers, error: subsError } = await supabase
+    .from('subscribers')
+    .select('email, token')
+    .eq('user_id', post.user_id)
+    .eq('status', 'active');
 
-          if (subsError || !subscribers || subscribers.length === 0) {
-            publishSuccess = true; // No subscribers, consider it a success
-          } else {
-            const emailContent = post.content;
-            const subjectMatch = emailContent.match(/^Subject:\s*(.+)$/m);
-            const subject = subjectMatch ? subjectMatch[1] : 'Your Ozigi Newsletter';
-            const body = emailContent.replace(/^Subject:\s*.+\n/, ''); // remove subject line
+  if (subsError || !subscribers || subscribers.length === 0) {
+    publishSuccess = true;
+  } else {
+    const emailContent = post.content || '';
 
-            const unsubscribeUrlBase = `${APP_URL}/api/unsubscribe?token=`;
+    // Extract subject: find a line that starts with "Subject:" (case‑insensitive) ignoring any HTML
+    let subject = 'Your Ozigi Newsletter';
+    let body = emailContent;
+    // Try plain text match first
+    let subjectMatch = emailContent.match(/^\s*Subject:\s*(.+)$/im);
+    if (subjectMatch) {
+      subject = subjectMatch[1].trim();
+      body = emailContent.replace(subjectMatch[0], '').replace(/^\n+/, '').trim();
+    } else {
+      // If no plain text match, try to find "Subject:" in HTML (e.g., inside <p> tags)
+      const htmlSubjectMatch = emailContent.match(/<[^>]*>\s*Subject:\s*(.+?)\s*<\/[^>]*>/i);
+      if (htmlSubjectMatch) {
+        subject = htmlSubjectMatch[1].trim();
+        // Remove that entire tag (simplistic, but works for typical editor output)
+        body = emailContent.replace(htmlSubjectMatch[0], '');
+      }
+    }
+    if (!subject) subject = 'Your Ozigi Newsletter';
 
-            for (const subscriber of subscribers) {
-              const unsubscribeLink = unsubscribeUrlBase + subscriber.token;
-              const htmlBody = `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                  ${body.replace(/\n/g, '<br/>')}
-                  <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #e2e8f0;" />
-                  <p style="font-size: 0.875rem; color: #64748b;">
-                    You're receiving this because you subscribed to this newsletter.
-                    <a href="${unsubscribeLink}" style="color: #ef4444;">Unsubscribe</a>
-                  </p>
-                  <p>POWERED BY OZIGI, WITH ❤️</p>
-                </div>
-              `;
-              let personalizedBody = htmlBody;
-// Extract first name from email (or use stored first_name later)
-const firstName = subscriber.email.split('@')[0];
-personalizedBody = personalizedBody.replace(/{{firstName}}/g, firstName);
-personalizedBody = personalizedBody.replace(/{{first_name}}/g, firstName);
-
-              try {
-                if (USE_SMTP) {
-                  const transporter = nodemailer.createTransport({
-                    host: process.env.SMTP_HOST,
-                    port: Number(process.env.SMTP_PORT),
-                    secure: true,
-                    auth: {
-                      user: process.env.SMTP_USER,
-                      pass: process.env.SMTP_PASS,
-                    },
-                  });
-                  await transporter.sendMail({
-                    from: `"${senderName}" <${EMAIL_FROM_ADDRESS}>`,
-                    to: subscriber.email,
-                    subject,
-                    html: htmlBody,
-                    replyTo,
-                  });
-                } else {
-                  await mailClient.sendMail({
-                    from: {
-                      address: EMAIL_FROM_ADDRESS,
-                      name: senderName,
-                    },
-                    reply_to: [
-                      {
-                        email_address: {
-                          address: replyTo,
-                          name: '',
-                        },
-                      },
-                    ] as any, // 👈 type assertion
-                    to: [
-                      {
-                        email_address: {
-                          address: subscriber.email,
-                          name: '',
-                        },
-                      },
-                    ] as any, // 👈 type assertion
-                    subject,
-                    htmlbody: htmlBody,
-                  });
-                }
-              } catch (err: any) {
-                console.error(`Failed to send email to ${subscriber.email}:`, err);
-              }
-            }
-            publishSuccess = true;
-          }
+    // Determine if body is HTML (contains any HTML tags)
+    const isHtml = /<[a-z][\s\S]*>/i.test(body);
+    let finalBody = body;
+    if (!isHtml) {
+      // Plain text: convert newlines to <br/>
+      finalBody = body.replace(/\n/g, '<br/>');
+    } else {
+      // HTML: add responsive image styles
+      finalBody = finalBody.replace(/<img\s([^>]*?)>/gi, (match: any, attrs: any) => {
+        // If style attribute exists, append max-width; else add style
+        if (/style=/i.test(attrs)) {
+          attrs = attrs.replace(/style="([^"]*)"/i, (_: any, styles: any) => {
+            return `style="${styles}; max-width:100%; height:auto;"`;
+          });
+        } else {
+          attrs += ` style="max-width:100%; height:auto;"`;
         }
+        return `<img ${attrs}>`;
+      });
+    }
+
+    const unsubscribeUrlBase = `${APP_URL}/api/unsubscribe?token=`;
+
+    for (const subscriber of subscribers) {
+      const unsubscribeLink = unsubscribeUrlBase + subscriber.token;
+      const replyToInfo = profile?.reply_to_email || profile?.email;
+      const htmlBody = buildNewsletterEmail(
+        finalBody,
+        unsubscribeLink,
+        replyToInfo,
+        senderName,
+        false,
+        post.id
+      );
+
+      // Size check
+      const payloadSize = new Blob([htmlBody]).size;
+      if (payloadSize > 10 * 1024 * 1024) {
+        console.error(`❌ Email size too large (${payloadSize} bytes) for ${subscriber.email}, skipping.`);
+        continue;
+      }
+
+      try {
+        if (USE_SMTP) {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT),
+            secure: true,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+          });
+          await transporter.sendMail({
+            from: `"${senderName}" <${fromAddress}>`,
+            to: subscriber.email,
+            subject,
+            html: htmlBody,
+          });
+        } else {
+          const payload: any = {
+            from: { address: fromAddress, name: senderName },
+            to: [{ email_address: { address: subscriber.email, name: '' } }],
+            subject: subject,
+            htmlbody: htmlBody,
+          };
+          await mailClient.sendMail(payload);
+          console.log(`✅ ZeptoMail sent to ${subscriber.email}`);
+        }
+      } catch (err: any) {
+        console.error(`❌ Failed to send email to ${subscriber.email}:`, err);
+        if (err.response) {
+          console.error('ZeptoMail response data:', JSON.stringify(err.response.data, null, 2));
+        }
+      }
+    }
+    publishSuccess = true;
+  }
+}
 
         // ---------- X PLATFORM ----------
-        else if (post.platform === 'x') {
-          // X: Send email reminder
+else if (post.platform === 'x') {
           if (post.user_email && !post.reminder_sent) {
             const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`;
-
-            console.log(`Attempting to send email for post ${post.id} to ${post.user_email}`);
+            const dashboardUrl = `${APP_URL}/dashboard`;
+            const htmlBody = buildXReminderEmail(post.content, intentUrl, dashboardUrl);
 
             try {
               if (USE_SMTP) {
@@ -203,52 +227,30 @@ personalizedBody = personalizedBody.replace(/{{first_name}}/g, firstName);
                   },
                 });
                 await transporter.sendMail({
-                  from: `"${EMAIL_FROM_NAME}" <${process.env.SMTP_USER}>`,
+                  from: `"${EMAIL_FROM_NAME}" <${EMAIL_FROM_ADDRESS}>`,
                   to: post.user_email,
                   subject: 'Your scheduled X post is ready',
-                  html: `
-                    <h2>Your scheduled X post is due!</h2>
-                    <p>Click the link below to publish it now:</p>
-                    <a href="${intentUrl}" target="_blank">Post to X</a>
-                    <p>Or log in to Ozigi to manage all scheduled posts.</p>
-                  `,
+                  html: htmlBody,
                 });
               } else {
-                await mailClient.sendMail({
-                  from: {
-                    address: EMAIL_FROM_ADDRESS,
-                    name: EMAIL_FROM_NAME,
-                  },
-                  to: [
-                    {
-                      email_address: {
-                        address: post.user_email,
-                        name: "",
-                      },
-                    },
-                  ] as any,
+                const payload: any = {
+                  from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
+                  to: [{ email_address: { address: post.user_email, name: '' } }],
                   subject: 'Your scheduled X post is ready',
-                  htmlbody: `
-                    <h2>Your scheduled X post is due!</h2>
-                    <p>Click the link below to publish it now:</p>
-                    <a href="${intentUrl}" target="_blank">Post to X</a>
-                    <p>Or log in to Ozigi to manage all scheduled posts.</p>
-                  `,
-                });
+                  htmlbody: htmlBody,
+                };
+                await mailClient.sendMail(payload);
               }
 
               await supabase
                 .from("scheduled_posts")
                 .update({ reminder_sent: true, status: "pending" })
                 .eq("id", post.id);
-
               publishSuccess = true;
             } catch (emailError: any) {
-              console.error(`❌ Failed to send email for post ${post.id}:`, emailError);
+              console.error(`❌ Failed to send X reminder for post ${post.id}:`, emailError);
               publishSuccess = false;
               publishError = emailError.message;
-
-              // Keep as pending, retry next time
               await supabase
                 .from("scheduled_posts")
                 .update({ status: "pending" })
@@ -264,7 +266,7 @@ personalizedBody = personalizedBody.replace(/{{first_name}}/g, firstName);
         }
 
         // ---------- LINKEDIN PLATFORM ----------
-        else if (post.platform === 'linkedin') {
+else if (post.platform === 'linkedin') {
           const userTokens = tokensByUser.get(post.user_id) || [];
           const linkedInToken = userTokens.find(t => t.provider === 'linkedin_oidc')?.access_token;
 
@@ -273,47 +275,89 @@ personalizedBody = personalizedBody.replace(/{{first_name}}/g, firstName);
             publishError = "No LinkedIn token found";
           } else {
             const res = await fetch(`${APP_URL}/api/publish/linkedin`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                text: post.content,
-                userId: post.user_id,
-                imageUrl: post.media_url,
-                accessToken: linkedInToken
-              })
-            });
-            const data = await res.json();
-            publishSuccess = res.ok;
-            publishError = data.error || null;
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    text: post.content,
+    userId: post.user_id,
+    imageUrl: post.media_url,
+    // Do NOT pass accessToken – let the endpoint fetch from database
+  })
+});
+const data = await res.json();
+console.log('[CRON] LinkedIn response:', data);
+publishSuccess = res.ok;
+publishError = data.error || null;
+if (data.postId) console.log('[CRON] LinkedIn post ID:', data.postId);
           }
         }
 
         // ---------- DISCORD PLATFORM ----------
         else if (post.platform === 'discord') {
-          const { data: profile, error: profileError } = await supabase
+          console.log(`[CRON] Processing Discord post ${post.id} for user ${post.user_id}`);
+          const { data: profile } = await supabase
             .from('profiles')
             .select('discord_webhook, display_name, avatar_url')
             .eq('id', post.user_id)
             .single();
 
           if (profile?.discord_webhook) {
+            console.log(`[CRON] Discord webhook found for user ${post.user_id}`);
+            const payload = {
+              content: post.content,
+              webhookUrl: profile.discord_webhook,
+              userId: post.user_id,
+              username: profile.display_name || 'Powered by Ozigi',
+              avatar_url: profile.avatar_url || 'https://ozigi.app/logo.png'
+            };
+            console.log('[CRON] Sending to Discord endpoint with payload:', payload);
             const res = await fetch(`${APP_URL}/api/post-discord`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                content: post.content,
-                webhookUrl: profile.discord_webhook,
-                userId: post.user_id,
-                username: profile.display_name || 'Ozigi Bot',
-                avatar_url: profile.avatar_url || 'https://ozigi.app/icon.png'
-              })
+              body: JSON.stringify(payload),
             });
             const data = await res.json();
+            console.log('[CRON] Discord response:', data);
             publishSuccess = res.ok;
             publishError = data.error || null;
           } else {
+            console.log(`[CRON] No Discord webhook for user ${post.user_id}`);
             publishSuccess = false;
             publishError = "No Discord webhook configured";
+          }
+        }
+
+        // ---------- SLACK PLATFORM ----------
+        else if (post.platform === 'slack') {
+          console.log(`[CRON] Processing Slack post ${post.id} for user ${post.user_id}`);
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('slack_webhook, display_name, avatar_url')
+            .eq('id', post.user_id)
+            .single();
+
+          if (profile?.slack_webhook) {
+            console.log(`[CRON] Slack webhook found for user ${post.user_id}`);
+            const payload = {
+              content: post.content,
+              webhookUrl: profile.slack_webhook,
+              username: profile.display_name || 'Powered by Ozigi',
+              icon_url: profile.avatar_url || 'https://ozigi.app/logo.png'
+            };
+            console.log('[CRON] Sending to Slack endpoint with payload:', payload);
+            const res = await fetch(`${APP_URL}/api/publish/slack`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            console.log('[CRON] Slack response:', data);
+            publishSuccess = res.ok;
+            publishError = data.error || null;
+          } else {
+            console.log(`[CRON] No Slack webhook for user ${post.user_id}`);
+            publishSuccess = false;
+            publishError = "No Slack webhook configured";
           }
         }
 

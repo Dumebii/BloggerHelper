@@ -1,18 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 
 export function useCampaignHistory(userId?: string) {
   const [pastCampaigns, setPastCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchHistory = async (uid: string) => {
-    const { data } = await supabase
+    setLoading(true);
+    const { data, error } = await supabase
       .from("campaigns")
       .select("*")
       .eq("user_id", uid)
       .order("created_at", { ascending: false });
-    if (data) setPastCampaigns(data);
+    if (error) {
+      console.error("Campaign fetch error:", error);
+    } else {
+      setPastCampaigns(data || []);
+    }
+    setLoading(false);
   };
+
+  useEffect(() => {
+    if (userId) {
+      fetchHistory(userId);
+    }
+  }, [userId]);
 
   const restoreCampaign = (record: any, setInputs: any, setCampaign: any) => {
     setInputs({
@@ -22,11 +35,12 @@ export function useCampaignHistory(userId?: string) {
       fileUrls: [],
       platforms: ["x", "linkedin", "discord", "email"],
       tweetFormat: "single",
+      campaignName: record.name || "",
       additionalInfo: "",
       personaId: "default",
     });
     setCampaign(record.generated_content);
   };
 
-  return { pastCampaigns, fetchHistory, restoreCampaign };
+  return { pastCampaigns, loading, fetchHistory, restoreCampaign };
 }

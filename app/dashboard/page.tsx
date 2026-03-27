@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation"; // ✅ correct import
+import { useRouter } from "next/navigation";
 import { Mail, Sparkles, User } from "lucide-react";
 import Distillery from "@/components/ContextEngine";
 import DistributionGrid from "@/components/DistributionGrid";
@@ -12,7 +12,6 @@ import SkeletonGrid from "@/components/SkeletonGrid";
 import ScheduledPostsModal from "@/components/ScheduledPostsModal";
 import SettingsModal from "@/components/SettingsModal";
 import Sidebar from "@/components/dashboard/Sidebar";
-import StatsWidget from "@/components/dashboard/StatsWidget";
 import EmailBanner from "@/components/dashboard/EmailBanner";
 import HistoryModal from "@/components/dashboard/HistoryModal";
 import SubscribersModal from "@/components/dashboard/SubscribersModal";
@@ -25,42 +24,42 @@ import { useEmailBanner } from "@/components/hooks/useEmailBanner";
 import { supabase } from "@/lib/supabase/client";
 import CopilotPanel from "@/components/CopilotPannel";
 import CopilotSettingsModal from "@/components/CopilotSettingsModal";
-import TrialBanner from "@/components/TrialBanner";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 import PricingCards from "@/components/PricingCards";
 import UpgradeModal from "@/components/UpgradeModal";
+import DashboardTour from "@/components/dashboard/DashboardTour";
+import { incrementCampaignGeneration } from "@/lib/plan";
+import { toast } from "sonner";
 
 export default function Dashboard() {
-  // --- Hooks (must be at top level) ---
   const router = useRouter();
   const { session, sessionLoading } = useSession();
   const { planStatus, loading: planLoading } = usePlanStatus();
 
-  // --- CORE STATE ---
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<any[]>([]);
   const [inputs, setInputs] = useState({
     url: "",
     text: "",
-    files: [],
     fileUrls: [],
+    files: [],
     platforms: ["x", "linkedin", "discord", "email"],
     tweetFormat: "single" as const,
     additionalInfo: "",
     personaId: "default",
+    campaignName: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [emailContent, setEmailContent] = useState<string | null>(null);
   const campaignRef = useRef<HTMLDivElement>(null);
   const isMounted = useRef(true);
 
-  // --- DATA HOOKS ---
   const { personas, refreshPersonas } = usePersonas(session?.user?.id);
   const { pastCampaigns, fetchHistory, restoreCampaign } = useCampaignHistory(session?.user?.id);
   const { stats, isLoadingStats, refreshStats } = useStats(session?.user?.id);
   const { needsEmail, setNeedsEmail, dismissBanner } = useEmailBanner(!session?.user?.email);
+  const [campaignName, setCampaignName] = useState("");
 
-  // --- MODAL STATES ---
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isScheduledOpen, setIsScheduledOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -69,28 +68,30 @@ export default function Dashboard() {
   const [isPersonasOpen, setIsPersonasOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
-  // --- SIDEBAR STATES ---
+  const [isTourReady, setIsTourReady] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // copilot states
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCopilotSettingsOpen, setIsCopilotSettingsOpen] = useState(false);
+  const hasCopilot = planStatus?.hasCopilot || false;
 
-  // --- NAVIGATION ITEMS ---
   const navItems = [
     {
       label: "Generation History",
-      icon: <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>,
+      icon: (
+        <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
       onClick: () => setIsHistoryOpen(true),
     },
     {
       label: "Scheduled Posts",
-      icon: <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>,
+      icon: (
+        <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
       onClick: () => setIsScheduledOpen(true),
     },
     {
@@ -105,14 +106,16 @@ export default function Dashboard() {
     },
     {
       label: "Settings & Integrations",
-      icon: <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-        />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>,
+      icon: (
+        <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
       onClick: () => setIsSettingsOpen(true),
     },
     {
@@ -122,118 +125,156 @@ export default function Dashboard() {
     },
   ];
 
-  // --- HANDLER FUNCTIONS ---
-  const handleGenerate = async () => {
-    setLoading(true);
-    setErrorMessage("");
-    console.log("Session in generate:", session);
-    if (!session?.access_token) {
-      setErrorMessage("Your session expired. Please log in again.");
+const handleGenerate = async () => {
+  setLoading(true);
+  setErrorMessage("");
+  if (!session?.access_token) {
+    setErrorMessage("Your session expired. Please log in again.");
+    setLoading(false);
+    return;
+  }
+  setCampaign([]);
+
+  try {
+    let selectedVoice =
+      "Expert Social Media Copywriter who adapts perfectly to the provided context";
+    if (inputs.personaId && inputs.personaId !== "default") {
+      const found = personas.find((p: any) => p.id === inputs.personaId);
+      if (found && found.prompt) {
+        selectedVoice = found.prompt;
+      }
+    }
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = inputs.text.match(urlRegex);
+    let url = "";
+    let rawText = inputs.text;
+    if (matches && matches.length > 0) {
+      url = matches[0];
+      rawText = inputs.text.replace(url, "").trim();
+    }
+
+    const payload = {
+      sourceMaterial: {
+        url,
+        rawText,
+        assetUrls: inputs.fileUrls,
+      },
+      campaignDirectives: {
+        platforms: inputs.platforms,
+        tweetFormat: inputs.tweetFormat,
+        additionalContext: inputs.additionalInfo,
+        personaVoice: selectedVoice,
+      },
+    };
+
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      let errorMsg = "We encountered a hiccup connecting to the AI engine. Please try again.";
+      try {
+        const errorData = await response.json();
+        if (errorData.error) errorMsg = errorData.error;
+      } catch {
+        // ignore
+      }
+      setErrorMessage(errorMsg);
       setLoading(false);
       return;
     }
-    setCampaign([]);
 
-    try {
-      let selectedVoice =
-        "Expert Social Media Copywriter who adapts perfectly to the provided context";
-      if (inputs.personaId && inputs.personaId !== "default") {
-        const found = personas.find((p: any) => p.id === inputs.personaId);
-        if (found && found.prompt) {
-          selectedVoice = found.prompt;
-        }
-      }
-
-      const payload = {
-        sourceMaterial: {
-          url: inputs.url,
-          rawText: inputs.text,
-          assetUrls: inputs.fileUrls,
-        },
-        campaignDirectives: {
-          platforms: inputs.platforms,
-          tweetFormat: inputs.tweetFormat,
-          additionalContext: inputs.additionalInfo,
-          personaVoice: selectedVoice,
-        },
-      };
-
-      console.log("🚀 Firing payload to AI:", payload);
-
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        let errorMsg =
-          "We encountered a hiccup connecting to the AI engine. Please try again.";
-        try {
-          const errorData = await response.json();
-          if (errorData.error) {
-            errorMsg = errorData.error;
-          }
-        } catch (parseError) {
-          console.error("Failed to parse error response");
-        }
-        setErrorMessage(errorMsg);
-        setLoading(false);
-        return;
-      }
-
-      const data = await response.json();
-      if (data.error) {
-        setErrorMessage(data.error);
-        setLoading(false);
-        return;
-      }
-
-      const cleanJson = data.output.replace(/```json/gi, "").replace(/```/gi, "");
-      const finalResponse = JSON.parse(cleanJson);
-      const finalCampaign = finalResponse.campaign || [];
-      const finalEmail = finalResponse.email || null;
-
-      if (finalCampaign.length > 0) {
-        setCampaign(finalCampaign);
-        setEmailContent(finalEmail);
-        setTimeout(() => {
-          campaignRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 100);
-
-        if (session?.user) {
-          await supabase.from("campaigns").insert({
-            user_id: session.user.id,
-            source_url: inputs.url,
-            source_notes: inputs.text || inputs.fileUrls.join(", "),
-            generated_content: finalCampaign,
-          });
-          fetchHistory(session.user.id); // from useCampaignHistory
-          refreshStats(); // from useStats
-        }
-      }
-    } catch (err) {
-      console.error("Context error:", err);
-      setErrorMessage(
-        "The AI returned an unexpected format. Please try tweaking your context and generating again."
-      );
-    } finally {
+    const data = await response.json();
+    if (data.error) {
+      setErrorMessage(data.error);
       setLoading(false);
+      return;
     }
-  };
+
+    // --- Robust JSON extraction ---
+    let jsonString = data.output;
+
+    // Remove markdown code fences (```json ... ``` or just ``` ... ```)
+    jsonString = jsonString.replace(/```json\s*([\s\S]*?)\s*```/gi, '$1');
+    jsonString = jsonString.replace(/```\s*([\s\S]*?)\s*```/gi, '$1');
+
+    // Find the first '{' and the last '}'
+    const firstBrace = jsonString.indexOf('{');
+    const lastBrace = jsonString.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      jsonString = jsonString.slice(firstBrace, lastBrace + 1);
+    }
+
+    let finalResponse;
+    try {
+      finalResponse = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Raw AI output:', data.output);
+      }
+      setErrorMessage("The AI returned an unexpected format. Please try tweaking your context and generating again.");
+      setLoading(false);
+      return;
+    }
+
+    const finalCampaign = finalResponse.campaign || [];
+    const finalEmail = finalResponse.email || null;
+
+    if (finalCampaign.length > 0) {
+      setCampaign(finalCampaign);
+      setEmailContent(finalEmail);
+      setTimeout(() => {
+        campaignRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+
+      if (session?.user) {
+        console.log('Inserting campaign for user:', session.user.id);
+        const { data: inserted, error: insertError } = await supabase.from("campaigns").insert({
+          user_id: session.user.id,
+          source_url: url,
+          source_notes: rawText || inputs.fileUrls.join(", "),
+          name: inputs.campaignName?.trim() || null,
+          generated_content: finalCampaign,
+        });
+        if (insertError) {
+          console.error('Campaign insert error:', insertError);
+          toast.error('Failed to save campaign to history.');
+        } else {
+          console.log('Campaign inserted:', inserted);
+        }
+        await incrementCampaignGeneration(session.user.id);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        refreshStats();
+        fetchHistory(session.user.id);
+      }
+    }
+  } catch (err) {
+    console.error("Context error:", err);
+    setErrorMessage(
+      "The AI returned an unexpected format. Please try tweaking your context and generating again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleEmailAdded = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (session?.user?.email) setNeedsEmail(false);
   };
 
-  // --- EFFECTS ---
+
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("openSettings") === "true") {
@@ -252,7 +293,22 @@ export default function Dashboard() {
     }
   }, []);
 
-  // --- RENDER ---
+  useEffect(() => {
+    if (!sessionLoading && !planLoading) {
+      const timer = setTimeout(() => setIsTourReady(true), 800);
+      return () => clearTimeout(timer);
+    } else {
+      setIsTourReady(false);
+    }
+  }, [sessionLoading, planLoading]);
+
+useEffect(() => {
+if (!sessionLoading && !planLoading && session) {
+const t = setTimeout(() => setIsTourReady(true), 800);
+return () => clearTimeout(t);
+}
+}, [sessionLoading, planLoading, session]);
+
   if (sessionLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
@@ -274,17 +330,16 @@ export default function Dashboard() {
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
         navItems={navItems}
-        stats={
-          <StatsWidget
-            stats={stats}
-            isLoadingStats={isLoadingStats}
-            isSidebarCollapsed={isSidebarCollapsed}
-          />
-        }
+        stats={stats}
+        planStatus={planStatus}
+        isLoadingStats={isLoadingStats}
       />
 
       {isMobileSidebarOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 z-40 md:hidden" onClick={() => setIsMobileSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-slate-900/50 z-40 md:hidden"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
       )}
 
       <main className="flex-1 h-full overflow-y-auto relative bg-slate-50">
@@ -303,15 +358,6 @@ export default function Dashboard() {
             onGoToSettings={() => setIsSettingsOpen(true)}
           />
 
-          {planStatus?.isTrialActive && planStatus.trialEndsAt && (
-            <div className="mb-6">
-              <TrialBanner
-                trialEndsAt={planStatus.trialEndsAt}
-                onUpgradeClick={() => router.push('/pricing')}
-              />
-            </div>
-          )}
-
           {isUpgradeModalOpen && (
             <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
               <div className="bg-white w-full max-w-4xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto relative">
@@ -321,7 +367,9 @@ export default function Dashboard() {
                 >
                   ✕
                 </button>
-                <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4">Upgrade Your Plan</h2>
+                <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-4">
+                  Upgrade Your Plan
+                </h2>
                 <PricingCards onOpenAuthModal={() => setIsAuthModalOpen(true)} />
               </div>
             </div>
@@ -367,7 +415,7 @@ export default function Dashboard() {
                     ← Architect New Campaign
                   </button>
                 </div>
-                <div className="scroll-mt-32" ref={campaignRef}>
+                <div className="scroll-mt-32" id="campaign-cards" ref={campaignRef} data-tour="campaign-cards">
                   <DistributionGrid
                     campaign={campaign}
                     selectedPlatforms={inputs.platforms}
@@ -387,10 +435,28 @@ export default function Dashboard() {
 
       {/* MODALS */}
       {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
-      {isScheduledOpen && <ScheduledPostsModal onClose={() => setIsScheduledOpen(false)} onStatsChange={refreshStats} />}
-      {isSettingsOpen && <SettingsModal session={session} onClose={() => setIsSettingsOpen(false)} onEmailAdded={handleEmailAdded} />}
-      <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} pastCampaigns={pastCampaigns} onRestore={(rec) => restoreCampaign(rec, setInputs, setCampaign)} />
-      <SubscribersModal isOpen={isSubscribersOpen} onClose={() => setIsSubscribersOpen(false)} session={session} onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)} />
+      {isScheduledOpen && (
+        <ScheduledPostsModal onClose={() => setIsScheduledOpen(false)} onStatsChange={refreshStats} />
+      )}
+      {isSettingsOpen && (
+        <SettingsModal
+          session={session}
+          onClose={() => setIsSettingsOpen(false)}
+          onEmailAdded={handleEmailAdded}
+        />
+      )}
+      <HistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        pastCampaigns={pastCampaigns}
+        onRestore={(rec) => restoreCampaign(rec, setInputs, setCampaign)}
+      />
+      <SubscribersModal
+        isOpen={isSubscribersOpen}
+        onClose={() => setIsSubscribersOpen(false)}
+        session={session}
+        onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
+      />
       <PersonasModal isOpen={isPersonasOpen} onClose={() => setIsPersonasOpen(false)} session={session} />
       <CopilotSettingsModal
         isOpen={isCopilotSettingsOpen}
@@ -407,6 +473,7 @@ export default function Dashboard() {
       {planStatus?.hasCopilot ? (
         <>
           <button
+            data-tour="copilot-button"
             onClick={() => setIsCopilotOpen(true)}
             className="fixed bottom-6 right-6 z-40 bg-indigo-600 text-white p-4 rounded-full shadow-2xl hover:bg-indigo-700 transition-all hover:scale-110 active:scale-95 flex items-center justify-center"
             aria-label="Open Copilot"
@@ -417,7 +484,7 @@ export default function Dashboard() {
             isOpen={isCopilotOpen}
             onClose={() => setIsCopilotOpen(false)}
             onSendToEngine={(text) => {
-              setInputs(prev => ({ ...prev, text: text }));
+              setInputs((prev) => ({ ...prev, text }));
               setIsCopilotOpen(false);
             }}
           />
@@ -436,6 +503,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+<DashboardTour isReady={isTourReady} hasCopilot={planStatus?.hasCopilot ?? false} />
     </div>
   );
 }

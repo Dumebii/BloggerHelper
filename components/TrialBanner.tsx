@@ -28,12 +28,12 @@ export default function TrialBanner({ trialEndsAt, onUpgradeClick }: TrialBanner
   else if (daysLeft === 1) message = "Your Pro trial ends tomorrow — upgrade to keep access";
 
   return (
-    <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between text-sm font-medium">
+    <div className="bg-brand-navy text-white px-4 py-3 rounded-xl flex items-center justify-between text-sm font-medium shadow-sm border border-brand-red/30">
       <span>{message}</span>
       <div className="flex items-center gap-4">
         <button
           onClick={onUpgradeClick}
-          className="bg-white text-blue-600 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-blue-50 transition-colors"
+          className="bg-brand-red text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-opacity-90 transition-colors"
         >
           Upgrade
         </button>

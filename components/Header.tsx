@@ -15,12 +15,37 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
   const [session, setSession] = useState<any>(propSession || null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFeaturesDropdownOpen, setIsFeaturesDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const featuresDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
+  const showNav = pathname !== "/dashboard";
 
-  // Fetch session internally if the parent component didn't pass it
+  // Features dropdown items
+  const features = [
+    { name: "Multimodal Ingestion", href: "/docs/multimodal-pipeline" },
+    { name: "Banned Lexicon", href: "/docs/the-banned-lexicon" },
+    { name: "System Personas", href: "/docs/system-personas" },
+    { name: "Human‑in‑the‑Loop", href: "/docs/human-in-the-loop" },
+  ];
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+      if (featuresDropdownRef.current && !featuresDropdownRef.current.contains(event.target as Node)) {
+        setIsFeaturesDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch session internally if needed
   useEffect(() => {
     if (!propSession) {
       const getSession = async () => {
@@ -39,22 +64,10 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
     return () => subscription.unsubscribe();
   }, [propSession]);
 
-  // Handle global settings modal trigger (used by Distillery)
   useEffect(() => {
     const handleOpenSettings = () => setIsSettingsOpen(true);
     window.addEventListener("openSettingsModal", handleOpenSettings);
     return () => window.removeEventListener("openSettingsModal", handleOpenSettings);
-  }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const signOut = async () => {
@@ -68,9 +81,8 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
       <header className={`w-full z-40 transition-all ${isDashboard ? 'bg-transparent' : 'bg-white border-b border-slate-200'}`}>
         <div className={`mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between ${isDashboard ? 'w-full' : 'max-w-7xl'}`}>
           
-          {/* --- LEFT SIDE: Brand & Mobile Toggle --- */}
+          {/* LEFT SIDE: Brand & Mobile Toggle */}
           <div className="flex items-center gap-4">
-            {/* Show Hamburger ONLY on Dashboard for Mobile */}
             {isDashboard && (
               <button 
                 onClick={onOpenMobileSidebar}
@@ -83,25 +95,68 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
               </button>
             )}
 
-            {/* Show Brand ONLY when NOT on Dashboard (sidebar handles dashboard logo) */}
             {!isDashboard && (
-              <Link href="/" className="text-2xl font-black text-slate-800 tracking-tighter navbar-brand brand-image">
-                Ozigi.
-              </Link>
+<Link href="/" className="flex items-center gap-2">
+  <img src="/logo.png" alt="Ozigi" className="h-8 w-auto logo-spin" />
+  <span className="text-2xl font-black text-brand-navy tracking-tighter">Ozigi</span>
+</Link>
             )}
           </div>
 
-          {/* --- RIGHT SIDE: Navigation & Profile --- */}
+          {/* RIGHT SIDE: Navigation & Profile */}
           <div className="flex items-center gap-4">
-            {/* Landing Page Navigation */}
-            {!isDashboard && !session && (
-              <nav className="hidden md:flex gap-6 mr-4 text-sm font-semibold text-slate-600">
-                <Link href="/pricing" className="hover:text-slate-900 transition">Pricing</Link>
-                <Link href="/demo" className="hover:text-slate-900 transition">Demo</Link>
+            {showNav && (
+              <nav className="hidden md:flex items-center gap-6 mr-4">
+                <Link href="/docs" className="text-sm font-semibold text-slate-600 hover:text-brand-red transition">
+                  Docs
+                </Link>
+                <Link href="/architecture" className="text-sm font-semibold text-slate-600 hover:text-brand-red transition">
+                  Architecture
+                </Link>
+                <Link href="/pricing" className="text-sm font-semibold text-slate-600 hover:text-brand-red transition">
+                  Pricing
+                </Link>
+
+                {/* Features Dropdown - opens on hover */}
+<div
+  className="relative"
+  ref={featuresDropdownRef}
+  onMouseEnter={() => setIsFeaturesDropdownOpen(true)}
+  onMouseLeave={() => setIsFeaturesDropdownOpen(false)}
+>
+  <button className="text-sm font-semibold text-slate-600 hover:text-brand-red transition flex items-center gap-1">
+    Features
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  {isFeaturesDropdownOpen && (
+    <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-50">
+      {features.map((feature) => (
+        <Link
+          key={feature.href}
+          href={feature.href}
+          className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-red transition"
+          onClick={() => setIsFeaturesDropdownOpen(false)}
+        >
+          {feature.name}
+        </Link>
+      ))}
+    </div>
+  )}
+</div>
+<a
+  href={process.env.NEXT_PUBLIC_CALENDLY_URL || "mailto:hello@ozigi.app"}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="hidden md:block text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors px-4 py-2"
+>
+  Contact Sales
+</a>
               </nav>
             )}
 
-            {/* User Profile Dropdown (when logged in) */}
+            {/* User Profile Dropdown (logged in) */}
             {session ? (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -132,6 +187,7 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
                       </p>
                     </div>
 
+
                     {!isDashboard && (
                       <Link
                         href="/dashboard"
@@ -141,7 +197,6 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
                         Dashboard
                       </Link>
                     )}
-                    {/* Settings button removed – accessible via sidebar */}
                     
                     <div className="h-px bg-slate-100 my-1" />
                     
@@ -159,7 +214,6 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
                 )}
               </div>
             ) : (
-              /* Not Logged In Actions (Landing Page) */
               <div className="flex items-center gap-3">
                 <button
                   onClick={onSignIn}
@@ -182,9 +236,7 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
       {isSettingsOpen && (
         <SettingsModal
           session={session}
-          onEmailAdded={() => {
-            // Optionally show a success message or refresh user data
-          }}
+          onEmailAdded={() => {}}
           onClose={() => setIsSettingsOpen(false)}
         />
       )}

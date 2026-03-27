@@ -2,23 +2,69 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Footer from "../components/Footer";
-import AuthModal from "../components/AuthModal";
-import { motion, Variants } from "framer-motion";
-import PricingWaitlistModal from "./PricingWaitlistModal";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase/client";
-import CompetitorCompare from "./CompetitorCompare";
-import PricingCards from "./PricingCards";
+import AuthModal from "../components/AuthModal";
 
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const float: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.3, repeat: Infinity, repeatType: "reverse", repeatDelay: 2 } }
+};
+
+const cardData = [
+  {
+    platform: "X (Twitter)",
+    icon: (
+      <svg className="w-5 h-5" viewBox="0 0 1200 1227" fill="currentColor">
+        <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
+      </svg>
+    ),
+    content: `
+      <div class="tweet">
+        <p>Building real-time video in Next.js isn’t just about the camera feed. We shipped a consultation app. The real work began orchestrating auth, data, and Stream's SDK. That setup makes all the difference. Secure video calls start with bulletproof authentication.</p>
+      </div>
+      <div class="tweet">
+        <strong>Tweet 2:</strong> We used Clerk for our Next.js video consultation app. Handling user sessions, tokens, and roles became straightforward, letting us focus on the video experience itself. It's a critical layer.
+      </div>
+      <div class="tweet">
+        <strong>Tweet 3:</strong> Recording video calls adds a layer of legal and practical value. We built in session recording using Upload.io for our Next.js consultation app. Beyond that, Tinybird helps us track call duration and participant counts, giving real numbers on usage.
+      </div>
+    `,
+    type: "Thread (3 tweets)"
+  },
+  {
+    platform: "LinkedIn",
+    icon: (
+      <svg className="w-5 h-5 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+      </svg>
+    ),
+    content: "Putting together a video consultation app requires more than just a video library. We integrated Clerk for authentication, PlanetScale for user and appointment data, and Stream's Video SDK for the core real-time communication. This stack delivers a robust foundation. Deciding which components handle what part of the user journey—from pre-call checks to actual session management—is where the architecture choices become clear. Our Next.js API routes became the glue. Understanding the interplay between these services was key to a stable release.",
+    type: "long‑form"
+  },
+  {
+    platform: "Discord",
+    icon: (
+      <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 127.14 96.36" fill="currentColor">
+        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77.7,77.7,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+      </svg>
+    ),
+    content: "Spent the morning integrating Clerk auth with our PlanetScale database for the video app. Getting user roles from Clerk to control access to consultation data in PlanetScale. The `webhooks` feature in Clerk is a good path for this. Anyone else doing similar setups with Next.js?",
+    type: "community update"
+  }
+];
 
 export default function Hero() {
   const router = useRouter();
   const [session, setSession] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  
+  const [currentCard, setCurrentCard] = useState(0);
   const prevSession = useRef<any>(null);
-
-const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
@@ -26,352 +72,217 @@ const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
       prevSession.current = initialSession;
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
-      
       if (event === "SIGNED_IN" && !prevSession.current) {
         router.push("/dashboard");
       }
-      
       prevSession.current = newSession;
     });
 
     return () => subscription.unsubscribe();
-    console.log("Hero mounted, URL:", window.location.href);
-supabase.auth.getSession().then(({ data: { session } }) => {
-  console.log("Initial session check:", session);
-  setSession(session);
-  prevSession.current = session;
-});
   }, [router]);
 
-  // --- Animation Variants ---
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } 
-  }
-};
-
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-    }
-  }
-};
-
-  const [isScheduledOpen, setIsScheduledOpen] = useState(false);
+  // Auto‑rotate cards every 4 seconds
   useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  if (code) {
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) console.error("Exchange error:", error);
-      // Clean the URL
-      window.history.replaceState({}, document.title, "/");
-    });
-  }
-}, []);
-
+    const interval = setInterval(() => {
+      setCurrentCard((prev) => (prev + 1) % cardData.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col">
+    <section className="relative overflow-hidden bg-brand-offwhite py-16 md:py-20 min-h-screen flex items-center">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-red/5 via-transparent to-brand-red/5 animate-gradient-x" />
+      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_0%,rgba(232,50,10,0.03)_100%)]" />
+      
+      {/* Floating abstract shapes */}
+      <motion.div
+        variants={float}
+        initial="hidden"
+        animate="visible"
+        className="absolute top-1/4 left-[5%] w-64 h-64 bg-brand-red/5 rounded-full blur-3xl"
+      />
+      <motion.div
+        variants={float}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.5 }}
+        className="absolute bottom-1/4 right-[5%] w-96 h-96 bg-brand-navy/5 rounded-full blur-3xl"
+      />
+      
+      {/* Animated particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-brand-red/30 rounded-full"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{
+              opacity: [0, 0.5, 0],
+              scale: [0, 1, 0],
+              x: [0, (Math.random() - 0.5) * 200],
+              y: [0, (Math.random() - 0.5) * 200],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+            }}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
 
-      <main className="flex-1">
-        
-{/* --- 1. HERO SECTION (Unified with Framer Motion) --- */}
-<motion.section 
-  className="relative overflow-hidden pb-10 md:pb-12 flex flex-col items-center justify-center selection:bg-slate-200 selection:text-slate-900 border-b border-slate-200/60"
-  // remove pt-28 md:pt-32
-  initial="hidden"
-  animate="visible"
-  variants={staggerContainer}
->
-          {/* Background Elements */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-slate-400/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="relative max-w-6xl mx-auto px-6 w-full">
+        <div className="flex flex-col lg:flex-row items-center gap-12">
+          {/* Left Column: Text */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="flex-1 text-center lg:text-left space-y-6"
+          >
+            <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-full px-4 py-2 shadow-sm mx-auto lg:mx-0">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-700">
+                New: Email & Slack distribution
+              </span>
+            </div>
 
-          <div className="relative max-w-5xl mx-auto px-6 text-center z-10 w-full">
-            {/* <motion.div variants={fadeUp} className="flex justify-center mb-5">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-widest text-slate-700">
-                  New: Multi-platform content campaigns
-                </span>
-              </div>
-            </motion.div> */}
-
-            <motion.div variants={fadeUp} className="flex flex-col items-center justify-center mb-4 gap-1">
-              <div className="overflow-hidden pb-1 px-4">
-<h1 className="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 mb-6 leading-[1.1] uppercase">
-            <span className="block uppercase">The intelligent</span>
-            <span className="block text-indigo-600 uppercase">content engine for technical creators</span>
-          </h1>
-              </div>
-
-            </motion.div>
-
-            <motion.div variants={fadeUp}>
-              {/* Bullet points */}
-              <div className="flex flex-wrap justify-center gap-4 mb-4 text-sm font-medium text-slate-700">
-                <span className="flex items-center gap-1">✅ No prompt engineering – just drop raw notes</span>
-                <span className="flex items-center gap-1">✅ Generates X, LinkedIn, Discord drafts in your voice</span>
-                <span className="flex items-center gap-1">✅ Works with URLs, PDFs, images, and messy text</span>
-              </div>
-<p className="mt-6 text-lg md:text-xl text-slate-600 pb-5 font-medium max-w-2xl mx-auto leading-relaxed">
-            Drop in raw notes, a URL, or a PDF. Ozigi generates platform-ready posts for X, LinkedIn, and Discord in your voice — without the AI-speak. No prompt engineering required.
-          </p>
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+<h1 className="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[1.1] text-brand-navy">              Turn raw context into <br />
+              <span className="text-brand-red relative inline-block">
+                platform‑ready content
+                <motion.span
+                  className="absolute -bottom-2 left-0 w-full h-1 bg-brand-red/30"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                />
+              </span>
+            </h1>
+            <p className="text-lg text-slate-600 max-w-lg mx-auto lg:mx-0">
+              Drop notes, URLs, or PDFs. Ozigi generates posts for X, LinkedIn, and Discord in your voice — no prompt engineering. Just your ideas.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
               <Link
                 href="/demo"
-                className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-1 active:translate-y-0 text-center"
+                className="bg-brand-navy text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-opacity-90 transition shadow-lg text-center group"
               >
-                Try the Engine Free
+                Try the live demo
+                <span className="inline-block ml-1 group-hover:translate-x-1 transition">→</span>
               </Link>
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-slate-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-1 active:translate-y-0"
+              <Link
+                href="/docs"
+                className="bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-slate-50 transition shadow-sm text-center"
               >
-                Sign Up – It’s Free
-              </button>
-            </motion.div>
-
-            {/* 🔥 Social proof */}
-            <motion.div variants={fadeUp} className="mt-10 flex justify-center">
-               <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md py-4 px-8 rounded-full border border-slate-200 shadow-lg">
-                   <div className="flex -space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm"></div>
-                      <div className="w-10 h-10 rounded-full bg-slate-300 border-2 border-white shadow-sm"></div>
-                      <div className="w-10 h-10 rounded-full bg-slate-400 border-2 border-white shadow-sm"></div>
-                      <div className="w-10 h-10 rounded-full bg-slate-900 border-2 border-white flex items-center justify-center text-xs text-white font-black tracking-tighter shadow-sm">140+</div>
-                   </div>
-                   <div className="text-left flex flex-col justify-center">
-                       <p className="text-sm font-black text-slate-900 tracking-tight leading-none mb-1">300+ Campaigns</p>
-                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Successfully generated</p>
-                   </div>
-               </div>
-            </motion.div>
-
-          </div>
-        </motion.section>
-<CompetitorCompare />
-        
-        {/* --- 2. HOW IT WORKS --- */}
-        <section id="how-it-works" className="py-16 md:py-24 bg-white border-b border-slate-200/60 relative">
-          <div className="max-w-6xl mx-auto px-6 relative z-10">
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false, amount: 0.1 }}
-              variants={fadeUp}
-              className="text-center mb-16 md:mb-20"
-            >
-              <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-slate-900 mb-4">
-                How The Engine Works
-              </h2>
-              <p className="text-slate-500 font-medium text-lg">Three steps from raw context to polished Content.</p>
-            </motion.div>
-
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false, amount: 0.1 }}
-              variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12"
-            >
-              <motion.div variants={fadeUp} className="bg-slate-50 p-8 md:p-10 rounded-[2.5rem] border border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out group cursor-default">
-                <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 flex items-center justify-center text-xl font-black text-slate-900 mb-8 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  1
-                </div>
-                <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 mb-4">Ingest Context</h3>
-                <p className="text-base text-slate-600 font-medium leading-relaxed">
-                  Paste a URL, dump unformatted meeting transcripts, or upload a PDF/image. Ozigi extracts the core narrative without you needing to summarize it first.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="bg-slate-50 p-8 md:p-10 rounded-[2.5rem] border border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out group cursor-default">
-                <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 flex items-center justify-center text-xl font-black text-slate-900 mb-8 shadow-sm group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-                  2
-                </div>
-                <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 mb-4">Apply Voice Persona</h3>
-                <p className="text-base text-slate-600 font-medium leading-relaxed">
-                  Create and save custom voice personas. The engine applies strict stylistic constraints to your selected persona, bypassing AI detection to sound exactly like you every time.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="bg-slate-50 p-8 md:p-10 rounded-[2.5rem] border border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out group cursor-default">
-                <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 flex items-center justify-center text-xl font-black text-slate-900 mb-8 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  3
-                </div>
-                <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 mb-4">Omnichannel Routing</h3>
-                <p className="text-base text-slate-600 font-medium leading-relaxed">
-                  Instantly receive structured content. Push directly to X (Twitter) via Web Intents, LinkedIn, or drop straight into your Discord server.
-                </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-
-        {/* Change 5: Social Proof / HITL Callout Block */}
-        <motion.section 
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={fadeUp}
-          className="w-full max-w-6xl mx-auto px-6 py-16"
-        >
-          <div className="rounded-[2.5rem] border border-slate-800 bg-slate-900 p-8 md:p-14 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl">
-            <div className="max-w-2xl space-y-4">
-              <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white">
-                AI handles the 90%. <br className="hidden md:block"/>You own the 10% that matters.
-              </h3>
-              <p className="text-slate-400 font-medium text-lg leading-relaxed">
-                Every generated post has an Edit button. Add the insider detail, the specific joke, the context only you know. Publish when it&apos;s yours.
-              </p>
+                Read the docs
+              </Link>
             </div>
-            <Link 
-              href="/docs#human-in-the-loop" 
-              className="whitespace-nowrap rounded-xl bg-slate-800 px-8 py-4 text-sm font-bold text-white shadow-sm hover:bg-slate-700 ring-1 ring-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-slate-500"
-            >
-              See how the Edit workflow works &rarr;
-            </Link>
-          </div>
-        </motion.section>
-
-        {/* --- 3. THE MOAT: CHAOS IN, STRATEGY OUT --- */}
-        <section className="w-full max-w-6xl mx-auto py-24 px-6">
-          <motion.div 
-            initial="hidden" 
-            whileInView="visible" 
-            viewport={{ once: true }} 
-            variants={staggerContainer}
-            className="flex flex-col items-center"
-          >
-            <motion.h2 variants={fadeUp} className="text-4xl sm:text-5xl font-black italic uppercase tracking-tighter text-slate-900 mb-16">
-              Chaos In. Strategy Out.
-            </motion.h2>
-            
-            <div className="grid md:grid-cols-2 gap-8 w-full items-stretch">
-              {/* Left: Standard AI Output */}
-              <motion.div variants={fadeUp} className="rounded-[2.5rem] border border-slate-200 bg-white p-10 flex flex-col items-center shadow-sm">
-                <div className="text-xl font-black italic uppercase tracking-tighter text-slate-400 mb-8">🤖 Standard AI Output</div>
-                
-                <div className="w-full h-full min-h-[14rem] bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 italic mb-8 border border-dashed border-slate-200 p-6 text-center text-sm font-medium leading-relaxed">
-                  "Here are 5 key takeaways from this PDF about Scaling automation. Number 1 will shock you! 🚀 In conclusion, AI is changing the landscape of development for everyone..."
-                </div>
-
-                <div className="rounded-full bg-red-50 px-4 py-1.5 text-sm font-bold text-red-600 ring-1 ring-inset ring-red-100">
-                  Sounds like a template
-                </div>
-              </motion.div>
-              
-              {/* Right: The Ozigi Engine (WITH SIDE-BY-SIDE PROOF) */}
-              <motion.div variants={fadeUp} className="rounded-[2.5rem] border border-indigo-100 bg-indigo-50/50 p-10 flex flex-col items-center shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full"></div>
-                <div className="text-xl font-black italic uppercase tracking-tighter text-indigo-600 mb-8">⚡ The Ozigi Engine</div>
-                
-                {/* Side-by-Side Proof Container */}
-                <div className="w-full h-auto min-h-[14rem] bg-white rounded-2xl flex flex-col md:flex-row items-stretch text-slate-700 mb-8 border border-indigo-100 shadow-sm overflow-hidden text-xs sm:text-sm font-medium">
-                  {/* Quality description column */}
-                  <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-indigo-50 bg-indigo-50/30 flex items-center justify-center text-center italic text-slate-500">
-                    [ Well-structured thread with your actual technical insights, pacing, and tone. No emojis or robotic conclusions. ]
-                  </div>
-                  {/* Real Post Proof column */}
-                  <div className="flex-1 p-5 flex items-center justify-start bg-white text-slate-900 leading-relaxed">
-                    <span>Scaling automation requires treating test code like production code. Poor architecture, like ignoring POM or SOLID, sinks suites faster than flaky environments. Data management is non-negotiable.</span>
-                  </div>
-                </div>
-
-                <div className="rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-bold text-emerald-600 ring-1 ring-inset ring-emerald-100">
-                  Sounds like a person
-                </div>
-              </motion.div>
+            <div className="flex flex-wrap items-center gap-6 pt-4 justify-center lg:justify-start text-slate-500">
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-brand-red">✓</span> No credit card
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-brand-red">✓</span> 5 free campaigns
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-brand-red">✓</span> 7‑day Pro trial
+              </div>
             </div>
           </motion.div>
-        </section>
 
-        {/* --- 4. VERSATILE USE CASES --- */}
-        <section className="py-24 md:py-32 bg-[#fafafa]">
-          <div className="max-w-6xl mx-auto px-6">
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false, amount: 0.1 }}
-              variants={fadeUp}
-              className="text-center mb-16 md:mb-24"
-            >
-              <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-slate-900 mb-4">
-                Built For Professionals
-              </h2>
-              <p className="text-slate-500 font-medium text-lg">An engine built to adapt to your industry.</p>
-            </motion.div>
-
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false, amount: 0.1 }}
-              variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
-            >
-              <motion.div variants={fadeUp} className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-slate-300 hover:-translate-y-2 transition-all duration-500 ease-out cursor-default">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-3">Use Case 01</h3>
-                <h4 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900 mb-4">Technical Writing</h4>
-                <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                  Turn dry API documentation, GitHub release notes, or complex architectural concepts into highly engaging X threads and LinkedIn posts without losing technical accuracy.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-slate-300 hover:-translate-y-2 transition-all duration-500 ease-out cursor-default">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-3">Use Case 02</h3>
-                <h4 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900 mb-4">Founders & Marketing</h4>
-                <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                  Convert messy product strategy documents, customer interview transcripts, or rough ideas into polished thought leadership campaigns that drive Go-To-Market outcomes.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-slate-300 hover:-translate-y-2 transition-all duration-500 ease-out cursor-default">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-3">Use Case 03</h3>
-                <h4 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900 mb-4">Digital Educators</h4>
-                <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                  Upload a PDF of your latest course curriculum or workshop slides, and let Ozigi extract the core lessons to build an automated, multi-day promotional campaign.
-                </p>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-slate-300 hover:-translate-y-2 transition-all duration-500 ease-out cursor-default">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-3">Use Case 04</h3>
-                <h4 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900 mb-4">Content Creators</h4>
-                <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                  Paste the URL of your latest YouTube video or podcast episode. The engine will instantly read the transcript and spin out native hooks and posts for your audience.
-                </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-        <section id="pricing" className="w-full max-w-7xl mx-auto py-24 px-6 scroll-mt-32">
-  <div className="text-center mb-12">
-    <h2 className="text-4xl sm:text-5xl font-black italic uppercase tracking-tighter text-slate-900">
-      Simple, transparent pricing
-    </h2>
-    <p className="mt-4 text-lg font-medium text-slate-500 max-w-2xl mx-auto">
-      No credit card required to start. Upgrade when you're ready to scale.
-    </p>
+          {/* Right Column: Vertical Slider */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="flex-1 relative flex justify-center items-center"
+          >
+            <div className="relative w-full max-w-md h-[340px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+  key={currentCard}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -30 }}
+  transition={{ duration: 0.4, ease: "easeInOut" }}
+  className="hero-card absolute inset-0 bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 overflow-y-auto"
+>
+  <div className="flex items-center gap-3 mb-4">
+    {cardData[currentCard].icon}
+    <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+      {cardData[currentCard].platform} • {cardData[currentCard].type}
+    </span>
   </div>
-<PricingCards onOpenAuthModal={() => setIsAuthModalOpen(true)} />
-  
-</section>
-      </main>
+  <div
+    className="text-sm text-slate-800 leading-relaxed"
+    dangerouslySetInnerHTML={{ __html: cardData[currentCard].content }}
+  />
+  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+    {cardData.map((_, idx) => (
+      <button
+        key={idx}
+        onClick={() => setCurrentCard(idx)}
+        className={`w-2 h-2 rounded-full transition-all ${
+          idx === currentCard ? "bg-brand-red w-4" : "bg-slate-300"
+        }`}
+        aria-label={`Go to slide ${idx + 1}`}
+      />
+    ))}
+  </div>
+</motion.div>
+              </AnimatePresence>
+            </div>
+            <div className="absolute -z-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-red/5 rounded-full blur-3xl" />
+          </motion.div>
+        </div>
+
+        {/* Social proof row - now fully visible */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mt-5 md:mt-8 flex flex-wrap justify-center gap-8 text-center"
+        >
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-left">
+              <div className="text-2xl font-black text-brand-navy">300+</div>
+              <div className="text-xs uppercase tracking-widest text-slate-500">campaigns generated</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <div className="text-left">
+              <div className="text-2xl font-black text-brand-navy">50+</div>
+              <div className="text-xs uppercase tracking-widest text-slate-500">active creators</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-left">
+              <div className="text-2xl font-black text-brand-navy">20s</div>
+              <div className="text-xs uppercase tracking-widest text-slate-500">average generation time</div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
       {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
-    </div>
+    </section>
   );
 }

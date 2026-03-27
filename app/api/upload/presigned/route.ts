@@ -17,6 +17,10 @@ export async function POST(request: Request) {
     const { filename, contentType } = await request.json();
     const uniqueKey = `assets/${Date.now()}-${filename.replace(/\s+/g, '-')}`;
 
+        console.log("Generating signed URL for:", uniqueKey);
+    console.log("R2_ENDPOINT:", process.env.R2_ENDPOINT);
+    console.log("R2_BUCKET_NAME:", process.env.R2_BUCKET_NAME);
+
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
       Key: uniqueKey,
@@ -28,7 +32,7 @@ export async function POST(request: Request) {
 
     
     const publicDomain = process.env.NEXT_PUBLIC_R2_DOMAIN || process.env.R2_ENDPOINT;
-    const publicUrl = `${publicDomain}/${process.env.R2_BUCKET_NAME}/${uniqueKey}`;
+const publicUrl = `${publicDomain}/${uniqueKey}`;
 
     return NextResponse.json({ signedUrl, publicUrl });
   } catch (error) {

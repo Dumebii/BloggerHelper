@@ -1,19 +1,21 @@
 "use client";
-import { useState } from "react";
-import DynamicLoader from "@/components/DynamicLoader";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Paperclip, ChevronDown, ArrowLeftRight, X } from "lucide-react";
 import SkeletonGrid from "./SkeletonGrid";
 import { uploadLargeAsset } from "@/lib/utils";
 
 interface DistilleryProps {
   session?: any;
-  userPersonas?: { id: string; name: string }[];
+  userPersonas?: { id: string; name: string; prompt?: string }[];
   onOpenSettings?: () => void;
   inputs: {
     url: string;
     text: string;
     files: File[];
-    fileUrls: string[]; // Tracks the R2 public links
+    fileUrls: string[];
     platforms: string[];
+    campaignName?: string;
     tweetFormat: "single" | "thread";
     additionalInfo?: string;
     personaId?: string;
@@ -23,7 +25,14 @@ interface DistilleryProps {
   loading: boolean;
 }
 
-type Tab = "text" | "link" | "file";
+// Platform definitions
+const ALL_PLATFORMS = [
+  { id: "x", shortLabel: "X", fullName: "X (Twitter)", tooltip: "Opens tweet intent in new tab" },
+  { id: "linkedin", shortLabel: "LI", fullName: "LinkedIn", tooltip: "Direct OAuth post with image support" },
+  { id: "discord", shortLabel: "DC", fullName: "Discord", tooltip: "Send via webhook (configure in Settings)" },
+  { id: "slack", shortLabel: "SL", fullName: "Slack", tooltip: "Send via webhook (configure in Settings)" },
+  { id: "email", shortLabel: "EM", fullName: "Email", tooltip: "Send newsletter to your subscribers" },
+];
 
 export default function Distillery({
   session,
@@ -34,61 +43,94 @@ export default function Distillery({
   onGenerate,
   loading,
 }: DistilleryProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("link");
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [isUploading, setIsUploading] = useState(false); // Local upload state
+  const [fileUploadOpen, setFileUploadOpen] = useState(false);
+  const [personaPopoverOpen, setPersonaPopoverOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const personaPopoverRef = useRef<HTMLDivElement>(null);
 
-  const handlePersonaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (value === "create_new") {
-      if (onOpenSettings) onOpenSettings();
-      setInputs({ ...inputs, personaId: "default" });
-    } else {
-      setInputs({ ...inputs, personaId: value });
-    }
-  };
-
-// 🚀 UPDATED: Handle selection + R2 Upload
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      
-      // Instantly show the files in the UI queue
-      setInputs({ ...inputs, files: [...inputs.files, ...newFiles] });
-      
-      // Lock the generate button and start uploading
-      setIsUploading(true);
-      try {
-        // Upload all selected files concurrently
-        const uploadPromises = newFiles.map(file => uploadLargeAsset(file));
-        const newUrls = await Promise.all(uploadPromises);
-        
-        // Save the resulting R2 URLs to our state
-        setInputs((prev: any) => ({ 
-          ...prev, 
-          fileUrls: [...(prev.fileUrls || []), ...newUrls] 
-        }));
-      } catch (error) {
-        console.error("R2 Upload error:", error);
-        alert("Failed to upload some files to storage. Please try again.");
-      } finally {
-        setIsUploading(false);
+  // Close persona popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (personaPopoverRef.current && !personaPopoverRef.current.contains(event.target as Node)) {
+        setPersonaPopoverOpen(false);
       }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleFileUpload = async (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    if (newFiles.length === 0) return;
+
+    setInputs({ ...inputs, files: [...inputs.files, ...newFiles] });
+    setIsUploading(true);
+    try {
+      const uploadPromises = newFiles.map(file => uploadLargeAsset(file));
+      const newUrls = await Promise.all(uploadPromises);
+      setInputs((prev: any) => ({ 
+        ...prev, 
+        fileUrls: [...(prev.fileUrls || []), ...newUrls] 
+      }));
+    } catch (error) {
+      console.error("R2 Upload error:", error);
+      alert("Failed to upload some files to storage. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
-const removeFile = (index: number) => {
+  const removeFile = (index: number) => {
     const updatedFiles = inputs.files.filter((_, i) => i !== index);
     const updatedUrls = inputs.fileUrls.filter((_, i) => i !== index);
     setInputs({ ...inputs, files: updatedFiles, fileUrls: updatedUrls });
   };
 
-  const togglePlatform = (platform: string) => {
-    const active = inputs.platforms.includes(platform);
+  const togglePlatform = (platformId: string) => {
+    const active = inputs.platforms.includes(platformId);
     if (active) {
-      setInputs({ ...inputs, platforms: inputs.platforms.filter(p => p !== platform) });
+      setInputs({ ...inputs, platforms: inputs.platforms.filter(p => p !== platformId) });
     } else {
-      setInputs({ ...inputs, platforms: [...inputs.platforms, platform] });
+      setInputs({ ...inputs, platforms: [...inputs.platforms, platformId] });
+    }
+  };
+
+  const handlePersonaSelect = (personaId: string) => {
+    if (personaId === "create_new") {
+      if (onOpenSettings) onOpenSettings();
+    } else {
+      setInputs({ ...inputs, personaId });
+    }
+    setPersonaPopoverOpen(false);
+  };
+
+  // Get selected persona name for display
+  const selectedPersona = inputs.personaId === "default"
+    ? "Default"
+    : userPersonas.find(p => p.id === inputs.personaId)?.name || "Default";
+
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (e.dataTransfer.files) {
+      handleFileUpload(e.dataTransfer.files);
     }
   };
 
@@ -101,272 +143,236 @@ const removeFile = (index: number) => {
   }
 
   return (
-<section className="flex flex-col gap-6 p-2 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
-        {/* Tab Navigation */}
-      <div className="flex p-2 bg-slate-50 rounded-[2rem] gap-1">
-        {(["link", "text", "file"] as Tab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all ${
-              activeTab === tab
-                ? "bg-white text-red-700 shadow-sm border border-slate-200"
-                : "text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            {tab === "link" && "🔗 URL"}
-            {tab === "text" && "📝 Notes"}
-            {tab === "file" && "📎 Files"}
-          </button>
-        ))}
-      </div>
-
-      <div className="px-4 pb-4">
-        {/* LINK TAB */}
-        {activeTab === "link" && (
-          <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex items-center bg-slate-50 rounded-2xl px-5 py-4 border border-slate-200 group focus-within:border-red-500/50 transition-colors">
-              <input
-                className="flex-1 outline-none text-slate-900 text-sm font-bold bg-transparent"
-                placeholder="Paste an article or blog post URL..."
-                value={inputs.url}
-                onChange={(e) => setInputs({ ...inputs, url: e.target.value })}
-              />
-            </div>
-            {!inputs.url && (
-              <div className="flex flex-wrap items-center gap-3 mt-1 px-2 text-[10px] font-black uppercase tracking-widest">
-                <span className="text-slate-400">Examples:</span>
-                <button
-                  onClick={() =>
-                    setInputs({
-                      ...inputs,
-                      url: "https://dev.to/dumebii/ozigi-v2-changelog-building-a-modular-agentic-content-engine-with-nextjs-supabase-and-playwright-59mo",
-                    })
-                  }
-                  className="text-slate-500 hover:text-red-600 transition-colors text-left"
-                >
-                  Ozigi V2
-                </button>
-                <span className="text-slate-300">•</span>
-                <button
-                  onClick={() =>
-                    setInputs({
-                      ...inputs,
-                      url: "https://currents.dev/posts/how-to-debug-playwright-tests-in-ci",
-                    })
-                  }
-                  className="text-slate-500 hover:text-red-600 transition-colors text-left"
-                >
-                  Playwright CI
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TEXT TAB */}
-        {activeTab === "text" && (
-          <div className="flex items-start bg-slate-50 rounded-2xl px-5 py-4 border border-slate-200 group focus-within:border-red-500/50 transition-colors animate-in fade-in slide-in-from-bottom-2">
+    <section className="flex flex-col gap-6 p-2 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
+      <div className="px-4 pt-5 pb-4">
+        <div className="space-y-6">
+          {/* Text input area */}
+          <div>
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">
+              Paste URL, notes, or raw context
+            </label>
             <textarea
-              className="flex-1 outline-none text-slate-900 text-sm font-medium bg-transparent min-h-[160px] resize-none"
-              placeholder="Paste your raw thoughts, meeting transcripts, or rough drafts here..."
+              data-tour="distillery-textarea"
+              className="w-full bg-slate-50 rounded-xl px-5 py-4 border border-slate-200 focus:border-brand-red/50 transition-colors text-sm font-medium text-slate-900 min-h-[120px] resize-y"
+              placeholder="Paste a URL, meeting notes, or any text context here..."
               value={inputs.text}
               onChange={(e) => setInputs({ ...inputs, text: e.target.value })}
             />
           </div>
-        )}
 
-        {/* FILE TAB */}
-        {activeTab === "file" && (
-          <div className="flex flex-col animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-8 border-2 border-dashed border-slate-200 group hover:border-red-500/50 transition-all cursor-pointer">
-              <span className="text-3xl mb-3">📁</span>
-              <p className="text-sm font-bold text-slate-900 mb-1">
-                Upload Reference Datasets
-              </p>
-              <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
-                Support for PDFs, TXTs, CSVs, Images, Videos, Audio...up to 100MB!
-              </p>
-              <input
-                type="file"
-                className="hidden"
-                id="file-upload"
-                multiple
-                accept=".pdf,.txt,.csv,image/*,video/*, audio/*"
-                onChange={handleFileChange}
-              />
-              <label
-                htmlFor="file-upload"
-                className="mt-4 px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 cursor-pointer"
-              >
-                Add Files
-              </label>
-            </div>
-            {inputs.files.length > 0 && (
-              <ul className="mt-4 space-y-2">
-                {inputs.files.map((file, idx) => (
-                  <li
-                    key={idx}
-                    className="flex justify-between items-center p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-                  >
-                    <span className="truncate">{file.name}</span>
-                    <button
-                      onClick={() => removeFile(idx)}
-                      className="text-red-500 hover:text-red-700 font-bold ml-4"
-                    >
-                      ✕
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+          {/* File upload toggle link */}
+          <div>
+            <button
+              onClick={() => setFileUploadOpen(!fileUploadOpen)}
+              className="text-xs text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
+            >
+              <Paperclip size={12} />
+              {fileUploadOpen ? "Remove attachment" : "Attach a file (PDF, image, video, audio)"}
+            </button>
           </div>
-        )}
 
-        {/* Platform selector – always visible */}
-<div className="mt-6">
-  <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 block">
-    Target Platforms (click to exclude)
-  </label>
-  <div className="flex gap-2 flex-wrap">
-    {["x", "linkedin", "discord", "email"].map((platform) => (
-      <div key={platform} className="relative group">
-        <button
-          onClick={() => togglePlatform(platform)}
-          className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-            inputs.platforms.includes(platform)
-              ? "bg-slate-900 text-white"
-              : "bg-white text-slate-400 border border-slate-200"
-          }`}
-        >
-          {platform === "x" ? "X" : platform.charAt(0).toUpperCase() + platform.slice(1)}
-        </button>
-        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50 shadow-lg">
-          {platform === "x" && "Opens tweet intent in new tab"}
-          {platform === "linkedin" && "Direct OAuth post with image support"}
-          {platform === "discord" && "Send via webhook (configure in Settings)"}
-          {platform === "email" && "Send newsletter to your subscribers"}
-        </span>
-      </div>
-    ))}
-  </div>
-  <p className="text-[8px] text-slate-400 mt-2">
-    Selected platforms will appear in the distribution grid. Uncheck any you don't need.
-  </p>
-</div>
-
-        {/* Advanced toggle */}
-        <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="w-full mt-6 py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200"
-        >
-          {showAdvanced
-            ? "Hide Advanced Options ⬆"
-            : "⚙️ Advanced Options (Personas, Directives, Format) ⬇"}
-        </button>
-
-        {/* Advanced panel (now without platforms) */}
-        {showAdvanced && (
-          <div className="mt-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-200 animate-in fade-in slide-in-from-top-2 flex flex-col gap-6">
-            {/* Persona selector */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-1">
-                  🗣️ Voice or Persona
-                </h4>
-              </div>
-              {!session ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-100 whitespace-nowrap">
-                    🔒 Sign in to unlock
-                  </span>
+          {/* File upload dropzone (collapsible) */}
+          <AnimatePresence>
+            {fileUploadOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                <div
+                  data-tour="file-upload-zone"
+                  ref={dropZoneRef}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  className={`relative flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-8 border-2 border-dashed transition-all ${
+                    isDragOver ? "border-brand-red bg-brand-red/5" : "border-slate-200"
+                  }`}
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    multiple
+                    accept=".pdf,.txt,.csv,image/*,video/*,audio/*"
+                    onChange={(e) => handleFileUpload(e.target.files)}
+                  />
+                  <span className="text-3xl mb-3">📁</span>
+                  <p className="text-sm font-bold text-slate-900 mb-1">
+                    Drop files here or click to upload
+                  </p>
+                  <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-4">
+                    PDFs, images, videos, audio – up to 100MB
+                  </p>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition"
+                  >
+                    Browse Files
+                  </button>
                 </div>
-              ) : (
-                (() => {
-                  const isValidPersona =
-                    inputs.personaId === "default" ||
-                    userPersonas.some((p) => p.id === inputs.personaId);
-                  const safePersonaId = isValidPersona ? inputs.personaId : "default";
-                  return (
-                    <select
-                      value={safePersonaId}
-                      onChange={handlePersonaChange}
-                      className="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none cursor-pointer hover:border-slate-300"
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* File list */}
+          {inputs.files.length > 0 && (
+            <ul className="space-y-2">
+              {inputs.files.map((file, idx) => (
+                <li key={idx} className="flex justify-between items-center p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700">
+                  <span className="truncate flex-1">{file.name}</span>
+                  <button onClick={() => removeFile(idx)} className="text-red-500 hover:text-red-700 font-bold ml-4">
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Config row: Persona + Platforms + X Format */}
+          <div className="flex items-center gap-4 flex-wrap py-2 border-t border-b border-slate-100">
+            {/* Persona selector */}
+            <div className="relative" ref={personaPopoverRef} data-tour="persona-selector">
+              <button
+                onClick={() => setPersonaPopoverOpen(!personaPopoverOpen)}
+                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                <span className="text-slate-400 uppercase tracking-widest text-[10px] font-bold">Persona</span>
+                <span className="font-medium text-slate-800">{selectedPersona}</span>
+                <ChevronDown size={12} />
+              </button>
+              {personaPopoverOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 min-w-48 py-1">
+                  <button
+                    onClick={() => handlePersonaSelect("default")}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    Default
+                  </button>
+                  {userPersonas.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => handlePersonaSelect(p.id)}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                     >
-                      <option value="default">Default Persona</option>
-                      {userPersonas.length > 0 && (
-                        <optgroup label="Your Saved Voices">
-                          {userPersonas.map((persona) => (
-                            <option key={persona.id} value={persona.id}>
-                              {persona.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                      <option value="create_new" className="font-black text-red-600">
-                        {userPersonas.length > 0 ? "⚙️ Manage Personas" : "+ Create New Persona"}
-                      </option>
-                    </select>
-                  );
-                })()
+                      {p.name}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handlePersonaSelect("create_new")}
+                    className="w-full text-left px-4 py-2 text-sm text-brand-red font-bold hover:bg-slate-50 transition-colors border-t border-slate-100 mt-1"
+                  >
+                    + Create New Persona
+                  </button>
+                </div>
               )}
             </div>
 
-            {/* Directives */}
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 flex items-center gap-2">
-                Campaign Directives
-              </label>
-              <input
-                type="text"
-                value={inputs.additionalInfo || ""}
-                onChange={(e) =>
-                  setInputs({ ...inputs, additionalInfo: e.target.value })
-                }
-                placeholder="e.g., Target junior devs. (No tone instructions here)"
-                className="w-full text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-slate-400 transition-colors"
-              />
+            <span className="text-slate-200 text-sm">|</span>
+
+            {/* Platforms inline multi-select */}
+            <div className="flex items-center gap-1.5 flex-wrap" data-tour="platform-selector">
+              <span className="text-slate-400 uppercase tracking-widest text-[10px] font-bold">Platforms</span>
+              {ALL_PLATFORMS.map((platform) => {
+                const isActive = inputs.platforms.includes(platform.id);
+                return (
+                  <div key={platform.id} className="relative group">
+                    <button
+                      onClick={() => togglePlatform(platform.id)}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+                        isActive
+                          ? "bg-brand-navy text-white border-brand-navy"
+                          : "bg-white text-slate-400 border-slate-200 line-through"
+                      }`}
+                    >
+                      {platform.shortLabel}
+                    </button>
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 shadow-lg">
+                      {platform.tooltip}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* X Format Toggle */}
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 block">
-                X (Twitter) Format
-              </label>
-              <div className="flex bg-white p-1 rounded-xl border border-slate-200">
-                <button
-                  onClick={() => setInputs({ ...inputs, tweetFormat: "single" })}
-                  className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                    inputs.tweetFormat === "single"
-                      ? "bg-slate-100 text-slate-900 shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-                >
-                  Single Tweet
-                </button>
-                <button
-                  onClick={() => setInputs({ ...inputs, tweetFormat: "thread" })}
-                  className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                    inputs.tweetFormat === "thread"
-                      ? "bg-slate-100 text-slate-900 shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-                >
-                  Full Thread
-                </button>
-              </div>
+            <span className="text-slate-200 text-sm">|</span>
+
+            {/* X format inline toggle */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400 uppercase tracking-widest text-[10px] font-bold">X</span>
+              <button
+                onClick={() => setInputs({ ...inputs, tweetFormat: inputs.tweetFormat === "single" ? "thread" : "single" })}
+                className="flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors"
+              >
+                {inputs.tweetFormat === "single" ? "Single tweet" : "Full thread"}
+                <ArrowLeftRight size={10} className="text-slate-400" />
+              </button>
             </div>
           </div>
-        )}
 
-{/* Generate button */}
-        <button
-          onClick={onGenerate}
-          disabled={!inputs.url && !inputs.text && inputs.files.length === 0 || isUploading}
-          className="w-full mt-6 bg-red-700 text-white py-6 rounded-[1.8rem] font-black uppercase tracking-widest hover:bg-red-800 transition-all disabled:bg-slate-200 disabled:text-slate-400 shadow-xl shadow-red-900/10 active:scale-[0.98]"
-        >
-          {isUploading ? "Uploading Assets to R2... ⏳" : "Generate Campaign ⚡"}
-        </button>
+          {/* Generate button */}
+          <button
+            data-tour="generate-button"
+            onClick={onGenerate}
+            disabled={(!inputs.text && inputs.files.length === 0) || isUploading}
+            className="w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all
+              bg-brand-red text-white hover:bg-[#C5280A] active:scale-[0.99]
+              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-brand-red"
+          >
+            {isUploading ? "Uploading Assets to R2... ⏳" : "Generate Campaign ⚡"}
+          </button>
+
+          {/* Advanced directives toggle (below button) */}
+          <div className="text-center">
+            <button
+              data-tour="advanced-toggle"
+              onClick={() => setAdvancedOpen(!advancedOpen)}
+              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              ⚙ Advanced directives {advancedOpen ? "▲" : "▼"}
+            </button>
+            <AnimatePresence>
+              {advancedOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="mt-4"
+                >
+                  {/* Campaign Directives */}
+                  <div className="mt-2 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-200">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 flex items-center gap-2">
+                      Campaign Directives
+                    </label>
+                    <input
+                      type="text"
+                      value={inputs.additionalInfo || ""}
+                      onChange={(e) => setInputs({ ...inputs, additionalInfo: e.target.value })}
+                      placeholder="e.g., Target junior devs. (No tone instructions here)"
+                      className="w-full text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-slate-400 transition-colors"
+                    />
+                  </div>
+                  {/* Campaign Name */}
+                  <div className="mt-4">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2 flex items-center gap-2">
+                      Campaign Name (optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={inputs.campaignName || ""}
+                      onChange={(e) => setInputs({ ...inputs, campaignName: e.target.value })}
+                      placeholder="e.g., Product Launch Week"
+                      className="w-full text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-slate-400 transition-colors"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </section>
   );

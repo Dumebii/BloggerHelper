@@ -73,7 +73,7 @@ export default function ScheduleModal({
           ×
         </button>
 
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 mb-2">
+        <h2 className="text-2xl font-black italic uppercase tracking-tighter text-brand-red mb-2">
           Schedule Post
         </h2>
         <p className="text-slate-500 text-sm font-medium mb-6">

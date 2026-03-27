@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     const customerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer';
 
     // Use Dodo API (REST)
-    const response = await fetch('https://live.dodopayments.com', {
+    const response = await fetch('https://live.dodopayments.com/checkouts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

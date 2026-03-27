@@ -59,7 +59,7 @@ export default function PersonasManager({ session }: PersonasManagerProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Your Personas</h2>
+        <h2 className="text-2xl font-black italic text-brand-red uppercase tracking-tighter mb-2">Your Personas</h2>
         <p className="text-slate-500 text-sm">Create and manage custom voices for your campaigns.</p>
       </div>
 
@@ -72,17 +72,17 @@ export default function PersonasManager({ session }: PersonasManagerProps) {
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
-              placeholder="e.g., Snarky DevRel"
+              className="w-full bg-slate-950 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
+              placeholder="e.g., Expert DevRel"
             />
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">System Prompt</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Persona Details</label>
             <textarea
               value={newPrompt}
               onChange={(e) => setNewPrompt(e.target.value)}
               rows={4}
-              className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
+              className="w-full bg-slate-950 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
               placeholder="You are a developer educator who hates corporate buzzwords..."
             />
           </div>

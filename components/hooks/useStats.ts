@@ -1,48 +1,58 @@
-"use clienrt";
-import { useState, useEffect } from "react";
+"use client";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 
 export function useStats(userId?: string) {
   const [stats, setStats] = useState({ campaignsGenerated: 0, scheduledCount: 0, personasSaved: 0 });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!userId) {
       setIsLoadingStats(false);
       return;
     }
-    try {
-      const [statsRes, scheduledRes] = await Promise.all([
-        supabase
-          .from("user_stats")
-          .select("campaigns_generated, posts_published, personas_saved")
-          .eq("user_id", userId)
-          .single(),
-        supabase
-          .from("scheduled_posts")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("status", "pending"),
-      ]);
 
-      if (statsRes.data) {
-        setStats({
-          campaignsGenerated: statsRes.data.campaigns_generated || 0,
-          scheduledCount: scheduledRes.count || 0,
-          personasSaved: statsRes.data.personas_saved || 0,
-        });
-      }
+    try {
+      const { data: statsData, error: statsError } = await supabase
+        .from("user_stats")
+        .select("campaigns_generated")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (statsError) console.error("Stats error:", statsError);
+
+      const { count: scheduledCount, error: scheduledError } = await supabase
+        .from("scheduled_posts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", "pending");
+      if (scheduledError) console.error("Scheduled error:", scheduledError);
+
+      const { count: personasCount, error: personasError } = await supabase
+        .from("user_personas")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+      if (personasError) console.error("Personas error:", personasError);
+
+      setStats({
+        campaignsGenerated: statsData?.campaigns_generated || 0,
+        scheduledCount: scheduledCount || 0,
+        personasSaved: personasCount || 0,
+      });
     } catch (e) {
       console.error("Failed to fetch stats", e);
+    } finally {
+      setIsLoadingStats(false);
     }
-    setIsLoadingStats(false);
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchStats();
-  }, [userId]);
+  }, [fetchStats]);
 
-  const refreshStats = () => fetchStats();
+  const refreshStats = useCallback(() => {
+    setIsLoadingStats(true);
+    fetchStats();
+  }, [fetchStats]);
 
   return { stats, isLoadingStats, refreshStats };
 }

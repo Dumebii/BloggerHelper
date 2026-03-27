@@ -1,11 +1,10 @@
-// app/api/post-discord/route.ts
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
   try {
     // Destructure all expected fields
-    const { content, webhookUrl: providedWebhook, userId: providedUserId, username, avatar_url } = await req.json();
+    const { content, webhookUrl: providedWebhook, userId: providedUserId, username, avatar_url, imageUrl } = await req.json();
 
     // Determine webhook URL
     let webhookUrl = providedWebhook;
@@ -55,6 +54,9 @@ export async function POST(req: Request) {
     const payload: any = { content };
     if (username) payload.username = username;
     if (avatar_url) payload.avatar_url = avatar_url;
+        if (imageUrl) {
+      payload.embeds = [{ image: { url: imageUrl } }];
+    }
 
     // Send to Discord
     const response = await fetch(parsedUrl.toString(), {

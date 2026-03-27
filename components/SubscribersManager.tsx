@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
+import Papa from "papaparse";
 import { supabase } from "@/lib/supabase/client";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 
 interface SubscribersManagerProps {
   session: any;
   onOpenUpgradeModal?: () => void;
-
 }
 
 export default function SubscribersManager({ session, onOpenUpgradeModal }: SubscribersManagerProps) {
@@ -14,9 +14,8 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
   const [newEmails, setNewEmails] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploadingCSV, setIsUploadingCSV] = useState(false);
   const { planStatus, loading: planLoading } = usePlanStatus();
-const subscriberLimit = planStatus?.emailSendsLimit === -1 ? "unlimited" : planStatus?.emailSendsLimit;
-
 
   useEffect(() => {
     fetchSubscribers();
@@ -44,6 +43,12 @@ const subscriberLimit = planStatus?.emailSendsLimit === -1 ? "unlimited" : planS
       .filter(e => e.length > 0 && e.includes('@'));
 
     if (emailList.length === 0) return;
+
+    // Check per-upload limit for Team plan
+    if (planStatus?.plan === 'team' && emailList.length > 500) {
+      alert("Team plan allows maximum 500 emails per CSV upload. Upgrade to Organization for unlimited uploads.");
+      return;
+    }
 
     setIsAdding(true);
     try {
@@ -79,21 +84,78 @@ const subscriberLimit = planStatus?.emailSendsLimit === -1 ? "unlimited" : planS
       console.error("Error deleting subscriber", error);
     }
   };
- 
+
+  const handleCSVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingCSV(true);
+    Papa.parse(file, {
+      header: false,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        // Extract emails – assume first column is email
+        const emails: string[] = [];
+        for (const row of results.data as any[]) {
+          const email = row[0]?.trim();
+          if (email && email.includes('@')) {
+            emails.push(email);
+          }
+        }
+
+        if (emails.length === 0) {
+          alert("No valid emails found in CSV.");
+          setIsUploadingCSV(false);
+          return;
+        }
+
+        // Check per-upload limit for Team plan
+        if (planStatus?.plan === 'team' && emails.length > 500) {
+          alert("Team plan allows maximum 500 emails per CSV upload. Upgrade to Organization for unlimited uploads.");
+          setIsUploadingCSV(false);
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/subscribers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emails }),
+          });
+          if (res.ok) {
+            await fetchSubscribers();
+            alert(`Successfully added ${emails.length} subscribers.`);
+          } else {
+            const data = await res.json();
+            alert(`Failed to add: ${data.error}`);
+          }
+        } catch (error) {
+          console.error("Error adding subscribers via CSV", error);
+          alert("Failed to upload CSV.");
+        } finally {
+          setIsUploadingCSV(false);
+          // Clear file input
+          event.target.value = '';
+        }
+      },
+      error: (error) => {
+        console.error("CSV parsing error:", error);
+        alert("Failed to parse CSV file.");
+        setIsUploadingCSV(false);
+      },
+    });
+  };
+
+  const subscriberLimit = planStatus?.emailSendsLimit === -1 ? "unlimited" : planStatus?.emailSendsLimit;
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Email Subscribers</h2>
+        <h2 className="text-2xl font-black italic uppercase text-brand-red tracking-tighter mb-2">Email Subscribers</h2>
         <p className="text-slate-500 text-sm">Manage your email list. Subscribers will receive your generated newsletters.</p>
       </div>
-      {planStatus?.emailSendsLimit !== -1 && (
-  <p className="text-xs text-slate-500 mt-4">
-    Your plan includes up to {subscriberLimit} subscribers. Upgrade for unlimited.
-  </p>
-)}
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-6">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">
           Add emails (one per line)
         </label>
@@ -104,13 +166,28 @@ const subscriberLimit = planStatus?.emailSendsLimit === -1 ? "unlimited" : planS
           value={newEmails}
           onChange={(e) => setNewEmails(e.target.value)}
         />
-        <button
-          onClick={handleAddSubscribers}
-          disabled={isAdding || !newEmails.trim()}
-          className="mt-3 bg-indigo-600 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-colors disabled:opacity-50"
-        >
-          {isAdding ? "Adding..." : "Add Emails"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleAddSubscribers}
+            disabled={isAdding || !newEmails.trim()}
+            className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            {isAdding ? "Adding..." : "Add Emails"}
+          </button>
+          <label className="cursor-pointer bg-slate-100 text-slate-700 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-colors">
+            {isUploadingCSV ? "Uploading..." : "📁 Upload CSV"}
+            <input
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={handleCSVUpload}
+              disabled={isUploadingCSV}
+            />
+          </label>
+        </div>
+        <p className="text-[10px] text-slate-400">
+          CSV file should have one email per row (first column). Team plan: max 500 emails per upload. Upgrade for unlimited.
+        </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
@@ -145,6 +222,11 @@ const subscriberLimit = planStatus?.emailSendsLimit === -1 ? "unlimited" : planS
               </li>
             ))}
           </ul>
+        )}
+        {planStatus?.plan !== 'organization' && (
+          <p className="text-xs text-slate-500 mt-4">
+            Your plan includes up to {subscriberLimit} subscribers. Upgrade for unlimited.
+          </p>
         )}
       </div>
     </div>

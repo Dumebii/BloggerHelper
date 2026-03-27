@@ -42,10 +42,10 @@ export default function ScheduleEmailModal({ isOpen, onClose, onSchedule }: Sche
         >
           ✕
         </button>
-        <h3 className="text-lg font-black mb-4">Schedule Newsletter</h3>
+        <h3 className="text-lg font-black text-brand-red mb-4">Schedule Newsletter</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
+            <label className="block text-xs text-brand-navy font-bold uppercase text-slate-400 mb-2">
               Date & Time (your local time)
             </label>
             <input
@@ -54,7 +54,7 @@ export default function ScheduleEmailModal({ isOpen, onClose, onSchedule }: Sche
               onChange={(e) => setDatetime(e.target.value)}
               min={minDateTime}
               required
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+              className="w-full border border-slate-200 text-brand-navy rounded-xl px-3 py-2 text-sm"
             />
           </div>
           <button

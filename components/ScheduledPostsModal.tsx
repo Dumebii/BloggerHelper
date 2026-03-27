@@ -58,6 +58,8 @@ export default function ScheduledPostsModal({ onClose, onStatsChange }: Schedule
     setCancelling(null);
   };
 
+  
+
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-6">
       <div className="bg-white w-full max-w-3xl rounded-3xl p-8 shadow-2xl border-4 border-slate-900 relative max-h-[80vh] flex flex-col">
@@ -68,7 +70,7 @@ export default function ScheduledPostsModal({ onClose, onStatsChange }: Schedule
           ×
         </button>
 
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-6">
+        <h2 className="text-2xl font-black italic text-brand-red uppercase tracking-tighter mb-6">
           Scheduled Posts
         </h2>
 
