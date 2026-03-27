@@ -145,14 +145,14 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
     </div>
   )}
 </div>
-<a
+
+<Link
   href={process.env.NEXT_PUBLIC_CALENDLY_URL || "mailto:hello@ozigi.app"}
   target="_blank"
   rel="noopener noreferrer"
-  className="hidden md:block text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors px-4 py-2"
->
+className="text-sm font-semibold text-slate-600 hover:text-brand-red transition">
   Contact Sales
-</a>
+</Link>
               </nav>
             )}
 
