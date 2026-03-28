@@ -27,11 +27,6 @@ const staggerContainer: Variants = {
   },
 };
 
-const scaleOnHover = {
-  whileHover: { scale: 1.02, transition: { duration: 0.2 } },
-  whileTap: { scale: 0.98 },
-};
-
 export default function Home() {
   const [session, setSession] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -47,13 +42,13 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-brand-offwhite font-sans text-slate-900 min-h-screen flex flex-col">
+    <div className="bg-brand-offwhite font-sans text-slate-900 min-h-screen flex flex-col overflow-hidden">
       <Header session={session} onSignIn={() => setIsAuthModalOpen(true)} />
       <main className="flex-1">
         <Hero />
 
         {/* How It Works */}
-        <section id="how-it-works" className="py-20 md:py-28 bg-white border-b border-slate-200/60 relative overflow-hidden">
+        <section className="py-20 md:py-28 bg-white border-b border-slate-200/60 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-brand-offwhite via-transparent to-transparent opacity-40" />
           <div className="relative max-w-6xl mx-auto px-6 z-10">
             <motion.div
@@ -99,7 +94,7 @@ export default function Home() {
                   key={idx}
                   variants={fadeUp}
                   whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-100 p-8 md:p-10 group"
+                  className="bg-white rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-100 p-6 md:p-10 group"
                 >
                   <div className="w-14 h-14 bg-gradient-to-br from-brand-red/10 to-brand-navy/10 rounded-2xl flex items-center justify-center text-2xl font-black text-brand-red mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {step.number}
@@ -147,67 +142,65 @@ export default function Home() {
         </motion.section>
 
         {/* The Moat: Chaos In, Strategy Out */}
-<section className="w-full max-w-6xl mx-auto py-20 md:py-28 px-6">
-  <motion.div
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true }}
-    variants={staggerContainer}
-    className="flex flex-col items-center"
-  >
-    <motion.h2
-      variants={fadeUp}
-      className="text-4xl sm:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-12 text-center"
-    >
-      Chaos In. Strategy Out.
-    </motion.h2>
+        <section className="w-full max-w-6xl mx-auto py-20 md:py-28 px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="flex flex-col items-center"
+          >
+            <motion.h2
+              variants={fadeUp}
+              className="text-4xl sm:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-12 text-center"
+            >
+              Chaos In. Strategy Out.
+            </motion.h2>
 
-    <div className="grid md:grid-cols-2 gap-8 w-full items-stretch">
-      {/* Left: Standard AI Output */}
-      <motion.div
-        variants={fadeUp}
-        whileHover={{ y: -8, transition: { duration: 0.2 } }}
-        className="rounded-3xl bg-white border-2 border-slate-200 p-8 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all group"
-      >
-        <div className="text-xl font-black italic uppercase tracking-tighter text-slate-500 mb-6">
-          🤖 Standard AI Output
-        </div>
-        <div className="w-full min-h-[14rem] bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 italic mb-6 border border-slate-300 p-6 text-center text-sm font-medium leading-relaxed">
-          "Here are 5 key takeaways from this PDF about Scaling automation. Number 1 will shock you! 🚀 In conclusion, AI is changing the landscape of development for everyone..."
-        </div>
-        <div className="rounded-full bg-red-100 px-4 py-1.5 text-sm font-bold text-red-700 ring-1 ring-inset ring-red-200">
-          Sounds like a template
-        </div>
-      </motion.div>
+            <div className="grid md:grid-cols-2 gap-8 w-full items-stretch">
+              <motion.div
+                variants={fadeUp}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                className="rounded-3xl bg-white border-2 border-slate-200 p-6 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all group"
+              >
+                <div className="text-xl font-black italic uppercase tracking-tighter text-slate-500 mb-6">
+                  🤖 Standard AI Output
+                </div>
+                <div className="w-full min-h-[14rem] bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 italic mb-6 border border-slate-300 p-6 text-center text-sm font-medium leading-relaxed">
+                  "Here are 5 key takeaways from this PDF about Scaling automation. Number 1 will shock you! 🚀 In conclusion, AI is changing the landscape of development for everyone..."
+                </div>
+                <div className="rounded-full bg-red-100 px-4 py-1.5 text-sm font-bold text-red-700 ring-1 ring-inset ring-red-200">
+                  Sounds like a template
+                </div>
+              </motion.div>
 
-      {/* Right: The Ozigi Engine */}
-<motion.div
-  variants={fadeUp}
-  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-  className="rounded-3xl bg-gradient-to-br from-brand-navy/5 via-white to-brand-red/5 border-2 border-brand-red/20 p-8 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group"
->
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-red/5 rounded-full blur-2xl" />
-        <div className="text-xl font-black italic uppercase tracking-tighter text-indigo-600 mb-6">
-          ⚡ The Ozigi Engine
-        </div>
-        <div className="w-full min-h-[14rem] bg-white rounded-2xl flex flex-col md:flex-row items-stretch text-slate-700 mb-6 border border-indigo-100 shadow-sm overflow-hidden text-xs sm:text-sm font-medium">
-          <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-indigo-50 bg-indigo-50/30 flex items-center justify-center text-center italic text-slate-500">
-            [ Well-structured thread with your actual technical insights, pacing, and tone. No emojis or robotic conclusions. ]
-          </div>
-          <div className="flex-1 p-5 flex items-center justify-start bg-white text-slate-900 leading-relaxed">
-            <span>
-              Scaling automation requires treating test code like production code. Poor architecture, like ignoring POM or SOLID, sinks suites faster than flaky environments. Data management is non-negotiable.
-            </span>
-          </div>
-        </div>
-  <div className="rounded-full bg-brand-red/10 px-4 py-1.5 text-sm font-bold text-brand-red ring-1 ring-inset ring-brand-red/20">
-    Sounds like a person
-  </div>
-</motion.div>
-    </div>
-  </motion.div>
-</section>
+              <motion.div
+                variants={fadeUp}
+                whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                className="rounded-3xl bg-gradient-to-br from-brand-navy/5 via-white to-brand-red/5 border-2 border-brand-red/20 p-6 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-red/5 rounded-full blur-2xl" />
+                <div className="text-xl font-black italic uppercase tracking-tighter text-indigo-600 mb-6">
+                  ⚡ The Ozigi Engine
+                </div>
+                <div className="w-full min-h-[14rem] bg-white rounded-2xl flex flex-col md:flex-row items-stretch text-slate-700 mb-6 border border-indigo-100 shadow-sm overflow-hidden text-xs sm:text-sm font-medium">
+                  <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-indigo-50 bg-indigo-50/30 flex items-center justify-center text-center italic text-slate-500">
+                    [ Well-structured thread with your actual technical insights, pacing, and tone. No emojis or robotic conclusions. ]
+                  </div>
+                  <div className="flex-1 p-5 flex items-center justify-start bg-white text-slate-900 leading-relaxed">
+                    <span>
+                      Scaling automation requires treating test code like production code. Poor architecture, like ignoring POM or SOLID, sinks suites faster than flaky environments. Data management is non-negotiable.
+                    </span>
+                  </div>
+                </div>
+                <div className="rounded-full bg-brand-red/10 px-4 py-1.5 text-sm font-bold text-brand-red ring-1 ring-inset ring-brand-red/20">
+                  Sounds like a person
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </section>
 
         {/* Versatile Use Cases */}
         <section className="py-20 md:py-28 bg-gradient-to-b from-white to-brand-offwhite">
@@ -256,7 +249,7 @@ export default function Home() {
                   key={idx}
                   variants={fadeUp}
                   whileHover={{ y: -4 }}
-                  className="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-white p-6 md:p-10 rounded-3xl border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <div className="text-sm font-black uppercase tracking-widest text-brand-red mb-4">
                     Use Case {String(idx + 1).padStart(2, "0")}
@@ -273,7 +266,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Feature Grid (keep existing) */}
+        {/* Feature Grid */}
         <section className="py-20 px-6 bg-white border-b border-slate-200/60">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -316,7 +309,7 @@ export default function Home() {
                   key={i}
                   variants={fadeUp}
                   whileHover={{ y: -4 }}
-                  className="bg-white border border-slate-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all"
                 >
                   <h3 className="text-xl font-black uppercase tracking-tighter mb-3 text-brand-navy">
                     {feature.title}
@@ -328,80 +321,80 @@ export default function Home() {
           </div>
         </section>
 
-{/* Testimonials */}
-<section className="py-20 md:py-28 bg-gradient-to-b from-brand-offwhite to-white">
-  <div className="max-w-6xl mx-auto px-6">
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={fadeUp}
-      className="text-center mb-16"
-    >
-      <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-4">
-        Loved by creators who ship
-      </h2>
-      <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
-        Don't take our word for it — hear what our users have to say.
-      </p>
-    </motion.div>
+        {/* Testimonials */}
+        <section className="py-20 md:py-28 bg-gradient-to-b from-brand-offwhite to-white">
+          <div className="max-w-6xl mx-auto px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }}
+              variants={fadeUp}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-4">
+                Loved by creators who ship
+              </h2>
+              <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
+                Don't take our word for it — hear what our users have to say.
+              </p>
+            </motion.div>
 
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={staggerContainer}
-      className="grid grid-cols-1 md:grid-cols-3 gap-8"
-    >
-      {[
-        {
-          name: "Priya Sharma",
-          role: "Senior Developer Advocate",
-          quote: "Ozigi turned my messy API docs into a 3‑day X thread that got 10k impressions. The Banned Lexicon is a game‑changer — I finally sound like myself.",
-          image: "/testimonials/priya.jpg",
-        },
-        {
-          name: "Marcus Chen",
-          role: "Technical Founder",
-          quote: "I used to spend hours tweaking prompts to avoid AI‑speak. Ozigi does it for me. Now I just drop in my notes and get ready‑to‑publish content. Huge time saver.",
-          image: "/testimonials/marcus.jpg",
-        },
-        {
-          name: "Sarah Okonkwo",
-          role: "DevRel Lead",
-          quote: "The persona feature is incredible. I saved my voice once, and now every campaign sounds exactly like me. My engagement has doubled since I started using Ozigi.",
-          image: "/testimonials/sarah.jpg",
-        },
-      ].map((testimonial, idx) => (
-        <motion.div
-          key={idx}
-          variants={fadeUp}
-          whileHover={{ y: -4 }}
-          className="bg-white rounded-3xl border border-slate-200 p-8 shadow-lg hover:shadow-xl transition-all"
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100">
-              <Image
-                src={testimonial.image}
-                alt={testimonial.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <h4 className="font-black text-brand-navy">{testimonial.name}</h4>
-              <p className="text-xs text-slate-500">{testimonial.role}</p>
-            </div>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            >
+              {[
+                {
+                  name: "Priya Sharma",
+                  role: "Senior Developer Advocate",
+                  quote: "Ozigi turned my messy API docs into a 3‑day X thread that got 10k impressions. The Banned Lexicon is a game‑changer — I finally sound like myself.",
+                  image: "/testimonials/priya.jpg",
+                },
+                {
+                  name: "Marcus Chen",
+                  role: "Technical Founder",
+                  quote: "I used to spend hours tweaking prompts to avoid AI‑speak. Ozigi does it for me. Now I just drop in my notes and get ready‑to‑publish content. Huge time saver.",
+                  image: "/testimonials/marcus.jpg",
+                },
+                {
+                  name: "Sarah Okonkwo",
+                  role: "DevRel Lead",
+                  quote: "The persona feature is incredible. I saved my voice once, and now every campaign sounds exactly like me. My engagement has doubled since I started using Ozigi.",
+                  image: "/testimonials/sarah.jpg",
+                },
+              ].map((testimonial, idx) => (
+                <motion.div
+                  key={idx}
+                  variants={fadeUp}
+                  whileHover={{ y: -4 }}
+                  className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-brand-navy">{testimonial.name}</h4>
+                      <p className="text-xs text-slate-500">{testimonial.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-slate-700 leading-relaxed italic">"{testimonial.quote}"</p>
+                  <div className="mt-6 flex text-brand-red">
+                    {"★".repeat(5)}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
-          <p className="text-slate-700 leading-relaxed italic">"{testimonial.quote}"</p>
-          <div className="mt-6 flex text-brand-red">
-            {"★".repeat(5)}
-          </div>
-        </motion.div>
-      ))}
-    </motion.div>
-  </div>
-</section>
+        </section>
 
         {/* Pricing Section */}
         <section id="pricing" className="py-20 px-6 scroll-mt-32">

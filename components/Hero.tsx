@@ -83,7 +83,6 @@ export default function Hero() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  // Auto‑rotate cards every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentCard((prev) => (prev + 1) % cardData.length);
@@ -92,11 +91,11 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-brand-offwhite py-16 md:py-20 min-h-screen flex items-center">
+    <section className="relative overflow-hidden bg-brand-offwhite py-12 md:py-20 min-h-screen flex items-center">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-r from-brand-red/5 via-transparent to-brand-red/5 animate-gradient-x" />
       <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_0%,rgba(232,50,10,0.03)_100%)]" />
-      
+
       {/* Floating abstract shapes */}
       <motion.div
         variants={float}
@@ -111,7 +110,7 @@ export default function Hero() {
         transition={{ delay: 0.5 }}
         className="absolute bottom-1/4 right-[5%] w-96 h-96 bg-brand-navy/5 rounded-full blur-3xl"
       />
-      
+
       {/* Animated particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
@@ -139,7 +138,7 @@ export default function Hero() {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-6 w-full">
-        <div className="flex flex-col lg:flex-row items-center gap-12">
+        <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12">
           {/* Left Column: Text */}
           <motion.div
             initial="hidden"
@@ -157,9 +156,10 @@ export default function Hero() {
               </span>
             </div>
 
-<h1 className="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[1.1] text-brand-navy">              Turn raw context into <br />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[1.1] text-brand-navy">
+              Turn your raw ideas into <br />
               <span className="text-brand-red relative inline-block">
-                platform‑ready content
+                winning social media content
                 <motion.span
                   className="absolute -bottom-2 left-0 w-full h-1 bg-brand-red/30"
                   initial={{ scaleX: 0 }}
@@ -169,7 +169,7 @@ export default function Hero() {
               </span>
             </h1>
             <p className="text-lg text-slate-600 max-w-lg mx-auto lg:mx-0">
-              Drop notes, URLs, or PDFs. Ozigi generates posts for X, LinkedIn, and Discord in your voice — no prompt engineering. Just your ideas.
+              Drop notes, URLs, or PDFs. Ozigi generates posts for X, LinkedIn, and Discord in your voice. No prompt engineering. Just your ideas.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
               <Link
@@ -186,71 +186,72 @@ export default function Hero() {
                 Read the docs
               </Link>
             </div>
-            <div className="flex flex-wrap items-center gap-6 pt-4 justify-center lg:justify-start text-slate-500">
-              <div className="flex items-center gap-1 text-sm">
-                <span className="text-brand-red">✓</span> No credit card
-              </div>
-              <div className="flex items-center gap-1 text-sm">
-                <span className="text-brand-red">✓</span> 5 free campaigns
-              </div>
-              <div className="flex items-center gap-1 text-sm">
-                <span className="text-brand-red">✓</span> 7‑day Pro trial
-              </div>
-            </div>
+<div className="flex flex-wrap items-center gap-6 pt-4 justify-center lg:justify-start text-slate-500 hidden md:flex">
+  <div className="flex items-center gap-1 text-sm">
+    <span className="text-brand-red">✓</span> No credit card
+  </div>
+  <div className="flex items-center gap-1 text-sm">
+    <span className="text-brand-red">✓</span> 5 free campaigns
+  </div>
+  <div className="flex items-center gap-1 text-sm">
+    <span className="text-brand-red">✓</span> 7‑day Pro trial
+  </div>
+</div>
           </motion.div>
 
           {/* Right Column: Vertical Slider */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex-1 relative flex justify-center items-center"
-          >
-            <div className="relative w-full max-w-md h-[340px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-  key={currentCard}
-  initial={{ opacity: 0, y: 30 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0, y: -30 }}
-  transition={{ duration: 0.4, ease: "easeInOut" }}
-  className="hero-card absolute inset-0 bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 overflow-y-auto"
+
+<motion.div
+  initial={{ opacity: 0, scale: 0.9 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.7, delay: 0.2 }}
+  className="flex-1 relative flex justify-center items-center w-full"
 >
-  <div className="flex items-center gap-3 mb-4">
-    {cardData[currentCard].icon}
-    <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-      {cardData[currentCard].platform} • {cardData[currentCard].type}
-    </span>
+  <div className="relative w-full max-w-full md:max-w-md min-h-[340px] md:h-[340px]">
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={currentCard}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -30 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className="hero-card absolute inset-0 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 md:p-6 overflow-y-auto pb-12"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          {cardData[currentCard].icon}
+          <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+            {cardData[currentCard].platform} • {cardData[currentCard].type}
+          </span>
+        </div>
+        <div
+          className="text-sm text-slate-800 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: cardData[currentCard].content }}
+        />
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+          {cardData.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentCard(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentCard ? "bg-brand-red w-4" : "bg-slate-300"
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      </motion.div>
+    </AnimatePresence>
   </div>
-  <div
-    className="text-sm text-slate-800 leading-relaxed"
-    dangerouslySetInnerHTML={{ __html: cardData[currentCard].content }}
-  />
-  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-    {cardData.map((_, idx) => (
-      <button
-        key={idx}
-        onClick={() => setCurrentCard(idx)}
-        className={`w-2 h-2 rounded-full transition-all ${
-          idx === currentCard ? "bg-brand-red w-4" : "bg-slate-300"
-        }`}
-        aria-label={`Go to slide ${idx + 1}`}
-      />
-    ))}
-  </div>
+  <div className="absolute -z-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-red/5 rounded-full blur-3xl" />
 </motion.div>
-              </AnimatePresence>
-            </div>
-            <div className="absolute -z-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-red/5 rounded-full blur-3xl" />
-          </motion.div>
         </div>
 
-        {/* Social proof row - now fully visible */}
+        {/* Social proof row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-5 md:mt-8 flex flex-wrap justify-center gap-8 text-center"
+          className="mt-5 md:mt-8 flex flex-wrap justify-center gap-4 md:gap-8 text-center"
         >
           <div className="flex items-center gap-2">
             <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">

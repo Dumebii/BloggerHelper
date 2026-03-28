@@ -1,0 +1,91 @@
+---
+title: "Ozigi v2 Changelog: Building a Modular Agentic Content Engine with Next.js, Supabase, and Playwright"
+date: "2026-03-02"
+description: "The complete technical changelog of how I completely turned Ozigi from a monolithic v1 MVP into a production-ready v2 SaaS."
+---
+
+When I first built [Ozigi](https://blogger-helper-tau.vercel.app/) (initially WriterHelper), the goal was simple: give content professionals in my team a way to break down their articles into high-signal social media campaigns.
+
+OziGi has now evolved to an open source SaaS product, oepn to the public to use and imnprove.
+
+Here is the complete technical changelog of how I completely turned Ozigi from a monolithic v1 MVP into a production-ready v2 SaaS.
+
+## 1. Modular Refactoring of The App.tsx (Separation of Concerns)
+
+In v1, my entire application: auth, API calls, and UI—lived inside a long `app/page.tsx` file. The more changes I made, the harder it became to manage.
+
+* **Modular Component Library:** I stripped down the monolith and broke the UI into pure, single-responsibility React components (`Header`, `Hero`, `Distillery`, etc.).
+
+![modular architecture](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/96cypkydgo446zrjcfwt.png)
+
+
+* **Centralized Type Safety:** I created a global `lib/types.ts` file with a strict `CampaignDay` interface (complete with index signatures) to finally eliminate the TypeScript "shadow type" build errors I was fighting.
+* **State Persistence:** Implemented `localStorage` syncing so the app "remembers" if a user is in the dashboard or the landing page, preventing frustrating resets on browser refresh.
+
+## 2. Using Supabase as the Database and Tightening the Backend
+
+A major UX flaw in v1 was that refreshing the page wiped the user's progress.
+
+* **Relational Database & OAuth:** I replaced anonymous access with secure GitHub OAuth via Supabase.
+* **Automated Context History:** I engineered a system that auto-saves every generated campaign to a PostgreSQL database. Users can now restore past URLs, notes, and outputs with a single click.
+
+![strategy history](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/odnvsgusnc26sy44u8sw.png)
+
+
+* **Identity Storage:** Built a settings flow to permanently save a user's custom "Persona Voice" and Discord Webhook URLs directly to their profile.
+
+
+![discord webhook upload and added context](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/j8b09ue6myvb4a0jxhzx.png)
+
+
+
+## 3. Core Feature Additions
+
+* **Multi-Modal Ingestion:** Upgraded the input engine to accept both a live URL *and* raw custom text simultaneously.
+
+![context engine dashboard](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/lkdo3urlx7xmhx3pu9th.png)
+
+
+* **Native Discord Deployment:** Built a dedicated API route and UI webhook integration to push generated content directly to Discord servers with one click.
+
+
+## 4. Update UI/UX & Professional Branding
+
+* **The Rebrand:** Pivoted the app's messaging to focus entirely on content professionals, positioning it as an engine to generate social media content with ease and in your own voice.
+
+* **Open-First Onboarding:** Designed a "Try Before You Buy" workflow. Unauthenticated users can test the AI generation seamlessly, but are gated from premium features (History, Personas, Discord) via an Upgrade Banner.
+
+![guest mode](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/oyaxoafb4dsuh3dqtt89.png)
+
+
+* **Pixel-Perfect Layouts & SEO:** Eliminated rogue whitespace and `z-index` issues using precise CSS Flexbox rules. Upgraded `app/layout.tsx` with professional OpenGraph and Twitter Card metadata.
+
+
+![ozigi homepage](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hqbf31p44p1p5e5sjyj4.png)
+
+
+
+## 5. Quality Assurance & DevOps (Automated Playwright E2E Tests)
+
+* **Automated E2E Testing:** Completely rewrote the Playwright test suite (`engine.spec.ts`) to verify the new landing page copy, test the navigation flow, and confirm security rules apply correctly.
+
+* **Linux Dependency Fixes:** Patched my CI/CD pipeline by ensuring underlying Linux browser dependencies (`--with-deps`) are installed so headless Chromium tests pass flawlessly.
+
+## What's Next? (v3 Roadmap)
+
+With the Context Engine now stable, the foundation is set. 
+My plan for V3 is to fix the deployment pipeline: 
+- integrating the native X (Twitter) 
+- LinkedIn APIs so users can publish directly from the Ozigi dashboard.
+
+*What has been your biggest challenge scaling a Next.js MVP? Let me know in the comments!*
+Try out [Ozigi](https://blogger-helper-tau.vercel.app/)
+And let me know if you have any feature suggestions? Let me know!
+Want to see my poorly written code? Find [OziGi on Github.](https://github.com/Dumebii/OziGi)
+
+Connect with me on [LinkedIn](www.linkedin.com/in/dumebi-okolo)!
+
+What came next:
+After shipping v2, the next hard question was model selection. A reader suggested switching to Claude for better content quality. I ran the benchmarks instead of just taking the advice. The results across JSON stability, latency, multimodal ingestion, and tone were clearer than I expected: [Gemini 2.5 Flash vs Claude 3.7 Sonnet: 4 Production Constraints That Made the Decision for Me](https://dev.to/dumebii/gemini-25-flash-vs-claude-37-sonnet-4-production-constraints-that-made-the-decision-for-me-bib)
+
+
