@@ -3,13 +3,19 @@ import path from "path";
 import matter from "gray-matter";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 
-interface PostPageProps {
-  params: Promise<{ slug: string }>;
-}
+// Custom components for MDX
+const components = {
+  img: (props: any) => (
+    <img
+      {...props}
+      referrerPolicy="no-referrer"
+      className="rounded-lg my-4 max-w-full h-auto"
+    />
+  ),
+};
 
-export default async function PostPage({ params }: PostPageProps) {
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const filePath = path.join(process.cwd(), `content/blog/${slug}.mdx`);
 
@@ -22,22 +28,14 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <article className="max-w-3xl mx-auto py-12 px-4">
-      {data.coverImage && (
-        <div className="relative h-64 w-full mb-8">
-          <Image
-            src={data.coverImage}
-            alt={data.title}
-            fill
-            className="object-cover rounded-xl"
-          />
-        </div>
-      )}
       <h1 className="text-4xl font-black italic uppercase tracking-tighter mb-2">
         {data.title}
       </h1>
-      <p className="text-slate-500 text-sm mb-8">{data.date}</p>
+      <p className="text-slate-500 text-sm mb-8">
+        {new Date(data.date).toLocaleDateString()}
+      </p>
       <div className="prose prose-slate max-w-none">
-        <MDXRemote source={content} />
+        <MDXRemote source={content} components={components} />
       </div>
     </article>
   );
