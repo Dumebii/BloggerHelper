@@ -60,14 +60,9 @@ export default function Footer() {
               >
                 GitHub
               </a>
-              <a
-                href="https://dev.to/dumebii"
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-slate-500 hover:text-white transition-colors"
-              >
-                Blog
-              </a>
+<a href="https://blog.ozigi.app" className="text-sm font-semibold text-slate-600 hover:text-brand-red transition">
+  Blog
+</a>
               <a
                 href="https://linkedin.com/in/dumebi-okolo"
                 target="_blank"
