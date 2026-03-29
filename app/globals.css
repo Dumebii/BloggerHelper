@@ -37,14 +37,65 @@ body {
 .logo-spin:hover {
   animation: gentleSpin 1s ease-in-out;
 }
+
 @keyframes gradient-x {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+
 .animate-gradient-x {
   background-size: 200% 200%;
   animation: gradient-x 8s ease infinite;
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(232, 50, 10, 0.7);
+  }
+  50% { 
+    box-shadow: 0 0 0 8px rgba(232, 50, 10, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
 /* Hero card tweet styling */
 .hero-card .tweet {
   border-bottom: 1px solid #e2e8f0;
@@ -56,4 +107,34 @@ body {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
+}
+
+/* Smooth gradient backgrounds */
+.gradient-navy-red {
+  background: linear-gradient(135deg, #0A1628 0%, #E8320A 100%);
+}
+
+.gradient-subtle {
+  background: linear-gradient(135deg, rgba(10, 22, 40, 0.05) 0%, rgba(232, 50, 10, 0.02) 100%);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Badge styling */
+.badge-red {
+  background-color: #E8320A;
+  color: white;
+}
+
+.badge-navy {
+  background-color: #0A1628;
+  color: white;
 }
