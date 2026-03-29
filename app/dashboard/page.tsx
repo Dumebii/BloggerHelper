@@ -30,6 +30,7 @@ import UpgradeModal from "@/components/UpgradeModal";
 import DashboardTour from "@/components/dashboard/DashboardTour";
 import { incrementCampaignGeneration } from "@/lib/plan";
 import { toast } from "sonner";
+import { PLATFORMS } from "@/lib/platforms";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function Dashboard() {
     text: "",
     fileUrls: [],
     files: [],
-    platforms: ["x", "linkedin", "discord", "email"],
+    platforms: [PLATFORMS.X, PLATFORMS.LINKEDIN, PLATFORMS.DISCORD, PLATFORMS.EMAIL],
     tweetFormat: "single" as const,
     additionalInfo: "",
     personaId: "default",

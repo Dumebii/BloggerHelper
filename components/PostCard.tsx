@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { PLATFORMS, getApiEndpoint } from "@/lib/platforms";
 
 interface PostCardProps {
   platform: string;
@@ -47,7 +48,7 @@ export default function PostCard({
   };
 
   const handlePost = async () => {
-    if (platform.toLowerCase() !== "discord") return;
+    if (platform.toLowerCase() !== PLATFORMS.DISCORD) return;
     if (!webhookUrl) {
       toast.error("Configure your Discord webhook in Settings first.");
       return;
@@ -55,7 +56,7 @@ export default function PostCard({
 
     setIsPosting(true);
     try {
-      const res = await fetch("/api/post-discord", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.DISCORD), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: editedContent, webhookUrl }),
@@ -125,7 +126,7 @@ export default function PostCard({
         </button>
       )}
 
-      {platform.toLowerCase() === "discord" && (
+      {platform.toLowerCase() === PLATFORMS.DISCORD && (
         <div className="mt-6 pt-5 border-t border-slate-100 flex gap-3">
           <button
             onClick={handlePost}

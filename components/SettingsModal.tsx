@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
+import { OAUTH_PROVIDERS, OAUTH_SCOPES } from "@/lib/platforms";
 
 interface SettingsModalProps {
   session: any;
@@ -69,7 +70,7 @@ export default function SettingsModal({
 
     if (data) {
       setConnections(
-        data.map((d) => (d.provider === "twitter" ? "x" : d.provider))
+        data.map((d) => (d.provider === "twitter" ? OAUTH_PROVIDERS.X : d.provider))
       );
     }
   };
@@ -134,7 +135,7 @@ export default function SettingsModal({
 
   const handleLinkAccount = async (provider: "x" | "linkedin_oidc") => {
     setLinkLoading(provider);
-    let scopes = provider === "x" ? "tweet.read tweet.write users.read offline.access" : "w_member_social openid profile email";
+    const scopes = provider === OAUTH_PROVIDERS.X ? OAUTH_SCOPES.X : OAUTH_SCOPES.LINKEDIN;
 
     const { error } = await supabase.auth.linkIdentity({
       provider,

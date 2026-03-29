@@ -7,6 +7,7 @@ import DistributionGrid from "../../components/DistributionGrid";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
+import { PLATFORMS } from "@/lib/platforms";
 
 export default function DemoSandbox() {
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,7 @@ export default function DemoSandbox() {
     text: "",
     fileUrls: [],
     files: [],
-    platforms: ["x", "linkedin", "discord"],
+    platforms: [PLATFORMS.X, PLATFORMS.LINKEDIN, PLATFORMS.DISCORD],
     tweetFormat: "single" as const,
     additionalInfo: "",
     personaId: "default",

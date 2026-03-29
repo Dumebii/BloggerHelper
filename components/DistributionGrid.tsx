@@ -8,6 +8,7 @@ import RichTextEditor from "./RichTextEditor";
 import ScheduleEmailModal from "./ScheduleEmailModal";
 import { uploadBase64Image } from "@/lib/utils";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
+import { PLATFORMS, getApiEndpoint } from "@/lib/platforms";
 
 // Add the missing interface
 interface DistributionGridProps {
@@ -359,7 +360,7 @@ const [slackStatuses, setSlackStatuses] = useState<{ [day: number]: "idle" | "lo
         body: JSON.stringify({
           posts: [
             {
-              platform: "email",
+              platform: PLATFORMS.EMAIL,
               content: localEmailContent,
               imageUrl: imageUrl,
               day: 0,
@@ -395,7 +396,7 @@ const handlePostToDiscord = async (text: string, day: number, imageUrl?: string)
   }
   setDiscordStatuses((prev) => ({ ...prev, [day]: "loading" }));
   try {
-    const res = await fetch("/api/post-discord", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.DISCORD), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -422,7 +423,7 @@ const handlePostToDiscord = async (text: string, day: number, imageUrl?: string)
     }
     setLiStatuses((prev) => ({ ...prev, [day]: "loading" }));
     try {
-      const res = await fetch("/api/publish/linkedin", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.LINKEDIN), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -450,7 +451,7 @@ const handlePostToSlack = async (text: string, day: number, imageUrl?: string) =
   }
   setSlackStatuses((prev) => ({ ...prev, [day]: "loading" }));
   try {
-    const res = await fetch("/api/publish/slack", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.SLACK), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -473,11 +474,11 @@ const handlePostToSlack = async (text: string, day: number, imageUrl?: string) =
   const safeCampaign = campaign ?? [];
   const safePlatforms = selectedPlatforms ?? [];
 
-  const hasX = safeCampaign.some((d: CampaignDay) => d.x) && safePlatforms.includes("x");
-  const hasLinkedIn = safeCampaign.some((d: CampaignDay) => d.linkedin) && safePlatforms.includes("linkedin");
-  const hasDiscord = safeCampaign.some((d: CampaignDay) => d.discord) && safePlatforms.includes("discord");
-  const hasEmail = !!localEmailContent && safePlatforms.includes("email");
-  const hasSlack = safeCampaign.some((d: CampaignDay) => d.slack) && safePlatforms.includes("slack");
+  const hasX = safeCampaign.some((d: CampaignDay) => d.x) && safePlatforms.includes(PLATFORMS.X);
+  const hasLinkedIn = safeCampaign.some((d: CampaignDay) => d.linkedin) && safePlatforms.includes(PLATFORMS.LINKEDIN);
+  const hasDiscord = safeCampaign.some((d: CampaignDay) => d.discord) && safePlatforms.includes(PLATFORMS.DISCORD);
+  const hasEmail = !!localEmailContent && safePlatforms.includes(PLATFORMS.EMAIL);
+  const hasSlack = safeCampaign.some((d: CampaignDay) => d.slack) && safePlatforms.includes(PLATFORMS.SLACK);
 
   return (
     <div className="space-y-12">
