@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -39,17 +40,18 @@ export default function PostCard({
       await navigator.clipboard.writeText(editedContent);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
+      toast.success("Copied!");
     } catch (err) {
-      alert("❌ Failed to copy text.");
+      toast.error("Failed to copy. Please try again.");
     }
   };
 
   const handlePost = async () => {
     if (platform.toLowerCase() !== "discord") return;
-    if (!webhookUrl)
-      return alert(
-        "❌ Please configure your Discord Webhook in Identity Settings."
-      );
+    if (!webhookUrl) {
+      toast.error("Configure your Discord webhook in Settings first.");
+      return;
+    }
 
     setIsPosting(true);
     try {
@@ -59,13 +61,13 @@ export default function PostCard({
         body: JSON.stringify({ content: editedContent, webhookUrl }),
       });
       const data = await res.json();
-      if (res.ok) alert("✅ Shared to your Discord server!");
-      else
-        alert(
-          `❌ Post failed: ${data.error || "Check your webhook settings."}`
-        );
+      if (res.ok) {
+        toast.success("Posted to Discord!");
+      } else {
+        toast.error(`Failed: ${data.error || "Check your webhook."}`);
+      }
     } catch (err) {
-      alert("❌ Post failed. Check connection.");
+      toast.error("Post failed. Check your connection.");
     } finally {
       setIsPosting(false);
     }

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
@@ -101,8 +102,9 @@ export default function RichTextEditor({ content, onChange, placeholder = "Write
     try {
       const url = await uploadLargeAsset(file);
       setImageUrl(url);
+      toast.success("Image uploaded!");
     } catch (err) {
-      alert("Upload failed: " + (err as Error).message);
+      toast.error(`Upload failed: ${(err as Error).message}`);
     } finally {
       setIsUploading(false);
     }
@@ -118,7 +120,7 @@ export default function RichTextEditor({ content, onChange, placeholder = "Write
       const srcMatch = embedUrl.match(/src=["'](https?:\/\/[^"']+)["']/);
       if (srcMatch) videoUrl = srcMatch[1];
       else {
-        alert("Could not extract video URL from embed code.");
+        toast.error("Could not extract URL from embed code.");
         return;
       }
     }

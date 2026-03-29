@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Paperclip, ChevronDown, ArrowLeftRight, X } from "lucide-react";
 import SkeletonGrid from "./SkeletonGrid";
 import { uploadLargeAsset } from "@/lib/utils";
@@ -79,7 +80,7 @@ export default function Distillery({
       }));
     } catch (error) {
       console.error("R2 Upload error:", error);
-      alert("Failed to upload some files to storage. Please try again.");
+      toast.error("Failed to upload some files. Please try again.");
     } finally {
       setIsUploading(false);
     }

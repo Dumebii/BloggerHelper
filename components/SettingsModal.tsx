@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 
 interface SettingsModalProps {
@@ -124,9 +125,10 @@ export default function SettingsModal({
       window.dispatchEvent(new Event("refreshPersonas"));
       setNewPersonaName("");
       setNewPersonaPrompt("");
+      toast.success("Persona saved!");
       onClose();
     } else {
-      alert("Failed to save persona: " + error.message);
+      toast.error(`Failed to save persona: ${error.message}`);
     }
   };
 
@@ -144,7 +146,7 @@ export default function SettingsModal({
 
     if (error) {
       console.error(`Error linking ${provider}:`, error);
-      alert(`Failed to connect account: ${error.message}`);
+      toast.error(`Failed to connect account: ${error.message}`);
       setLinkLoading(null);
     }
   };
@@ -167,12 +169,12 @@ export default function SettingsModal({
         window.location.href = '/';
       } else {
         const errorData = await response.json();
-        alert(`Failed to delete account: ${errorData.error}`);
+        toast.error(`Failed to delete account: ${errorData.error}`);
         setIsDeleting(false);
       }
     } catch (error) {
       console.error("Error calling deletion API:", error);
-      alert("An unexpected error occurred while trying to delete your account.");
+      toast.error("Failed to delete account. Please try again.");
       setIsDeleting(false);
     }
   };

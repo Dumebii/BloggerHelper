@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 
 interface ScheduledPost {
@@ -50,10 +51,11 @@ export default function ScheduledPostsModal({ onClose, onStatsChange }: Schedule
 
     if (error) {
       console.error("Error cancelling post:", error);
-      alert("Failed to cancel post. Please try again.");
+      toast.error("Failed to cancel post. Please try again.");
     } else {
       setPosts(posts.filter(p => p.id !== postId));
-      if (onStatsChange) onStatsChange(); // 👈 refresh stats after cancellation
+      if (onStatsChange) onStatsChange();
+      toast.success("Post cancelled.");
     }
     setCancelling(null);
   };

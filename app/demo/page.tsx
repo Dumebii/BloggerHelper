@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import Distillery from "../../components/ContextEngine";
 import DistributionGrid from "../../components/DistributionGrid";
 import Header from "../../components/Header";
@@ -55,7 +56,7 @@ export default function DemoSandbox() {
       if (response.status === 403) {
         const data = await response.json();
         if (data.error === "demo_limit_reached") {
-          alert("You have already used the demo. Sign up to continue.");
+          toast.error("Demo limit reached. Sign up to continue.");
           setLoading(false);
           return;
         }
@@ -80,10 +81,11 @@ export default function DemoSandbox() {
             block: "start",
           });
         }, 100);
+        toast.success("Content generated!");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong. Please try again later.");
+      toast.error("Generation failed. Please try again.");
     } finally {
       setLoading(false);
     }

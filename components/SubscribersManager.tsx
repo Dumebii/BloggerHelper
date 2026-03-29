@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Papa from "papaparse";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 
@@ -46,7 +47,7 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
 
     // Check per-upload limit for Team plan
     if (planStatus?.plan === 'team' && emailList.length > 500) {
-      alert("Team plan allows maximum 500 emails per CSV upload. Upgrade to Organization for unlimited uploads.");
+      toast.error("Team plan allows max 500 emails per upload. Upgrade to Organization for unlimited.");
       return;
     }
 
@@ -60,12 +61,14 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
       if (res.ok) {
         setNewEmails('');
         await fetchSubscribers();
+        toast.success(`Added ${emailList.length} subscribers!`);
       } else {
         const data = await res.json();
-        alert(`Failed to add: ${data.error}`);
+        toast.error(`Failed to add: ${data.error}`);
       }
     } catch (error) {
       console.error("Error adding subscribers", error);
+      toast.error("Failed to add subscribers. Please try again.");
     } finally {
       setIsAdding(false);
     }
@@ -77,11 +80,13 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
       const res = await fetch(`/api/subscribers/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setSubscribers(subscribers.filter(s => s.id !== id));
+        toast.success("Subscriber removed.");
       } else {
-        alert("Failed to remove subscriber");
+        toast.error("Failed to remove subscriber. Please try again.");
       }
     } catch (error) {
       console.error("Error deleting subscriber", error);
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -104,14 +109,14 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
         }
 
         if (emails.length === 0) {
-          alert("No valid emails found in CSV.");
+          toast.error("No valid emails found in CSV.");
           setIsUploadingCSV(false);
           return;
         }
 
         // Check per-upload limit for Team plan
         if (planStatus?.plan === 'team' && emails.length > 500) {
-          alert("Team plan allows maximum 500 emails per CSV upload. Upgrade to Organization for unlimited uploads.");
+          toast.error("Team plan allows max 500 emails per upload. Upgrade to Organization for unlimited.");
           setIsUploadingCSV(false);
           return;
         }
@@ -124,14 +129,14 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
           });
           if (res.ok) {
             await fetchSubscribers();
-            alert(`Successfully added ${emails.length} subscribers.`);
+            toast.success(`Successfully added ${emails.length} subscribers!`);
           } else {
             const data = await res.json();
-            alert(`Failed to add: ${data.error}`);
+            toast.error(`Failed to add: ${data.error}`);
           }
         } catch (error) {
           console.error("Error adding subscribers via CSV", error);
-          alert("Failed to upload CSV.");
+          toast.error("Failed to upload CSV. Please try again.");
         } finally {
           setIsUploadingCSV(false);
           // Clear file input
@@ -140,7 +145,7 @@ export default function SubscribersManager({ session, onOpenUpgradeModal }: Subs
       },
       error: (error) => {
         console.error("CSV parsing error:", error);
-        alert("Failed to parse CSV file.");
+        toast.error("Failed to parse CSV file. Please check the format.");
         setIsUploadingCSV(false);
       },
     });
