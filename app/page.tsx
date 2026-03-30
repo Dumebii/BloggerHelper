@@ -48,8 +48,9 @@ export default function Home() {
         <Hero />
 
         {/* How It Works */}
-        <section className="py-20 md:py-28 bg-white border-b border-slate-200/60 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-offwhite via-transparent to-transparent opacity-40" />
+        <section className="py-20 md:py-28 bg-gradient-to-b from-white to-brand-offwhite border-b border-slate-200/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-red/8 rounded-full blur-3xl opacity-40" />
+          <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-brand-navy/5 rounded-full blur-3xl opacity-30" />
           <div className="relative max-w-6xl mx-auto px-6 z-10">
             <motion.div
               initial="hidden"
@@ -59,10 +60,10 @@ export default function Home() {
               className="text-center mb-16 md:mb-20"
             >
               <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-4">
-                How The Engine Works
+                From chaos to clarity
               </h2>
               <p className="text-slate-500 font-medium text-lg">
-                Three steps from raw context to polished Content.
+                Your voice. Your insights. Polished and ready.
               </p>
             </motion.div>
 
@@ -76,35 +77,37 @@ export default function Home() {
               {[
                 {
                   number: 1,
-                  title: "Ingest Context",
-                  desc: "Paste a URL, dump unformatted meeting transcripts, or upload a PDF/image. Ozigi extracts the core narrative without you needing to summarize it first.",
+                  title: "Feed raw material",
+                  desc: "Paste a URL, paste meeting notes, upload a PDF. No need to clean it up. Ozigi strips the noise and extracts what matters.",
                 },
                 {
                   number: 2,
-                  title: "Apply Voice Persona",
-                  desc: "Create and save custom voice personas. The engine applies strict stylistic constraints to your selected persona, bypassing AI detection to sound exactly like you every time.",
+                  title: "Your voice applies",
+                  desc: "Set your persona once. Technical depth, tone, pacing, banned phrases—the engine locks in your style and enforces it perfectly every time.",
                 },
                 {
                   number: 3,
-                  title: "Multi-channel Routing",
-                  desc: "Instantly receive structured content. Push directly to X (Twitter) via Web Intents, LinkedIn, Email or drop straight into your Discord or Slack.",
+                  title: "Ship everywhere",
+                  desc: "Post to X, LinkedIn, Discord, email, or Slack directly. One click. Your content reaches your audience sounding exactly like you.",
                 },
               ].map((step, idx) => (
                 <motion.div
                   key={idx}
                   variants={fadeUp}
                   whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-100 p-6 md:p-10 group"
+                  className="bg-white rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-100 p-6 md:p-10 group relative overflow-hidden"
                 >
-                  <div className="w-14 h-14 bg-gradient-to-br from-brand-red/10 to-brand-navy/10 rounded-2xl flex items-center justify-center text-2xl font-black text-brand-red mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand-red/5 rounded-full blur-2xl group-hover:bg-brand-red/10 transition-colors" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-brand-red/20 to-brand-navy/10 rounded-2xl flex items-center justify-center text-2xl font-black text-brand-red mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 relative z-10">
                     {step.number}
                   </div>
-                  <h3 className="text-xl font-black uppercase tracking-widest text-brand-navy mb-4">
+                  <h3 className="text-xl font-black uppercase tracking-widest text-brand-navy mb-4 relative z-10">
                     {step.title}
                   </h3>
-                  <p className="text-base text-slate-600 font-medium leading-relaxed">
+                  <p className="text-base text-slate-600 font-medium leading-relaxed relative z-10">
                     {step.desc}
                   </p>
+                  <div className="absolute bottom-0 left-0 w-1 h-0 bg-brand-red group-hover:h-full transition-all duration-500" />
                 </motion.div>
               ))}
             </motion.div>
@@ -124,12 +127,12 @@ export default function Home() {
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-red/5 rounded-full blur-3xl" />
             <div className="max-w-2xl space-y-4 relative z-10">
               <h3 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-white">
-                AI handles the 90%. <br className="hidden md:block" />
-                You own the 10% that matters.
+                AI does the heavy lifting. <br className="hidden md:block" />
+                You add the secret sauce.
               </h3>
               <p className="text-slate-300 font-medium text-lg leading-relaxed">
-                Every generated post has an Edit button. Add the insider detail, the specific joke,
-                the context only you know. Publish when it&apos;s yours.
+                Every post comes with an edit button. Add the insider detail, the specific story,
+                the personal take that only you can make. Publish when it feels authentically yours.
               </p>
             </div>
             <Link
@@ -142,34 +145,36 @@ export default function Home() {
         </motion.section>
 
         {/* The Moat: Chaos In, Strategy Out */}
-        <section className="w-full max-w-6xl mx-auto py-20 md:py-28 px-6">
+        <section className="w-full max-w-6xl mx-auto py-20 md:py-28 px-6 relative">
+          <div className="absolute -top-32 right-0 w-96 h-96 bg-brand-red/8 rounded-full blur-3xl opacity-30" />
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center relative z-10"
           >
             <motion.h2
               variants={fadeUp}
               className="text-4xl sm:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-12 text-center"
             >
-              Chaos In. Strategy Out.
+              The difference between sounding human and sounding like a chatbot
             </motion.h2>
 
             <div className="grid md:grid-cols-2 gap-8 w-full items-stretch">
               <motion.div
                 variants={fadeUp}
                 whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                className="rounded-3xl bg-white border-2 border-slate-200 p-6 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all group"
+                className="rounded-3xl bg-white border-2 border-red-200 p-6 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden"
               >
-                <div className="text-xl font-black italic uppercase tracking-tighter text-slate-500 mb-6">
-                  🤖 Standard AI Output
+                <div className="absolute top-0 right-0 w-24 h-24 bg-red-100/50 rounded-full blur-xl" />
+                <div className="text-xl font-black italic uppercase tracking-tighter text-red-600 mb-6 relative z-10">
+                  Standard AI Output
                 </div>
-                <div className="w-full min-h-[14rem] bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 italic mb-6 border border-slate-300 p-6 text-center text-sm font-medium leading-relaxed">
+                <div className="w-full min-h-[14rem] bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600 italic mb-6 border border-slate-200 p-6 text-center text-sm font-medium leading-relaxed relative z-10">
                   "Here are 5 key takeaways from this PDF about Scaling automation. Number 1 will shock you! 🚀 In conclusion, AI is changing the landscape of development for everyone..."
                 </div>
-                <div className="rounded-full bg-red-100 px-4 py-1.5 text-sm font-bold text-red-700 ring-1 ring-inset ring-red-200">
+                <div className="rounded-full bg-red-100 px-4 py-1.5 text-sm font-bold text-red-700 ring-1 ring-inset ring-red-200 relative z-10">
                   Sounds like a template
                 </div>
               </motion.div>
@@ -177,25 +182,25 @@ export default function Home() {
               <motion.div
                 variants={fadeUp}
                 whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                className="rounded-3xl bg-gradient-to-br from-brand-navy/5 via-white to-brand-red/5 border-2 border-brand-red/20 p-6 md:p-10 flex flex-col items-center shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group"
+                className="rounded-3xl bg-gradient-to-br from-brand-red/8 via-white to-brand-red/5 border-2 border-brand-red/30 p-6 md:p-10 flex flex-col items-center shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-red/5 rounded-full blur-2xl" />
-                <div className="text-xl font-black italic uppercase tracking-tighter text-indigo-600 mb-6">
-                  ⚡ The Ozigi Engine
+                <div className="absolute top-0 right-0 w-40 h-40 bg-brand-red/15 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-red/8 rounded-full blur-2xl" />
+                <div className="text-xl font-black italic uppercase tracking-tighter text-brand-red mb-6 relative z-10">
+                  The Ozigi Engine
                 </div>
-                <div className="w-full min-h-[14rem] bg-white rounded-2xl flex flex-col md:flex-row items-stretch text-slate-700 mb-6 border border-indigo-100 shadow-sm overflow-hidden text-xs sm:text-sm font-medium">
-                  <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-indigo-50 bg-indigo-50/30 flex items-center justify-center text-center italic text-slate-500">
-                    [ Well-structured thread with your actual technical insights, pacing, and tone. No emojis or robotic conclusions. ]
+                <div className="w-full min-h-[14rem] bg-white rounded-2xl flex flex-col md:flex-row items-stretch text-slate-700 mb-6 border border-brand-red/15 shadow-sm overflow-hidden text-xs sm:text-sm font-medium relative z-10">
+                  <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-brand-red/10 bg-brand-red/5 flex items-center justify-center text-center italic text-slate-600">
+                    [ Well-structured thread with your actual technical insights, pacing, and tone. No templates. ]
                   </div>
                   <div className="flex-1 p-5 flex items-center justify-start bg-white text-slate-900 leading-relaxed">
                     <span>
-                      Scaling automation requires treating test code like production code. Poor architecture, like ignoring POM or SOLID, sinks suites faster than flaky environments. Data management is non-negotiable.
+                      Scaling automation requires treating test code like production code. Poor architecture sinks suites faster than flaky environments. Data management is non-negotiable.
                     </span>
                   </div>
                 </div>
-                <div className="rounded-full bg-brand-red/10 px-4 py-1.5 text-sm font-bold text-brand-red ring-1 ring-inset ring-brand-red/20">
-                  Sounds like a person
+                <div className="rounded-full bg-brand-red/15 px-4 py-1.5 text-sm font-bold text-brand-red ring-1 ring-inset ring-brand-red/30 relative z-10">
+                  Sounds like a real person
                 </div>
               </motion.div>
             </div>
@@ -203,8 +208,10 @@ export default function Home() {
         </section>
 
         {/* Versatile Use Cases */}
-        <section className="py-20 md:py-28 bg-gradient-to-b from-white to-brand-offwhite">
-          <div className="max-w-6xl mx-auto px-6">
+        <section className="py-20 md:py-28 bg-gradient-to-b from-white to-brand-offwhite relative overflow-hidden">
+          <div className="absolute top-1/2 right-0 w-96 h-96 bg-brand-navy/5 rounded-full blur-3xl opacity-30" />
+          <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-brand-red/5 rounded-full blur-3xl opacity-20" />
+          <div className="max-w-6xl mx-auto px-6 relative z-10">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -213,10 +220,10 @@ export default function Home() {
               className="text-center mb-16 md:mb-24"
             >
               <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-4">
-                Built For Professionals
+                Works for your world
               </h2>
               <p className="text-slate-500 font-medium text-lg">
-                An engine built to adapt to your industry.
+                From technical founders to digital creators.
               </p>
             </motion.div>
 
@@ -229,37 +236,39 @@ export default function Home() {
             >
               {[
                 {
-                  title: "Technical Writing",
-                  desc: "Turn dry API documentation, GitHub release notes, or complex architectural concepts into highly engaging X threads and LinkedIn posts without losing technical accuracy.",
+                  title: "Developers & DevRel",
+                  desc: "Turn messy API docs or release notes into polished X threads that actually engage developers. Keep the rigor, lose the jargon.",
                 },
                 {
-                  title: "Founders & Marketing",
-                  desc: "Convert messy product strategy documents, customer interview transcripts, or rough ideas into polished thought leadership campaigns that drive Go-To-Market outcomes.",
+                  title: "Founders & Leaders",
+                  desc: "Take rough notes from a fundraising call or product meeting and generate thought leadership posts that move the needle on your go-to-market.",
                 },
                 {
-                  title: "Digital Educators",
-                  desc: "Upload a PDF of your latest course curriculum or workshop slides, and let Ozigi extract the core lessons to build an automated, multi-day promotional campaign.",
+                  title: "Educators & Trainers",
+                  desc: "Upload your course slides or workshop deck. Ozigi pulls the core lessons and builds a multi-week campaign around them.",
                 },
                 {
-                  title: "Content Creators",
-                  desc: "Paste the URL of your latest YouTube video or podcast episode. The engine will instantly read the transcript and spin out native hooks and posts for your audience.",
+                  title: "Creators & Writers",
+                  desc: "Publish a podcast, drop a video, or post a newsletter. Ozigi reads it and generates hooks and follow-ups that sound like you.",
                 },
               ].map((useCase, idx) => (
                 <motion.div
                   key={idx}
                   variants={fadeUp}
                   whileHover={{ y: -4 }}
-                  className="bg-white p-6 md:p-10 rounded-3xl border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-white p-6 md:p-10 rounded-3xl border border-slate-200/50 shadow-lg hover:shadow-2xl transition-all duration-300 group relative overflow-hidden"
                 >
-                  <div className="text-sm font-black uppercase tracking-widest text-brand-red mb-4">
-                    Use Case {String(idx + 1).padStart(2, "0")}
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-brand-red/10 rounded-full blur-2xl group-hover:bg-brand-red/15 transition-colors" />
+                  <div className="text-xs font-black uppercase tracking-widest text-brand-red mb-4 relative z-10">
+                    {String(idx + 1).padStart(2, "0")} / Use Case
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-brand-navy mb-4">
+                  <h3 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-brand-navy mb-4 relative z-10">
                     {useCase.title}
                   </h3>
-                  <p className="text-lg text-slate-600 font-medium leading-relaxed">
+                  <p className="text-lg text-slate-600 font-medium leading-relaxed relative z-10">
                     {useCase.desc}
                   </p>
+                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-brand-red to-transparent w-0 group-hover:w-full transition-all duration-500" />
                 </motion.div>
               ))}
             </motion.div>
@@ -267,8 +276,9 @@ export default function Home() {
         </section>
 
         {/* Feature Grid */}
-        <section className="py-20 px-6 bg-white border-b border-slate-200/60">
-          <div className="max-w-6xl mx-auto">
+        <section className="py-20 px-6 bg-white border-b border-slate-200/40 relative overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-red/8 rounded-full blur-3xl opacity-30" />
+          <div className="max-w-6xl mx-auto relative z-10">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -277,10 +287,10 @@ export default function Home() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-brand-navy">
-                Designed for creators who ship
+                Built for speed, styled for authenticity
               </h2>
               <p className="text-slate-500 font-medium mt-4 max-w-2xl mx-auto">
-                No more staring at a blank page. Ozigi handles the heavy lifting.
+                Skip the blank page. Skip the awkward AI language. Just ship.
               </p>
             </motion.div>
 
@@ -293,28 +303,30 @@ export default function Home() {
             >
               {[
                 {
-                  title: "Multimodal Ingestion",
-                  desc: "Drop URLs, PDFs, or raw notes – the engine extracts the core narrative automatically.",
+                  title: "Messy input welcome",
+                  desc: "URLs, PDFs, voice notes, scattered thoughts—throw it all at Ozigi. It finds the signal in the noise.",
                 },
                 {
-                  title: "Your Voice, Enforced",
-                  desc: "Create reusable personas. The Banned Lexicon kills AI‑speak.",
+                  title: "Your voice locked in",
+                  desc: "Define your persona once. Tone, depth, banned words, style—the engine enforces it flawlessly.",
                 },
                 {
-                  title: "One‑Click Publishing",
-                  desc: "Post to X, LinkedIn, Discord, or email – directly from your dashboard.",
+                  title: "Instant publishing",
+                  desc: "Ship to X, LinkedIn, Discord, email, Slack from your dashboard in seconds. No more context switching.",
                 },
               ].map((feature, i) => (
                 <motion.div
                   key={i}
                   variants={fadeUp}
                   whileHover={{ y: -4 }}
-                  className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-white border border-slate-200/60 rounded-2xl p-6 md:p-8 shadow-md hover:shadow-xl transition-all group relative overflow-hidden"
                 >
-                  <h3 className="text-xl font-black uppercase tracking-tighter mb-3 text-brand-navy">
+                  <div className="absolute -top-8 -right-8 w-20 h-20 bg-brand-red/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500" />
+                  <h3 className="text-xl font-black uppercase tracking-tighter mb-3 text-brand-navy relative z-10">
                     {feature.title}
                   </h3>
-                  <p className="text-slate-600">{feature.desc}</p>
+                  <p className="text-slate-600 relative z-10">{feature.desc}</p>
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-red group-hover:w-full transition-all duration-500" />
                 </motion.div>
               ))}
             </motion.div>
@@ -322,8 +334,10 @@ export default function Home() {
         </section>
 
         {/* Testimonials */}
-        <section className="py-20 md:py-28 bg-gradient-to-b from-brand-offwhite to-white">
-          <div className="max-w-6xl mx-auto px-6">
+        <section className="py-20 md:py-28 bg-gradient-to-b from-brand-offwhite to-white relative overflow-hidden">
+          <div className="absolute top-1/3 right-0 w-96 h-96 bg-brand-red/8 rounded-full blur-3xl opacity-30" />
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-brand-navy/5 rounded-full blur-3xl opacity-20" />
+          <div className="max-w-6xl mx-auto px-6 relative z-10">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -332,10 +346,10 @@ export default function Home() {
               className="text-center mb-16"
             >
               <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-brand-navy mb-4">
-                Loved by creators who ship
+                Shipping faster, sounding smarter
               </h2>
               <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
-                Don't take our word for it — hear what our users have to say.
+                Real people. Real results. Real voice.
               </p>
             </motion.div>
 
@@ -350,19 +364,19 @@ export default function Home() {
                 {
                   name: "Priya Sharma",
                   role: "Senior Developer Advocate",
-                  quote: "Ozigi turned my messy API docs into a 3‑day X thread that got 10k impressions. The Banned Lexicon is a game‑changer — I finally sound like myself.",
+                  quote: "I paste my rough notes into Ozigi and get back a polished X thread that sounds like me, not a chatbot. It's the difference between shipping and not shipping.",
                   image: "/testimonials/priya.jpg",
                 },
                 {
                   name: "Marcus Chen",
                   role: "Technical Founder",
-                  quote: "I used to spend hours tweaking prompts to avoid AI‑speak. Ozigi does it for me. Now I just drop in my notes and get ready‑to‑publish content. Huge time saver.",
+                  quote: "Before Ozigi, I'd spend two hours tweaking prompts and still sound like ChatGPT. Now I feed in rough thoughts and ship authentic posts in minutes.",
                   image: "/testimonials/marcus.jpg",
                 },
                 {
                   name: "Sarah Okonkwo",
                   role: "DevRel Lead",
-                  quote: "The persona feature is incredible. I saved my voice once, and now every campaign sounds exactly like me. My engagement has doubled since I started using Ozigi.",
+                  quote: "Set my voice once. Now every post is on-brand, on-voice, and ready to go. My LinkedIn engagement tripled because I actually sound like me again.",
                   image: "/testimonials/sarah.jpg",
                 },
               ].map((testimonial, idx) => (
@@ -370,10 +384,11 @@ export default function Home() {
                   key={idx}
                   variants={fadeUp}
                   whileHover={{ y: -4 }}
-                  className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-white rounded-3xl border border-slate-200/60 p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100">
+                  <div className="absolute top-0 right-0 w-28 h-28 bg-brand-red/8 rounded-full blur-2xl group-hover:bg-brand-red/12 transition-colors" />
+                  <div className="flex items-center gap-4 mb-6 relative z-10">
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 ring-2 ring-brand-red/20">
                       <Image
                         src={testimonial.image}
                         alt={testimonial.name}
@@ -386,8 +401,8 @@ export default function Home() {
                       <p className="text-xs text-slate-500">{testimonial.role}</p>
                     </div>
                   </div>
-                  <p className="text-slate-700 leading-relaxed italic">"{testimonial.quote}"</p>
-                  <div className="mt-6 flex text-brand-red">
+                  <p className="text-slate-700 leading-relaxed italic relative z-10">"{testimonial.quote}"</p>
+                  <div className="mt-6 flex text-brand-red relative z-10">
                     {"★".repeat(5)}
                   </div>
                 </motion.div>
@@ -397,13 +412,15 @@ export default function Home() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-20 px-6 scroll-mt-32">
-          <div className="max-w-6xl mx-auto">
+        <section id="pricing" className="py-20 px-6 scroll-mt-32 relative overflow-hidden">
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand-red/8 rounded-full blur-3xl opacity-30" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-navy/5 rounded-full blur-3xl opacity-20" />
+          <div className="max-w-6xl mx-auto relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-brand-navy">
-                Simple, transparent pricing
+                No surprises. Just results.
               </h2>
-              <p className="text-slate-500 font-medium mt-4">Start free, upgrade when you're ready.</p>
+              <p className="text-slate-500 font-medium mt-4">Try free forever. Scale when you ship.</p>
             </div>
             <PricingCards onOpenAuthModal={() => setIsAuthModalOpen(true)} />
           </div>

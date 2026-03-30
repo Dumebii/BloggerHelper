@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface ScheduleEmailModalProps {
   isOpen: boolean;
@@ -17,8 +18,9 @@ export default function ScheduleEmailModal({ isOpen, onClose, onSchedule }: Sche
     if (!isNaN(localDate.getTime())) {
       onSchedule(localDate.toISOString());
       onClose();
+      toast.success("Email scheduled!");
     } else {
-      alert("Invalid date/time");
+      toast.error("Invalid date/time. Please try again.");
     }
   };
 

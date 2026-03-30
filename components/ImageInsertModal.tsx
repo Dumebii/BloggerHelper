@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { toast } from "sonner";
 import { uploadLargeAsset } from "@/lib/utils";
 
 interface ImageInsertModalProps {
@@ -17,8 +18,9 @@ export default function ImageInsertModal({ isOpen, onClose, onInsert }: ImageIns
     try {
       const url = await uploadLargeAsset(file);
       setImageUrl(url);
+      toast.success("Image uploaded!");
     } catch (err) {
-      alert("Upload failed: " + (err as Error).message);
+      toast.error(`Upload failed: ${(err as Error).message}`);
     } finally {
       setIsUploading(false);
     }

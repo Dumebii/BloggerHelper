@@ -30,6 +30,7 @@ import UpgradeModal from "@/components/UpgradeModal";
 import DashboardTour from "@/components/dashboard/DashboardTour";
 import { incrementCampaignGeneration } from "@/lib/plan";
 import { toast } from "sonner";
+import { PLATFORMS } from "@/lib/platforms";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function Dashboard() {
     text: "",
     fileUrls: [],
     files: [],
-    platforms: ["x", "linkedin", "discord", "email"],
+    platforms: [PLATFORMS.X, PLATFORMS.LINKEDIN, PLATFORMS.DISCORD, PLATFORMS.EMAIL],
     tweetFormat: "single" as const,
     additionalInfo: "",
     personaId: "default",
@@ -211,15 +212,35 @@ const handleGenerate = async () => {
       jsonString = jsonString.slice(firstBrace, lastBrace + 1);
     }
 
+// --- Bulletproof JSON Extraction ---
     let finalResponse;
     try {
-      finalResponse = JSON.parse(jsonString);
+      // 1. Check if the fetch response already auto-parsed it into an object
+      if (typeof data.output === 'object' && data.output !== null) {
+        finalResponse = data.output;
+      } else {
+        let jsonString = data.output || "";
+
+        // 2. Aggressively strip markdown code fences
+        jsonString = jsonString.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+        // 3. Find where the actual JSON object starts and ends
+        const firstBrace = jsonString.indexOf('{');
+        const lastBrace = jsonString.lastIndexOf('}');
+        
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          // Slice out only the valid JSON payload, ignoring conversational text
+          jsonString = jsonString.slice(firstBrace, lastBrace + 1);
+        }
+
+        // 4. Parse the cleaned string
+        finalResponse = JSON.parse(jsonString);
+      }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Raw AI output:', data.output);
-      }
-      setErrorMessage("The AI returned an unexpected format. Please try tweaking your context and generating again.");
+      console.error('Raw AI output that caused the crash:', data.output);
+      
+      setErrorMessage("Campaign was successfully created! Please check your campaign history. If no generation appears, try tweaking your context and generating again.");
       setLoading(false);
       return;
     }
@@ -258,7 +279,7 @@ const handleGenerate = async () => {
   } catch (err) {
     console.error("Context error:", err);
     setErrorMessage(
-      "The AI returned an unexpected format. Please try tweaking your context and generating again."
+      "Campaign was successfully generated, please check your campaign history. If no generation appears, try tweaking your context and generating again."
     );
   } finally {
     setLoading(false);

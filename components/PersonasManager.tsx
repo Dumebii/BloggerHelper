@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 
 interface PersonasManagerProps {
@@ -41,9 +42,10 @@ export default function PersonasManager({ session }: PersonasManagerProps) {
       setNewName("");
       setNewPrompt("");
       fetchPersonas();
-      window.dispatchEvent(new Event("refreshPersonas")); // for ContextEngine dropdown
+      window.dispatchEvent(new Event("refreshPersonas"));
+      toast.success("Persona created!");
     } else {
-      alert("Failed to save persona: " + error.message);
+      toast.error(`Failed to save persona: ${error.message}`);
     }
   };
 

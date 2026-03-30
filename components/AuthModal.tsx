@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Provider } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
+import { OAUTH_PROVIDERS, OAUTH_SCOPES } from "@/lib/platforms";
 
 export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
@@ -18,10 +19,10 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
   const handleSignIn = async (provider: Provider) => {
     setLoadingProvider(provider);
     let scopes = undefined;
-    if (provider === "x") {
-      scopes = "tweet.read tweet.write users.read offline.access";
-    } else if (provider === "linkedin_oidc") {
-      scopes = "w_member_social openid profile email";
+    if (provider === OAUTH_PROVIDERS.X) {
+      scopes = OAUTH_SCOPES.X;
+    } else if (provider === OAUTH_PROVIDERS.LINKEDIN) {
+      scopes = OAUTH_SCOPES.LINKEDIN;
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -135,7 +136,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
             </button>
 
             <button
-              onClick={() => handleSignIn("x" as Provider)}
+              onClick={() => handleSignIn(OAUTH_PROVIDERS.X as Provider)}
               disabled={!!loadingProvider}
               className="w-full flex items-center justify-center gap-3 bg-black border-2 border-black text-white hover:bg-slate-800 px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50"
             >

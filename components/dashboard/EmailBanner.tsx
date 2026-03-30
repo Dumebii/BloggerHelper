@@ -19,9 +19,7 @@ export default function EmailBanner({ needsEmail, onDismiss, onGoToSettings }: E
         ✕
       </button>
       <div>
-        <h3 className="font-bold text-sm text-brand-red">Action Required: Secure your account</h3>
-
-        <p className="text-xs text-brand-red/80 mt-1">
+        <p className="text-xs text-brand-red/80">
           If you signed in with X. Please add an email address in Settings for X schedule reminders. <span>              <button
         onClick={onGoToSettings}
         className="shrink-0 bg-brand-red text-white py-2 px-1  rounded-lg text-sm font-semibold hover:bg-opacity-90 transition"

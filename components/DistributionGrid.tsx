@@ -1,12 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
+import { toast } from "sonner";
 import { CampaignDay } from "../lib/types";
 import ScheduleModal from "./ScheduleModal";
 import RichTextEditor from "./RichTextEditor";
 import ScheduleEmailModal from "./ScheduleEmailModal";
 import { uploadBase64Image } from "@/lib/utils";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
+import { PLATFORMS, getApiEndpoint } from "@/lib/platforms";
 
 // Add the missing interface
 interface DistributionGridProps {
@@ -104,7 +106,7 @@ function SocialCard({
   const handleGenerateImage = async () => {
     if (!planStatus) return;
     if (planStatus.imageGenLimit !== -1 && imagesGeneratedCount >= planStatus.imageGenLimit) {
-      alert(`You've reached your image generation limit (${planStatus.imageGenLimit} per campaign). Upgrade to generate more.`);
+      toast.error(`You've reached your image limit (${planStatus.imageGenLimit} per campaign). Upgrade for more.`);
       return;
     }
 
@@ -124,13 +126,14 @@ function SocialCard({
       const publicUrl = await uploadBase64Image(data.imageUrl);
       setImageUrl(publicUrl);
       incrementImageCount();
+      toast.success("Image generated!");
     } catch (err: any) {
       console.error(err);
-      let errorMsg = `Image Error: ${err.message}`;
+      let errorMsg = `Image generation failed: ${err.message}`;
       if (err.message.includes("Quota exceeded")) {
-        errorMsg = "Image generation quota exceeded. Please try again later or upgrade your plan.";
+        errorMsg = "Image quota exceeded. Try again later or upgrade.";
       }
-      alert(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsGeneratingImg(false);
     }
@@ -150,7 +153,7 @@ function SocialCard({
   const handleSchedule = async (scheduledFor: string, email?: string | null) => {
     const token = session?.access_token;
     if (!token) {
-      alert("You must be signed in to schedule posts.");
+      toast.error("Sign in to schedule posts.");
       return;
     }
 
@@ -342,7 +345,10 @@ const [slackStatuses, setSlackStatuses] = useState<{ [day: number]: "idle" | "lo
   };
 
   const handleEmailSchedule = async (scheduledFor: string, imageUrl?: string) => {
-    if (!session?.access_token) return alert("Please sign in to schedule.");
+    if (!session?.access_token) {
+      toast.error("Sign in to schedule emails.");
+      return;
+    }
     setEmailStatus("loading");
     try {
       const res = await fetch("/api/schedule", {
@@ -354,7 +360,7 @@ const [slackStatuses, setSlackStatuses] = useState<{ [day: number]: "idle" | "lo
         body: JSON.stringify({
           posts: [
             {
-              platform: "email",
+              platform: PLATFORMS.EMAIL,
               content: localEmailContent,
               imageUrl: imageUrl,
               day: 0,
@@ -368,8 +374,9 @@ const [slackStatuses, setSlackStatuses] = useState<{ [day: number]: "idle" | "lo
       setEmailStatus("success");
       setTimeout(() => setEmailStatus("idle"), 3000);
       if (onStatsChange) onStatsChange();
+      toast.success("Email scheduled!");
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message || "Failed to schedule email.");
       setEmailStatus("error");
     }
   };
@@ -384,12 +391,12 @@ const [slackStatuses, setSlackStatuses] = useState<{ [day: number]: "idle" | "lo
 const handlePostToDiscord = async (text: string, day: number, imageUrl?: string) => {
   const discordWebhook = session?.user?.user_metadata?.discord_webhook;
   if (!discordWebhook) {
-    alert("No Discord Webhook found. Please add one in Settings ⚙️");
+    toast.error("Add your Discord webhook in Settings first.");
     return;
   }
   setDiscordStatuses((prev) => ({ ...prev, [day]: "loading" }));
   try {
-    const res = await fetch("/api/post-discord", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.DISCORD), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -401,18 +408,22 @@ const handlePostToDiscord = async (text: string, day: number, imageUrl?: string)
     if (!res.ok) throw new Error("Discord rejected the webhook payload.");
     setDiscordStatuses((prev) => ({ ...prev, [day]: "success" }));
     setTimeout(() => setDiscordStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
+    toast.success("Posted to Discord!");
   } catch (error: any) {
     console.error("Discord Error:", error);
     setDiscordStatuses((prev) => ({ ...prev, [day]: "error" }));
-    alert(`Failed to post to Discord: ${error.message}`);
+    toast.error(`Failed to post to Discord: ${error.message}`);
   }
 };
 
   const handlePostToLinkedIn = async (text: string, day: number, imageUrl?: string) => {
-    if (!session?.access_token) return alert("You must be signed in to post!");
+    if (!session?.access_token) {
+      toast.error("Sign in to post to LinkedIn.");
+      return;
+    }
     setLiStatuses((prev) => ({ ...prev, [day]: "loading" }));
     try {
-      const res = await fetch("/api/publish/linkedin", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.LINKEDIN), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -424,22 +435,23 @@ const handlePostToDiscord = async (text: string, day: number, imageUrl?: string)
       if (!res.ok) throw new Error(data.error || "Failed to post to LinkedIn");
       setLiStatuses((prev) => ({ ...prev, [day]: "success" }));
       setTimeout(() => setLiStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
+      toast.success("Posted to LinkedIn!");
     } catch (error: any) {
       console.error("LinkedIn Posting Error:", error);
       setLiStatuses((prev) => ({ ...prev, [day]: "error" }));
-      alert(`Failed to post: ${error.message}`);
+      toast.error(`Failed to post: ${error.message}`);
     }
   };
 
 const handlePostToSlack = async (text: string, day: number, imageUrl?: string) => {
   const slackWebhook = session?.user?.user_metadata?.slack_webhook;
   if (!slackWebhook) {
-    alert("No Slack Webhook found. Please add one in Settings ⚙️");
+    toast.error("Add your Slack webhook in Settings first.");
     return;
   }
   setSlackStatuses((prev) => ({ ...prev, [day]: "loading" }));
   try {
-    const res = await fetch("/api/publish/slack", {
+      const res = await fetch(getApiEndpoint(PLATFORMS.SLACK), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -451,21 +463,22 @@ const handlePostToSlack = async (text: string, day: number, imageUrl?: string) =
     if (!res.ok) throw new Error("Slack rejected the webhook payload.");
     setSlackStatuses((prev) => ({ ...prev, [day]: "success" }));
     setTimeout(() => setSlackStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
+    toast.success("Posted to Slack!");
   } catch (error: any) {
     console.error("Slack Error:", error);
     setSlackStatuses((prev) => ({ ...prev, [day]: "error" }));
-    alert(`Failed to post to Slack: ${error.message}`);
+    toast.error(`Failed to post to Slack: ${error.message}`);
   }
 };
 
   const safeCampaign = campaign ?? [];
   const safePlatforms = selectedPlatforms ?? [];
 
-  const hasX = safeCampaign.some((d: CampaignDay) => d.x) && safePlatforms.includes("x");
-  const hasLinkedIn = safeCampaign.some((d: CampaignDay) => d.linkedin) && safePlatforms.includes("linkedin");
-  const hasDiscord = safeCampaign.some((d: CampaignDay) => d.discord) && safePlatforms.includes("discord");
-  const hasEmail = !!localEmailContent && safePlatforms.includes("email");
-  const hasSlack = safeCampaign.some((d: CampaignDay) => d.slack) && safePlatforms.includes("slack");
+  const hasX = safeCampaign.some((d: CampaignDay) => d.x) && safePlatforms.includes(PLATFORMS.X);
+  const hasLinkedIn = safeCampaign.some((d: CampaignDay) => d.linkedin) && safePlatforms.includes(PLATFORMS.LINKEDIN);
+  const hasDiscord = safeCampaign.some((d: CampaignDay) => d.discord) && safePlatforms.includes(PLATFORMS.DISCORD);
+  const hasEmail = !!localEmailContent && safePlatforms.includes(PLATFORMS.EMAIL);
+  const hasSlack = safeCampaign.some((d: CampaignDay) => d.slack) && safePlatforms.includes(PLATFORMS.SLACK);
 
   return (
     <div className="space-y-12">

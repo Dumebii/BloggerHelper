@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Send, X, ArrowRight, Trash2, Globe, Loader2, User, Bot } from "lucide-react";
+import { Send, X, ArrowRight, Trash2, Globe, User, Bot, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import TextareaAutosize from 'react-textarea-autosize';
@@ -32,6 +32,7 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
       { role: "assistant", content: "Hi! I'm your content copilot. What do you want to brainstorm today?" }
     ];
   });
+  
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchEnabled, setSearchEnabled] = useState(false);
@@ -53,7 +54,9 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage = { role: "user" as const, content: input };
+    const userText = input.trim();
+    const userMessage = { role: "user" as const, content: userText };
+    
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -75,24 +78,29 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
       let done = false;
       let accumulated = "";
 
+      // Append an empty assistant message to act as the streaming target
       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
-        const chunk = decoder.decode(value, { stream: true });
-        accumulated += chunk;
+        
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          accumulated += chunk;
 
-        setMessages(prev => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1].content = accumulated;
-          return newMessages;
-        });
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1].content = accumulated;
+            return newMessages;
+          });
+        }
       }
     } catch (err: any) {
-      setMessages(prev => [...prev, { role: "assistant", content: `Error: ${err.message}` }]);
+      setMessages(prev => [...prev, { role: "assistant", content: `**Error:** ${err.message}` }]);
     } finally {
       setIsLoading(false);
+      setTimeout(() => textareaRef.current?.focus(), 10);
     }
   };
 
@@ -113,155 +121,137 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[420px] bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
-      {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-brand-navy text-white">
+    <div className="fixed inset-y-0 right-0 w-[420px] bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200">
+      
+      {/* --- HEADER --- */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-900 text-white shadow-sm">
         <div className="flex items-center gap-2">
-          <Bot size={20} />
-          <h2 className="text-sm font-black uppercase tracking-widest">Ozigi Copilot</h2>
+          <div className="bg-brand-red p-1.5 rounded-md">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-100">Ozigi Copilot</h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             onClick={handleClearConversation}
-            className="text-white/70 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest"
             title="Clear conversation"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} /> Clear
           </button>
-          <button onClick={onClose} className="text-white/70 hover:text-white">
+          <button onClick={onClose} className="text-slate-400 hover:text-brand-red transition-colors">
             <X size={20} />
           </button>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-6">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-              {/* Avatar */}
-              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                msg.role === "user" 
-                  ? "bg-brand-red text-white" 
-                  : "bg-slate-100 text-slate-600"
-              }`}>
-                {msg.role === "user" ? <User size={16} /> : <Bot size={16} />}
-              </div>
+      {/* --- MESSAGES AREA --- */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/50 scroll-smooth">
+        {messages.map((msg, idx) => {
+          const isUser = msg.role === "user";
+          return (
+            <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+              <div className={`flex gap-3 max-w-[90%] ${isUser ? "flex-row-reverse" : ""}`}>
+                
+                {/* Avatar */}
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
+                  isUser 
+                    ? "bg-brand-red text-white" 
+                    : "bg-white border border-slate-200 text-slate-700"
+                }`}>
+                  {isUser ? <User size={14} strokeWidth={2.5} /> : <Bot size={16} />}
+                </div>
 
-              {/* Bubble */}
-              <div className={`rounded-2xl px-4 py-3 text-sm ${
-                msg.role === "user"
-                  ? "bg-brand-red text-white"
-                  : "bg-slate-100 text-slate-800"
-              }`}>
-                {msg.role === "assistant" ? (
-                  <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-slate-800 prose-p:text-slate-700 prose-strong:text-slate-900 prose-code:text-red-600 prose-code:bg-slate-200 prose-code:px-1 prose-code:rounded prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-pre:overflow-x-auto prose-pre:text-xs">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ node, ...props }) => (
-                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-brand-red underline" />
-                        ),
-                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                        h1: ({ children }) => <h1 className="text-xl font-black mt-4 mb-2">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-lg font-bold mt-3 mb-2">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-base font-semibold mt-2 mb-1">{children}</h3>,
-                        ul: ({ children }) => <ul className="list-disc pl-4 my-2 space-y-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-4 my-2 space-y-1">{children}</ol>,
-                        li: ({ children }) => <li className="text-sm">{children}</li>,
-                        code: ({ node, className, children, ...props }) => {
-                          const match = /language-(\w+)/.exec(className || '');
-                          const inline = !match && !className?.includes('language-');
-                          return inline ? (
-                            <code className="bg-slate-200 px-1 rounded text-xs text-red-600" {...props}>{children}</code>
-                          ) : (
-                            <pre className="bg-slate-800 text-slate-100 p-3 rounded-lg overflow-x-auto my-2 text-xs">
-                              <code className={className} {...props}>{children}</code>
-                            </pre>
-                          );
-                        },
-                        blockquote: ({ children }) => (
-                          <blockquote className="border-l-4 border-brand-red pl-3 my-2 text-slate-600 italic">
-                            {children}
-                          </blockquote>
-                        ),
-                        hr: () => <hr className="my-4 border-slate-200" />,
-                      }}
-                    >
-                      {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <div className="whitespace-pre-wrap break-words">{msg.content}</div>
-                )}
+                {/* Bubble */}
+                <div className={`rounded-2xl px-5 py-4 text-sm shadow-sm border ${
+                  isUser
+                    ? "bg-brand-red border-brand-red text-white rounded-tr-sm"
+                    : "bg-white border-slate-200 text-slate-800 rounded-tl-sm"
+                }`}>
+                  {!isUser && msg.content === "" && isLoading ? (
+                    <div className="flex items-center gap-1 h-5">
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                    </div>
+                  ) : isUser ? (
+                    <div className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</div>
+                  ) : (
+                    <div className="prose prose-sm max-w-none 
+                      prose-headings:font-bold prose-headings:text-slate-900 
+                      prose-p:text-slate-700 prose-p:leading-relaxed 
+                      prose-strong:text-slate-900 
+                      prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline
+                      prose-code:text-brand-red prose-code:bg-red-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium prose-code:before:content-none prose-code:after:content-none
+                      prose-pre:bg-slate-900 prose-pre:text-slate-50 prose-pre:p-4 prose-pre:rounded-xl prose-pre:border prose-pre:border-slate-800
+                      prose-li:text-slate-700
+                    ">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="flex gap-3 max-w-[85%]">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                <Bot size={16} className="text-slate-600" />
-              </div>
-              <div className="bg-slate-100 rounded-2xl px-4 py-3 text-sm text-slate-800">
-                <Loader2 size={16} className="animate-spin" />
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          );
+        })}
+        <div ref={messagesEndRef} className="h-2" />
       </div>
 
-      {/* Input area */}
-      <div className="border-t border-slate-200 p-4 bg-white">
-        <div className="flex gap-2">
+      {/* --- INPUT AREA --- */}
+      <div className="bg-white border-t border-slate-200 p-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
+        
+        {/* Send to Engine (Sticky above input if context exists) */}
+        {messages.length > 1 && messages[messages.length - 1].role === "assistant" && !isLoading && (
+          <div className="mb-4">
+            <button
+              onClick={() => onSendToEngine(messages[messages.length - 1].content)}
+              className="w-full bg-red-50 border border-red-100 text-brand-red py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-100 hover:border-red-200 transition-all flex items-center justify-center gap-2 group shadow-sm"
+            >
+              Use this context <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        )}
+
+        <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:border-brand-red focus-within:ring-1 focus-within:ring-brand-red/20 transition-all">
           <TextareaAutosize
             ref={textareaRef}
-            minRows={2}
-            maxRows={10}
+            minRows={1}
+            maxRows={6}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
-            className="flex-1 bg-slate-50 rounded-xl px-4 py-3 text-sm text-slate-900 border border-slate-200 focus:outline-none focus:border-brand-red placeholder:text-slate-400 resize-none"
+            className="flex-1 bg-transparent px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 resize-none outline-none leading-relaxed"
           />
           <button
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="bg-brand-navy text-white p-3 rounded-xl hover:bg-opacity-90 disabled:opacity-50 self-end transition-colors"
+            className="bg-brand-red text-white p-2.5 rounded-xl hover:bg-red-600 disabled:opacity-40 disabled:hover:bg-brand-red transition-all flex-shrink-0 shadow-sm"
           >
-            <Send size={18} />
+            <Send size={16} className={isLoading ? "opacity-0" : "opacity-100"} />
+            {isLoading && <div className="absolute inset-0 flex items-center justify-center"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
           </button>
         </div>
 
-        {/* Search toggle */}
-        <div className="flex items-center gap-2 mt-3">
-          <input
-            type="checkbox"
-            id="search-toggle"
-            checked={searchEnabled}
-            onChange={(e) => setSearchEnabled(e.target.checked)}
-            className="rounded border-slate-300 text-brand-red focus:ring-brand-red"
-          />
-          <label htmlFor="search-toggle" className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
-            <Globe size={12} />
-            Search the web (enhances answers)
+        {/* Search Toggle */}
+        <div className="flex items-center gap-2 mt-4 px-2">
+          <label className="relative inline-flex items-center cursor-pointer group">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={searchEnabled}
+              onChange={(e) => setSearchEnabled(e.target.checked)}
+            />
+            <div className="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-red"></div>
+            <span className="ml-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 group-hover:text-slate-700 flex items-center gap-1.5 transition-colors">
+              <Globe size={12} className={searchEnabled ? "text-brand-red" : ""} />
+              Live Web Search
+            </span>
           </label>
         </div>
-
-        {/* Send to Engine button */}
-        {messages.length > 1 && messages[messages.length - 1].role === "assistant" && (
-          <button
-            onClick={() => onSendToEngine(messages[messages.length - 1].content)}
-            className="mt-3 w-full bg-brand-red/10 text-brand-red py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-brand-red/20 transition-colors flex items-center justify-center gap-2"
-          >
-            Send to Context Engine <ArrowRight size={14} />
-          </button>
-        )}
+        
       </div>
     </div>
   );

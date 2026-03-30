@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 import { Check } from "lucide-react";
 
@@ -137,11 +138,11 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        alert("Failed to create checkout. Please try again later.");
+        toast.error("Failed to create checkout. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 

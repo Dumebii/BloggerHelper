@@ -152,14 +152,14 @@ export default function Hero() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
               <span className="text-xs font-bold uppercase tracking-widest text-slate-700">
-                New: Email & Slack distribution
+                AI that learns your voice
               </span>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[1.1] text-brand-navy">
-              Turn your raw ideas into <br />
+              Content that doesn't <br />
               <span className="text-brand-red relative inline-block">
-                winning social media content
+                sound like AI wrote it
                 <motion.span
                   className="absolute -bottom-2 left-0 w-full h-1 bg-brand-red/30"
                   initial={{ scaleX: 0 }}
@@ -169,21 +169,21 @@ export default function Hero() {
               </span>
             </h1> 
             <p className="text-lg text-slate-600 max-w-lg mx-auto lg:mx-0">
-              Drop notes, URLs, or PDFs. Ozigi generates posts for X, LinkedIn, and Discord in your voice. No prompt engineering. Just your ideas.
+              Stop writing. Start shipping. Drop raw thoughts, PDFs, or links. Ozigi transforms them into platform-ready posts that sound authentically like you—not a template.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
               <Link
                 href="/demo"
                 className="bg-brand-navy text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-opacity-90 transition shadow-lg text-center group"
               >
-                Try the live demo
+                Start for free
                 <span className="inline-block ml-1 group-hover:translate-x-1 transition">→</span>
               </Link>
               <Link
                 href="/docs"
                 className="bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-slate-50 transition shadow-sm text-center"
               >
-                Read the docs
+                See how it works
               </Link>
             </div>
 <div className="flex flex-wrap items-center gap-6 pt-4 justify-center lg:justify-start text-slate-500 hidden md:flex">
@@ -258,26 +258,26 @@ export default function Hero() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="text-left">
-              <div className="text-2xl font-black text-brand-navy">300+</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500">campaigns generated</div>
+              <div className="text-2xl font-black text-brand-navy">1,200+</div>
+              <div className="text-xs uppercase tracking-widest text-slate-500">posts shipped</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             <div className="text-left">
-              <div className="text-2xl font-black text-brand-navy">50+</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500">active creators</div>
+              <div className="text-2xl font-black text-brand-navy">10s</div>
+              <div className="text-xs uppercase tracking-widest text-slate-500">content generation</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="text-left">
-              <div className="text-2xl font-black text-brand-navy">20s</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500">average generation time</div>
+              <div className="text-2xl font-black text-brand-navy">0</div>
+              <div className="text-xs uppercase tracking-widest text-slate-500">AI-speak detected</div>
             </div>
           </div>
         </motion.div>

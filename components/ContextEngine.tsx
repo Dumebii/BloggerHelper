@@ -1,9 +1,13 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Paperclip, ChevronDown, ArrowLeftRight, X } from "lucide-react";
 import SkeletonGrid from "./SkeletonGrid";
 import { uploadLargeAsset } from "@/lib/utils";
+import { PLATFORM_METADATA } from "@/lib/platforms";
+
+const ALL_PLATFORMS = Object.values(PLATFORM_METADATA);
 
 interface DistilleryProps {
   session?: any;
@@ -24,15 +28,6 @@ interface DistilleryProps {
   onGenerate: () => void;
   loading: boolean;
 }
-
-// Platform definitions
-const ALL_PLATFORMS = [
-  { id: "x", shortLabel: "X", fullName: "X (Twitter)", tooltip: "Opens tweet intent in new tab" },
-  { id: "linkedin", shortLabel: "LI", fullName: "LinkedIn", tooltip: "Direct OAuth post with image support" },
-  { id: "discord", shortLabel: "DC", fullName: "Discord", tooltip: "Send via webhook (configure in Settings)" },
-  { id: "slack", shortLabel: "SL", fullName: "Slack", tooltip: "Send via webhook (configure in Settings)" },
-  { id: "email", shortLabel: "EM", fullName: "Email", tooltip: "Send newsletter to your subscribers" },
-];
 
 export default function Distillery({
   session,
@@ -79,7 +74,7 @@ export default function Distillery({
       }));
     } catch (error) {
       console.error("R2 Upload error:", error);
-      alert("Failed to upload some files to storage. Please try again.");
+      toast.error("Failed to upload some files. Please try again.");
     } finally {
       setIsUploading(false);
     }

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
+import { PLATFORMS } from "@/lib/platforms"; 
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export default function ScheduleModal({
             />
           </div>
 
-  {platform.toLowerCase() === "x" && (
+  {platform.toLowerCase() === PLATFORMS.X && (
     <div className="space-y-3">
       {!emailToUse ? (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -122,7 +123,7 @@ export default function ScheduleModal({
     </div>
   )}
 
-  {platform.toLowerCase() === "email" && (
+  {platform.toLowerCase() === PLATFORMS.EMAIL && (
   <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
     <p className="text-xs text-indigo-800 font-medium">
       📧 This email will be sent to all your active subscribers.
