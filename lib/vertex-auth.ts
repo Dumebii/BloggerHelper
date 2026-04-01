@@ -5,7 +5,10 @@ import path from 'path';
 export async function getVertexGoogleAuthOptions() {
   const projectId = process.env.GCP_PROJECT_ID || "ozigi-489021";
 
-  if (process.env.VERCEL) {
+  // Check for Vercel environment (production, preview, or v0 sandbox)
+  const isVercelEnv = process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_URL;
+  
+  if (isVercelEnv) {
     const projectNumber = process.env.GCP_PROJECT_NUMBER?.trim();
     const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID?.trim();
     const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID?.trim();

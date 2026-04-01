@@ -247,9 +247,7 @@ export async function POST(req: Request) {
     }
 
     const planStatus = await getPlanStatus(user.id);
-    console.log('[v0] Plan status for user', user.id, ':', JSON.stringify(planStatus, null, 2));
     if (!planStatus.canGenerate) {
-      console.log('[v0] Generation blocked - used:', planStatus.generationsUsed, 'limit:', planStatus.generationsLimit);
       return NextResponse.json(
         {
           error: 'generation_limit_reached',
