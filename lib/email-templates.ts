@@ -65,3 +65,134 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+export function buildWelcomeEmail(userName?: string) {
+  const displayName = userName || 'there';
+  const dashboardUrl = `${process.env.APP_URL || 'https://ozigi.app'}/dashboard`;
+  const docsUrl = `${process.env.APP_URL || 'https://ozigi.app'}/docs`;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px 32px; text-align: center;">
+            <img src="https://ozigi.app/logo.png" alt="Ozigi" style="height: 48px; margin-bottom: 16px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Welcome to Ozigi!</h1>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 32px;">
+            <p style="font-size: 18px; color: #0f172a; margin: 0 0 24px 0;">
+              Hey ${escapeHtml(displayName)},
+            </p>
+            <p style="font-size: 16px; color: #475569; line-height: 1.6; margin: 0 0 24px 0;">
+              Welcome to Ozigi - your AI-powered marketing companion. We&apos;re excited to have you on board!
+            </p>
+            
+            <!-- Features -->
+            <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin: 24px 0;">
+              <h3 style="color: #0f172a; margin: 0 0 16px 0; font-size: 16px;">Here&apos;s what you can do:</h3>
+              <ul style="margin: 0; padding: 0 0 0 20px; color: #475569; line-height: 2;">
+                <li>Generate AI-powered marketing campaigns in seconds</li>
+                <li>Schedule posts to X, LinkedIn, Discord, and Slack</li>
+                <li>Send beautiful email newsletters to your subscribers</li>
+                <li>Analyze your content with AI insights</li>
+              </ul>
+            </div>
+            
+            <!-- CTA -->
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${dashboardUrl}" style="background: #0f172a; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                Go to Dashboard
+              </a>
+            </div>
+            
+            <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin: 24px 0 0 0;">
+              Need help getting started? Check out our <a href="${docsUrl}" style="color: #1d4ed8; text-decoration: none;">documentation</a> or reply to this email - we&apos;re here to help!
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-size: 12px; margin: 0;">
+              You&apos;re receiving this because you signed up for Ozigi.<br>
+              Made with care by the Ozigi team.
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+export function buildPromotionalEmail(
+  subject: string,
+  headline: string,
+  body: string,
+  ctaText?: string,
+  ctaUrl?: string,
+  unsubscribeUrl?: string
+) {
+  const appUrl = process.env.APP_URL || 'https://ozigi.app';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="padding: 32px 32px 0; text-align: center;">
+            <img src="https://ozigi.app/logo.png" alt="Ozigi" style="height: 40px;">
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 32px;">
+            <h1 style="color: #0f172a; margin: 0 0 24px 0; font-size: 24px; font-weight: 700; text-align: center;">
+              ${escapeHtml(headline)}
+            </h1>
+            <div style="font-size: 16px; color: #475569; line-height: 1.6;">
+              ${body}
+            </div>
+            
+            ${ctaText && ctaUrl ? `
+            <div style="text-align: center; margin: 32px 0 16px;">
+              <a href="${ctaUrl}" style="background: #0f172a; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                ${escapeHtml(ctaText)}
+              </a>
+            </div>
+            ` : ''}
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
+              You&apos;re receiving this because you have an account on Ozigi.
+            </p>
+            ${unsubscribeUrl ? `
+            <p style="margin: 0;">
+              <a href="${unsubscribeUrl}" style="color: #ef4444; font-size: 12px; text-decoration: none;">Unsubscribe from promotional emails</a>
+            </p>
+            ` : ''}
+            <p style="color: #94a3b8; font-size: 11px; margin: 12px 0 0 0;">
+              Ozigi - AI-Powered Marketing
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
