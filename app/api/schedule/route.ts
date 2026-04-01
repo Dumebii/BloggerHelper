@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { schedulePostWithQStash } from "@/lib/qstash";
 
 export async function POST(req: Request) {
   try {
@@ -42,7 +43,24 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data });
+    // Schedule QStash jobs for each post for precise timing
+    const qstashResults = [];
+    for (const post of data || []) {
+      try {
+        const messageId = await schedulePostWithQStash(post.id, scheduledFor);
+        // Store the QStash message ID so we can cancel if needed
+        await supabase
+          .from("scheduled_posts")
+          .update({ qstash_message_id: messageId })
+          .eq("id", post.id);
+        qstashResults.push({ postId: post.id, messageId, success: true });
+      } catch (qstashError: any) {
+        console.error(`Failed to schedule QStash for post ${post.id}:`, qstashError);
+        qstashResults.push({ postId: post.id, success: false, error: qstashError.message });
+      }
+    }
+
+    return NextResponse.json({ success: true, data, qstash: qstashResults });
   } catch (error: any) {
     console.error("Schedule error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
