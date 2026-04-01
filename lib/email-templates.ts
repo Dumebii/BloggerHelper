@@ -68,8 +68,9 @@ function escapeHtml(text: string): string {
 
 export function buildWelcomeEmail(userName?: string) {
   const displayName = userName || 'there';
-  const dashboardUrl = `${process.env.APP_URL || 'https://ozigi.app'}/dashboard`;
-  const docsUrl = `${process.env.APP_URL || 'https://ozigi.app'}/docs`;
+  const appUrl = process.env.APP_URL || 'https://ozigi.app';
+  const dashboardUrl = `${appUrl}/dashboard`;
+  const pricingUrl = `${appUrl}/pricing`;
 
   return `
     <!DOCTYPE html>
@@ -85,6 +86,7 @@ export function buildWelcomeEmail(userName?: string) {
           <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px 32px; text-align: center;">
             <img src="https://ozigi.app/logo.png" alt="Ozigi" style="height: 48px; margin-bottom: 16px;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Welcome to Ozigi!</h1>
+            <p style="color: #94a3b8; margin: 12px 0 0 0; font-size: 16px;">Your AI-powered marketing companion</p>
           </div>
           
           <!-- Content -->
@@ -93,37 +95,98 @@ export function buildWelcomeEmail(userName?: string) {
               Hey ${escapeHtml(displayName)},
             </p>
             <p style="font-size: 16px; color: #475569; line-height: 1.6; margin: 0 0 24px 0;">
-              Welcome to Ozigi - your AI-powered marketing companion. We&apos;re excited to have you on board!
+              Thanks for joining Ozigi! You now have access to a powerful suite of AI marketing tools that will help you create, schedule, and distribute content across multiple platforms - all from one place.
             </p>
             
-            <!-- Features -->
-            <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin: 24px 0;">
-              <h3 style="color: #0f172a; margin: 0 0 16px 0; font-size: 16px;">Here&apos;s what you can do:</h3>
-              <ul style="margin: 0; padding: 0 0 0 20px; color: #475569; line-height: 2;">
-                <li>Generate AI-powered marketing campaigns in seconds</li>
-                <li>Schedule posts to X, LinkedIn, Discord, and Slack</li>
-                <li>Send beautiful email newsletters to your subscribers</li>
-                <li>Analyze your content with AI insights</li>
-              </ul>
+            <!-- Trial Banner -->
+            <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); border-radius: 12px; padding: 20px 24px; margin: 24px 0; text-align: center;">
+              <p style="color: #ffffff; margin: 0; font-size: 16px; font-weight: 600;">
+                You have 7 days of full access to all features
+              </p>
+              <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">
+                30 AI generations, unlimited scheduling, email newsletters & more
+              </p>
+            </div>
+            
+            <!-- Feature Cards -->
+            <h3 style="color: #0f172a; margin: 32px 0 20px 0; font-size: 18px; font-weight: 600;">What you can do with Ozigi:</h3>
+            
+            <!-- Feature 1 -->
+            <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+              <div style="background: #f0fdf4; border-radius: 10px; padding: 12px; margin-right: 16px; flex-shrink: 0;">
+                <span style="font-size: 24px;">&#x1F680;</span>
+              </div>
+              <div>
+                <h4 style="color: #0f172a; margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">AI Campaign Generator</h4>
+                <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Generate complete marketing campaigns with AI - including social posts, email copy, and images - in seconds.</p>
+              </div>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+              <div style="background: #eff6ff; border-radius: 10px; padding: 12px; margin-right: 16px; flex-shrink: 0;">
+                <span style="font-size: 24px;">&#x1F4C5;</span>
+              </div>
+              <div>
+                <h4 style="color: #0f172a; margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">Multi-Platform Scheduling</h4>
+                <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Schedule posts to X (Twitter), LinkedIn, Discord, and Slack. Set it and forget it - we handle the rest.</p>
+              </div>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+              <div style="background: #fef3c7; border-radius: 10px; padding: 12px; margin-right: 16px; flex-shrink: 0;">
+                <span style="font-size: 24px;">&#x2709;&#xFE0F;</span>
+              </div>
+              <div>
+                <h4 style="color: #0f172a; margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">Email Newsletters</h4>
+                <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Build and send beautiful email newsletters to your subscribers. Import lists, track opens, and grow your audience.</p>
+              </div>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+              <div style="background: #fce7f3; border-radius: 10px; padding: 12px; margin-right: 16px; flex-shrink: 0;">
+                <span style="font-size: 24px;">&#x1F3A8;</span>
+              </div>
+              <div>
+                <h4 style="color: #0f172a; margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">AI Image Generation</h4>
+                <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Create stunning visuals for your posts with AI. No design skills needed - just describe what you want.</p>
+              </div>
             </div>
             
             <!-- CTA -->
-            <div style="text-align: center; margin: 32px 0;">
-              <a href="${dashboardUrl}" style="background: #0f172a; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
-                Go to Dashboard
+            <div style="text-align: center; margin: 36px 0 24px;">
+              <a href="${dashboardUrl}" style="background: #0f172a; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                Start Creating
               </a>
             </div>
             
+            <!-- Quick Links -->
+            <div style="background: #f8fafc; border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+              <p style="color: #0f172a; margin: 0 0 12px 0; font-size: 14px; font-weight: 600;">Quick Links:</p>
+              <p style="margin: 0; font-size: 14px; line-height: 2;">
+                <a href="${dashboardUrl}" style="color: #1d4ed8; text-decoration: none;">Dashboard</a> &bull;
+                <a href="${pricingUrl}" style="color: #1d4ed8; text-decoration: none;">Pricing & Plans</a> &bull;
+                <a href="mailto:hello@ozigi.app" style="color: #1d4ed8; text-decoration: none;">Contact Support</a>
+              </p>
+            </div>
+            
             <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin: 24px 0 0 0;">
-              Need help getting started? Check out our <a href="${docsUrl}" style="color: #1d4ed8; text-decoration: none;">documentation</a> or reply to this email - we&apos;re here to help!
+              Questions? Just reply to this email - we read and respond to every message.
+            </p>
+            
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 16px 0 0 0;">
+              Happy marketing!<br>
+              <strong>The Ozigi Team</strong>
             </p>
           </div>
           
           <!-- Footer -->
           <div style="background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
             <p style="color: #64748b; font-size: 12px; margin: 0;">
-              You&apos;re receiving this because you signed up for Ozigi.<br>
-              Made with care by the Ozigi team.
+              You received this email because you signed up for Ozigi.<br>
+              &copy; ${new Date().getFullYear()} Ozigi. Made with care.
             </p>
           </div>
         </div>
