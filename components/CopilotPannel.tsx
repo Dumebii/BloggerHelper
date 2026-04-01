@@ -121,7 +121,7 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[420px] bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200">
+    <div className="fixed inset-y-0 right-0 w-[560px] bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200">
       
       {/* --- HEADER --- */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-900 text-white shadow-sm">
@@ -151,7 +151,7 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
           const isUser = msg.role === "user";
           return (
             <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-              <div className={`flex gap-3 max-w-[90%] ${isUser ? "flex-row-reverse" : ""}`}>
+              <div className={`flex gap-3 max-w-[85%] ${isUser ? "flex-row-reverse" : ""}`}>
                 
                 {/* Avatar */}
                 <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${

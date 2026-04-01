@@ -2,7 +2,8 @@
 title: "Gemini 2.5 Flash vs Claude 3.7 Sonnet: 4 Production Constraints That Made the Decision for Me"
 date: "2026-03-10"
 description: "An evaluation of the Gemini 2.5 flash and Claude 3.7 Sonnet model for an agentic engine."
-coverImage: "https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F0p9e395mvjgypzlg7cr3.png"
+coverImage: "/images/blog/gemini-vs-claude/cover-image.png"
+category: "Tutorial"
 ---
 
 An evaluation of the Gemini 2.5 flash and Claude 3.7 Sonnet model for an agentic engine.
@@ -278,7 +279,7 @@ Gemini won on five of six dimensions. Claude won on one — base tone — and th
 
 If you're building something similar to Ozigi, these are the constraints worth looking through before you pick an API and start building:
 
-**1. Does your UI depend on structured output? If your frontend calls `JSON.parse()` on a raw model response, you need API-level schema enforcement — not prompt instructions asking nicely. [`responseSchema` via Vertex AI] (https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output), Claude's tool use with forced `tool_choice`, or [structured outputs via OpenAI] (https://platform.openai.com/docs/guides/structured-outputs) all enforce at the decoding layer. The question isn't which model supports it — most do — it's which enforcement path fits your existing stack.
+**1. Does your UI depend on structured output? If your frontend calls `JSON.parse()` on a raw model response, you need API-level schema enforcement — not prompt instructions asking nicely. [`responseSchema` via Vertex AI](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output), Claude's tool use with forced `tool_choice`, or [structured outputs via OpenAI](https://platform.openai.com/docs/guides/structured-outputs) all enforce at the decoding layer. The question isn't which model supports it — most do — it's which enforcement path fits your existing stack.
 
 **2. Do you have a free tier or public sandbox?** If yes, latency and cost are product decisions that affect conversion, not just infrastructure decisions that affect margins.
 

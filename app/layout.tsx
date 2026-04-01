@@ -16,21 +16,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ozigi — Turn Raw Notes, PDFs & URLs Into Social Posts | AI Content Engine",
-  description: "Drop in raw notes, a PDF, or a URL. Ozigi generates platform-ready posts for X, LinkedIn, and Discord in your voice — without sounding like AI wrote them. Free to try.",
+  title: "Ozigi — Turn Raw Notes, PDFs & URLs Into Social Posts | Automated Content Generator for Creators",
+  description: "Drop in raw notes, a PDF, or a URL. Ozigi generates content for X, LinkedIn, Slack and Discord in your voice — without sounding like AI wrote them. Free to try.",
   keywords: [
     "AI content generator",
     "social media posts from notes",
     "AI content generator from PDF",
+    "Best AI Content Generator for Creators",
+    "Direct posting generator for X and LinkedIn",
     "generate LinkedIn posts from URL",
     "AI writing tool for developers",
     "content engine for technical creators",
     "AI social media post generator",
+    "Content automation",
+    "Good content, no AI voice",
     "turn notes into social media posts",
   ],
   openGraph: {
-    title: "Ozigi — AI Content Engine for Technical Creators",
-    description: "Drop in raw notes, a PDF, or a URL. Get platform-ready posts for X, LinkedIn, and Discord in your voice — not AI's.",
+    title: "Ozigi — Automated Content Generator for Technical Creators",
+    description: "Drop in raw notes, a PDF, or a URL. Get generated content or posts for X, LinkedIn, Slack and Discord in your voice — not AI's.",
     url: "https://ozigi.app",
     siteName: "Ozigi",
     type: "website",
@@ -45,8 +49,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ozigi — AI Content Engine for Technical Creators",
-    description: "Drop in raw notes, a PDF, or a URL. Get platform-ready posts for X, LinkedIn, and Discord in your voice — not AI's.",
+    title: "Ozigi — Automated Content Generator for Technical Creators",
+    description: "Drop in raw notes, a PDF, or a URL. Get content or posts for X, LinkedIn, Slack and Discord in your voice — not AI's.",
     images: ["https://ozigi.app/opengraph-image.png"],
     creator: "@DumebiTheWriter",
   },

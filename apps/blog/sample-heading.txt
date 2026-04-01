@@ -1,0 +1,29 @@
+---
+title: "Building a Content Engine with Next.js"
+date: "2026-03-30"
+description: "How Ozigi uses Next.js and AI to generate social posts."
+excerpt: "How Ozigi uses Next.js and AI to generate social posts."
+coverImage: "/images/blog/content-engine.jpg"
+author: "Dumebi Okolo"
+readTime: "8 min read"
+category: "Tutorial"
+keywords: ["Next.js", "AI", "content generation"]
+---
+
+# Introduction
+
+This is the first paragraph of the post. You can write in **markdown**.
+
+![Screenshot of dashboard](/images/blog/dashboard.png)
+
+## Code Block
+
+```js
+const hello = "world";
+console.log(hello);
+
+You can also use the JSX Image component if you need more control:
+
+import Image from 'next/image';
+
+<Image src="/images/blog/diagram.png" alt="Architecture diagram" width={600} height={400} className="rounded-lg shadow-md" />

@@ -9,7 +9,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getPlanStatus, incrementCampaignGeneration } from '@/lib/plan';
 import { getVertexAIClient } from '@/lib/genai-client';
-// NEW: YouTube transcript helpers
+import { getComposioConnection } from '@/lib/composio';
 import { extractYouTubeId, getYouTubeTranscript } from '@/lib/youtube';
 
 console.log('🔑 ANON_KEY starts with:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10));
@@ -218,6 +218,34 @@ export async function POST(req: Request) {
       );
     }
 
+    // --- GitHub repos context (only if user has connected GitHub) ---
+    let githubContext = '';
+    const { data: githubConn, error: githubError } = await supabaseFromCookie
+      .from('user_composio_connections')
+      .select('connection_id')
+      .eq('user_id', user.id)
+      .eq('app', 'github')
+      .maybeSingle();
+
+    if (githubConn && !githubError) {
+      try {
+        const connection = await getComposioConnection(githubConn.connection_id);
+        const reposResp = await fetch(`https://backend.composio.dev/api/v1/connectedAccounts/${connection.id}/actions/getUserRepos`, {
+          headers: { 'x-api-key': process.env.COMPOSIO_API_KEY! },
+        });
+        if (reposResp.ok) {
+          const repos = await reposResp.json();
+          if (repos && repos.length) {
+            githubContext = '\n\nUser\'s GitHub repositories:\n' + repos.map((repo: any) => 
+              `- ${repo.name}: ${repo.description || 'No description'}`
+            ).join('\n');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch GitHub repos:', err);
+      }
+    }
+
     const planStatus = await getPlanStatus(user.id);
     if (!planStatus.canGenerate) {
       return NextResponse.json(
@@ -250,12 +278,15 @@ export async function POST(req: Request) {
       }
     }
 
+    // Combine textContext with GitHub context (if any)
+    const enhancedText = textContext + githubContext;
+
     const tweetFormat = campaignDirectives?.tweetFormat || 'single';
     const personaVoice = campaignDirectives?.personaVoice || 'Expert Content Strategist';
 
     const finalContext = campaignDirectives?.additionalContext
-      ? `${textContext}\n\nAdditional Directives: ${campaignDirectives.additionalContext}`
-      : textContext;
+      ? `${enhancedText}\n\nAdditional Directives: ${campaignDirectives.additionalContext}`
+      : enhancedText;
 
     if (containsPromptInjection(finalContext)) {
       console.warn(`[SECURITY] Prompt injection attempt intercepted from IP: ${ip}`);

@@ -153,25 +153,25 @@ export default function SettingsModal({
     }
   };
 
-  // 👈 New function for Composio GitHub Connection
-  const handleConnectGitHub = async () => {
-    setGithubLoading(true);
-    try {
-      const res = await fetch('/api/composio/connect', { method: 'POST' });
-      const data = await res.json();
-      
-      if (data.url) {
-        window.location.href = data.url; // Redirects to Composio auth page
-      } else {
-        toast.error(data.error || 'Failed to generate connection link.');
-      }
-    } catch (error) {
-      console.error('Error connecting to GitHub:', error);
-      toast.error('Network error while connecting to GitHub.');
-    } finally {
-      setGithubLoading(false);
+  // // 👈 New function for Composio GitHub Connection
+const handleConnectGitHub = async () => {
+  setGithubLoading(true);
+  try {
+    const res = await fetch('/api/composio/connect', { method: 'POST' });
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url; // Redirect to Composio auth page
+    } else {
+      toast.error(data.error || 'Failed to generate connection link.');
     }
-  };
+  } catch (error) {
+    console.error('Error connecting to GitHub:', error);
+    toast.error('Network error while connecting to GitHub.');
+  } finally {
+    setGithubLoading(false);
+  }
+};
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(

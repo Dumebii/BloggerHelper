@@ -57,3 +57,9 @@ body {
   margin-bottom: 0;
   padding-bottom: 0;
 }
+
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

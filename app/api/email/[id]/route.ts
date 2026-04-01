@@ -4,9 +4,9 @@ import { buildNewsletterEmail } from "@/lib/email-templates";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const postId = params.id;
+  const { id: postId } = await params;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,7 +33,7 @@ export async function GET(
   const senderName = profile?.email_sender_name?.trim() || "Ozigi User";
   const replyTo = profile?.reply_to_email || profile?.email;
 
-  // Extract subject and body (same logic as cron)
+  // Extract subject and body
   const emailContent = post.content || "";
   let subject = "Your Ozigi Newsletter";
   let body = emailContent;

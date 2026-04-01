@@ -72,6 +72,16 @@ export default function StatsWidget({
           </div>
         </div>
       )}
+      {!isSidebarCollapsed && planStatus?.plan === 'free' && (
+  <div className="mt-4">
+    <button
+      onClick={() => router.push('/pricing')}
+      className="w-full bg-brand-red text-white py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-opacity-90 transition"
+    >
+      Upgrade to Team →
+    </button>
+  </div>
+)}
       {!isLoadingStats && !isSidebarCollapsed && planStatus === null && (
   <div className="mt-4 h-16 bg-slate-100 animate-pulse rounded-xl" />
 )}

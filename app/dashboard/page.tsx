@@ -200,47 +200,31 @@ const handleGenerate = async () => {
 
     // --- Robust JSON extraction ---
     let jsonString = data.output;
-
-    // Remove markdown code fences (```json ... ``` or just ``` ... ```)
-    jsonString = jsonString.replace(/```json\s*([\s\S]*?)\s*```/gi, '$1');
-    jsonString = jsonString.replace(/```\s*([\s\S]*?)\s*```/gi, '$1');
-
-    // Find the first '{' and the last '}'
-    const firstBrace = jsonString.indexOf('{');
-    const lastBrace = jsonString.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      jsonString = jsonString.slice(firstBrace, lastBrace + 1);
-    }
-
-// --- Bulletproof JSON Extraction ---
     let finalResponse;
+
     try {
-      // 1. Check if the fetch response already auto-parsed it into an object
-      if (typeof data.output === 'object' && data.output !== null) {
-        finalResponse = data.output;
-      } else {
-        let jsonString = data.output || "";
+      // Remove markdown code fences
+      jsonString = jsonString.replace(/```json\s*([\s\S]*?)\s*```/gi, '$1');
+      jsonString = jsonString.replace(/```\s*([\s\S]*?)\s*```/gi, '$1').trim();
 
-        // 2. Aggressively strip markdown code fences
-        jsonString = jsonString.replace(/```json/gi, '').replace(/```/g, '').trim();
-
-        // 3. Find where the actual JSON object starts and ends
-        const firstBrace = jsonString.indexOf('{');
-        const lastBrace = jsonString.lastIndexOf('}');
-        
-        if (firstBrace !== -1 && lastBrace !== -1) {
-          // Slice out only the valid JSON payload, ignoring conversational text
-          jsonString = jsonString.slice(firstBrace, lastBrace + 1);
-        }
-
-        // 4. Parse the cleaned string
-        finalResponse = JSON.parse(jsonString);
+      // Find the first '{' and the last '}'
+      const firstBrace = jsonString.indexOf('{');
+      const lastBrace = jsonString.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        jsonString = jsonString.slice(firstBrace, lastBrace + 1);
       }
+
+      // If still not valid, try to find any JSON object
+      if (!jsonString.startsWith('{')) {
+        const possibleMatch = jsonString.match(/\{[\s\S]*\}/);
+        if (possibleMatch) jsonString = possibleMatch[0];
+      }
+
+      finalResponse = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
       console.error('Raw AI output that caused the crash:', data.output);
-      
-      setErrorMessage("Campaign was successfully created! Please check your campaign history. If no generation appears, try tweaking your context and generating again.");
+      setErrorMessage("The AI returned an unexpected format. Please try again with different context.");
       setLoading(false);
       return;
     }
@@ -248,16 +232,24 @@ const handleGenerate = async () => {
     const finalCampaign = finalResponse.campaign || [];
     const finalEmail = finalResponse.email || null;
 
-    if (finalCampaign.length > 0) {
-      setCampaign(finalCampaign);
-      setEmailContent(finalEmail);
-      setTimeout(() => {
-        campaignRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+    if (finalCampaign.length === 0) {
+      setErrorMessage("The AI returned an empty campaign. Please try again.");
+      setLoading(false);
+      return;
+    }
 
-      if (session?.user) {
+    // Show the generated content immediately
+    setCampaign(finalCampaign);
+    setEmailContent(finalEmail);
+    setTimeout(() => {
+      campaignRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+
+    // Save to database and update stats – but don't show error if it fails
+    if (session?.user) {
+      try {
         console.log('Inserting campaign for user:', session.user.id);
-        const { data: inserted, error: insertError } = await supabase.from("campaigns").insert({
+        const { error: insertError } = await supabase.from("campaigns").insert({
           user_id: session.user.id,
           source_url: url,
           source_notes: rawText || inputs.fileUrls.join(", "),
@@ -266,21 +258,24 @@ const handleGenerate = async () => {
         });
         if (insertError) {
           console.error('Campaign insert error:', insertError);
-          toast.error('Failed to save campaign to history.');
+          toast.error('Campaign saved locally but failed to sync to history.');
         } else {
-          console.log('Campaign inserted:', inserted);
+          console.log('Campaign inserted successfully');
         }
+
+        // Increment stats (fire and forget)
         await incrementCampaignGeneration(session.user.id);
         await new Promise((resolve) => setTimeout(resolve, 200));
         refreshStats();
         fetchHistory(session.user.id);
+      } catch (dbError) {
+        console.error('Database operation error:', dbError);
+        toast.error('Campaign generated but could not update stats.');
       }
     }
   } catch (err) {
-    console.error("Context error:", err);
-    setErrorMessage(
-      "Campaign was successfully generated, please check your campaign history. If no generation appears, try tweaking your context and generating again."
-    );
+    console.error("Unexpected error in handleGenerate:", err);
+    setErrorMessage("An unexpected error occurred. Please try again.");
   } finally {
     setLoading(false);
   }
