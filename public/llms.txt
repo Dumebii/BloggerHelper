@@ -1,0 +1,45 @@
+# Ozigi
+
+> Ozigi is an AI content engine that transforms raw notes, URLs, and PDFs into platform-ready social posts for X, LinkedIn, Discord, Slack, and email — without sounding like AI wrote them.
+
+## Core URLs
+
+- Homepage: https://ozigi.app
+- Documentation: https://ozigi.app/docs
+- Pricing: https://ozigi.app/pricing
+- Demo: https://ozigi.app/demo
+- Blog: https://blog.ozigi.app
+
+## Platform Deep Dives
+
+- Multimodal Ingestion Pipeline: https://ozigi.app/docs/multimodal-pipeline
+- The Banned Lexicon (Curing AI-Speak): https://ozigi.app/docs/the-banned-lexicon
+- System Personas (Editorial Briefs): https://ozigi.app/docs/system-personas
+- Human-in-the-Loop Architecture: https://ozigi.app/docs/human-in-the-loop
+
+## Key Features
+
+- Context Engine: Extracts narrative from unstructured data (notes, PDFs, URLs, images, audio, video)
+- Banned Lexicon: API-level token restrictions that eliminate AI-speak and corporate buzzwords
+- System Personas: Database-backed voice profiles that define editorial identity, not just instructions
+- Human-in-the-Loop: 90/10 rule — engine does the extraction and drafting, you add specificity and context
+- Multi-Platform Publishing: Native integrations for X (Twitter), LinkedIn, Discord, Slack, and email
+- Native Image Generation: Platform-aware graphics powered by Gemini 2.5 Flash
+
+## Technical Stack
+
+- Built on Google Gemini 2.5 Flash for large context windows and multimodal capabilities
+- Next.js frontend with Supabase backend
+- OAuth integrations for X and LinkedIn
+- Webhook support for Discord and Slack
+
+## Target Audience
+
+- Developers and technical founders
+- DevRel professionals
+- Content creators who want AI assistance without AI voice
+
+## Contact
+
+- Creator: @DumebiTheWriter on X/Twitter
+- Website: https://ozigi.app

@@ -1,0 +1,33 @@
+# Ozigi Blog
+
+> Technical insights, changelog updates, and deep dives from the creators of Ozigi — the AI content engine that transforms raw notes into social posts without sounding like AI.
+
+## Latest Articles
+
+- Ozigi v2 Changelog: https://blog.ozigi.app/blog/ozigi-v2-changelog
+- Gemini 2.5 vs Claude 3.7 Benchmark: https://blog.ozigi.app/blog/gemini-2.5-vs-claude-3.7
+- Your Launch Post Got 4 Likes: https://blog.ozigi.app/blog/your-launch-post-got-4-likes
+
+## Topics Covered
+
+- AI content generation best practices
+- Technical architecture decisions
+- Model selection and benchmarking (Gemini, Claude, GPT)
+- Next.js and Supabase production patterns
+- Content automation for developers and founders
+
+## Related Resources
+
+- Main Product: https://ozigi.app
+- Documentation: https://ozigi.app/docs
+- Platform Deep Dives: https://ozigi.app/docs/deep-dives
+- Pricing: https://ozigi.app/pricing
+
+## About
+
+The Ozigi Blog is the technical publication for developers, DevRel professionals, and founders building in public. Articles focus on practical engineering decisions, real production constraints, and the philosophy behind building AI tools that respect human authorship.
+
+## Contact
+
+- Author: Dumebi Okolo (@DumebiTheWriter)
+- Product: https://ozigi.app

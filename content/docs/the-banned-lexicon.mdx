@@ -4,6 +4,8 @@ readTime: "6 min read"
 tag: "Architecture Deep Dive"
 ---
 
+> **TL;DR:** AI models default to corporate buzzwords like "delve," "tapestry," and "robust" because those tokens are overrepresented in training data. Ozigi enforces a hard-coded list of banned words at the API level, forcing the model to find direct, precise phrasing instead of filler. This raises perplexity and burstiness, making output pass AI detectors and read like a real person wrote it.
+
 ## The Statistical Mean Problem
 
 Large Language Models are predictive engines at their core. When generating text, they gravitate toward the statistical mean of their training data. Because models like Gemini and GPT are trained heavily on corporate documentation, SEO-optimized marketing copy, and standardized business writing, their default output leans on a predictable cadence and a recurring set of vocabulary crutches.
