@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Mail, User, Sparkles, Lock, Zap } from "lucide-react";
 import Distillery from "../../components/ContextEngine";
 import DistributionGrid from "../../components/DistributionGrid";
-import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
 import { PLATFORMS } from "@/lib/platforms";
@@ -421,12 +420,24 @@ export default function DemoSandbox() {
 
       {/* Main Content */}
       <main className="flex-1 h-full overflow-y-auto relative bg-slate-50">
-        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200">
-          <Header
-            session={null}
-            onSignIn={() => setIsAuthModalOpen(true)}
-            onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
-          />
+        {/* Mobile top bar - only shows hamburger and sign up on mobile */}
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 md:hidden">
+          <div className="flex items-center justify-between px-4 py-3">
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="p-2 text-slate-600 hover:text-slate-900"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="bg-brand-red hover:bg-[#C5280A] text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-colors"
+            >
+              Sign Up
+            </button>
+          </div>
         </div>
 
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
