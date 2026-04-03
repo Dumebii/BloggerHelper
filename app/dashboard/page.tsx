@@ -223,7 +223,7 @@ const handleGenerate = async () => {
       finalResponse = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      console.error('Raw AI output that caused the crash:', fullText);
+      console.error('Raw AI output that caused the crash:', data.output);
       setErrorMessage("The AI returned an unexpected format. Please try again with different context.");
       setLoading(false);
       return;
