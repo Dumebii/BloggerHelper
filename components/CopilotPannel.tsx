@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Send, X, ArrowRight, Trash2, Globe, User, Bot, Sparkles } from "lucide-react";
+import { Send, X, ArrowRight, Trash2, Globe, User, Bot, Sparkles, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import TextareaAutosize from 'react-textarea-autosize';
@@ -8,6 +9,40 @@ import TextareaAutosize from 'react-textarea-autosize';
 interface Message {
   role: "user" | "assistant";
   content: string;
+}
+
+// Animated thinking indicator for Copilot
+function CopilotThinking() {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const messages = [
+    "Thinking...",
+    "Researching...",
+    "Analyzing context...",
+    "Crafting response...",
+    "Almost there...",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % messages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-2 py-1">
+      <div className="flex items-center gap-2">
+        <div className="flex gap-1">
+          <span className="w-2 h-2 bg-brand-red rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+          <span className="w-2 h-2 bg-brand-red/70 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+          <span className="w-2 h-2 bg-brand-red/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+        </div>
+        <span className="text-xs font-medium text-slate-500 animate-pulse">
+          {messages[messageIndex]}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 interface CopilotPanelProps {
@@ -43,13 +78,32 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
     localStorage.setItem("ozigi_copilot_conversation", JSON.stringify(messages));
   }, [messages]);
 
-  const scrollToBottom = () => {
+  const [copiedMessageIdx, setCopiedMessageIdx] = useState<number | null>(null);
+  const isStreamingRef = useRef(false);
+  const lastScrollRef = useRef(0);
+
+  const scrollToBottom = (force = false) => {
+    const now = Date.now();
+    // Throttle scrolling during streaming to prevent janky behavior
+    if (!force && isStreamingRef.current && now - lastScrollRef.current < 500) return;
+    lastScrollRef.current = now;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Only scroll on new user messages or when streaming completes
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "user" || (!isLoading && lastMsg?.role === "assistant")) {
+      scrollToBottom(true);
+    }
+  }, [messages.length, isLoading]);
+
+  const handleCopyMessage = (content: string, idx: number) => {
+    navigator.clipboard.writeText(content);
+    setCopiedMessageIdx(idx);
+    toast.success("Copied to clipboard");
+    setTimeout(() => setCopiedMessageIdx(null), 2000);
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -60,6 +114,7 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    isStreamingRef.current = true;
 
     try {
       const res = await fetch("/api/copilot", {
@@ -78,8 +133,8 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
       let done = false;
       let accumulated = "";
 
-      // Append an empty assistant message to act as the streaming target
-      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+      // Append an empty assistant message with a loading placeholder
+      setMessages(prev => [...prev, { role: "assistant", content: "__LOADING__" }]);
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
@@ -91,6 +146,7 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
 
           setMessages(prev => {
             const newMessages = [...prev];
+            // Replace loading placeholder or empty content with actual content
             newMessages[newMessages.length - 1].content = accumulated;
             return newMessages;
           });
@@ -99,7 +155,9 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
     } catch (err: any) {
       setMessages(prev => [...prev, { role: "assistant", content: `**Error:** ${err.message}` }]);
     } finally {
+      isStreamingRef.current = false;
       setIsLoading(false);
+      scrollToBottom(true);
       setTimeout(() => textareaRef.current?.focus(), 10);
     }
   };
@@ -146,57 +204,71 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
       </div>
 
       {/* --- MESSAGES AREA --- */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/50 scroll-smooth">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-slate-50 to-white">
         {messages.map((msg, idx) => {
           const isUser = msg.role === "user";
+          const isLoadingMsg = !isUser && (msg.content === "" || msg.content === "__LOADING__") && isLoading;
+          
           return (
-            <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-              <div className={`flex gap-3 max-w-[85%] ${isUser ? "flex-row-reverse" : ""}`}>
-                
-                {/* Avatar */}
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
-                  isUser 
-                    ? "bg-brand-red text-white" 
-                    : "bg-white border border-slate-200 text-slate-700"
-                }`}>
-                  {isUser ? <User size={14} strokeWidth={2.5} /> : <Bot size={16} />}
+            <div key={idx} className={`group ${isUser ? "flex justify-end" : ""}`}>
+              {isUser ? (
+                // User message - compact bubble on right
+                <div className="max-w-[80%] bg-brand-red text-white rounded-2xl rounded-br-md px-4 py-3 shadow-sm">
+                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
                 </div>
-
-                {/* Bubble */}
-                <div className={`rounded-2xl px-5 py-4 text-sm shadow-sm border ${
-                  isUser
-                    ? "bg-brand-red border-brand-red text-white rounded-tr-sm"
-                    : "bg-white border-slate-200 text-slate-800 rounded-tl-sm"
-                }`}>
-                  {!isUser && msg.content === "" && isLoading ? (
-                    <div className="flex items-center gap-1 h-5">
-                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
-                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
-                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+              ) : (
+                // Assistant message - full width, clean layout
+                <div className="space-y-3">
+                  {/* Header with avatar and copy button */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-sm">
+                        <Sparkles size={14} className="text-white" />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Copilot</span>
                     </div>
-                  ) : isUser ? (
-                    <div className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</div>
-                  ) : (
-                    <div className="prose prose-sm max-w-none 
-                      prose-headings:font-bold prose-headings:text-slate-900 
-                      prose-p:text-slate-700 prose-p:leading-relaxed 
-                      prose-strong:text-slate-900 
-                      prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline
-                      prose-code:text-brand-red prose-code:bg-red-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium prose-code:before:content-none prose-code:after:content-none
-                      prose-pre:bg-slate-900 prose-pre:text-slate-50 prose-pre:p-4 prose-pre:rounded-xl prose-pre:border prose-pre:border-slate-800
-                      prose-li:text-slate-700
-                    ">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content}
-                      </ReactMarkdown>
-                    </div>
-                  )}
+                    {!isLoadingMsg && msg.content && msg.content !== "__LOADING__" && (
+                      <button
+                        onClick={() => handleCopyMessage(msg.content, idx)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg"
+                      >
+                        {copiedMessageIdx === idx ? (
+                          <><Check size={12} /> Copied</>
+                        ) : (
+                          <><Copy size={12} /> Copy</>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="pl-9">
+                    {isLoadingMsg ? (
+                      <CopilotThinking />
+                    ) : (
+                      <div className="prose prose-slate prose-sm max-w-none
+                        prose-headings:font-bold prose-headings:text-slate-900 prose-headings:mt-4 prose-headings:mb-2
+                        prose-p:text-slate-600 prose-p:leading-relaxed prose-p:my-2
+                        prose-strong:text-slate-800 prose-strong:font-semibold
+                        prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline
+                        prose-code:text-brand-red prose-code:bg-red-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-medium prose-code:before:content-none prose-code:after:content-none
+                        prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:p-4 prose-pre:rounded-xl prose-pre:text-xs prose-pre:my-3
+                        prose-ul:my-2 prose-ul:space-y-1 prose-li:text-slate-600 prose-li:my-0
+                        prose-ol:my-2 prose-ol:space-y-1
+                        prose-blockquote:border-l-brand-red prose-blockquote:bg-red-50/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
+                      ">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           );
         })}
-        <div ref={messagesEndRef} className="h-2" />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
 
       {/* --- INPUT AREA --- */}

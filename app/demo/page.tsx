@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Mail, User, Sparkles, Lock, Zap } from "lucide-react";
 import Distillery from "../../components/ContextEngine";
 import DistributionGrid from "../../components/DistributionGrid";
+import GeneratingState from "../../components/GeneratingState";
 import Footer from "../../components/Footer";
 import AuthModal from "../../components/AuthModal";
 import { PLATFORMS } from "@/lib/platforms";
@@ -316,7 +317,7 @@ export default function DemoSandbox() {
     setEmailContent(null);
 
     try {
-      const response = await fetch("/api/generate-stream", {
+      const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -351,41 +352,8 @@ export default function DemoSandbox() {
         throw new Error("Generation failed");
       }
 
-      // Handle streaming response
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body");
-
-      const decoder = new TextDecoder();
-      let fullText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                fullText += parsed.text;
-              }
-              if (parsed.error) {
-                throw new Error(parsed.error);
-              }
-            } catch (e) {
-              // Ignore JSON parse errors for incomplete chunks
-            }
-          }
-        }
-      }
-
-      // Parse the complete JSON response
-      const cleanJson = fullText.replace(/```json/gi, "").replace(/```/gi, "").trim();
+      const data = await response.json();
+      const cleanJson = data.output.replace(/```json/gi, "").replace(/```/gi, "").trim();
       const finalResponse = JSON.parse(cleanJson);
       const finalCampaign = finalResponse.campaign || [];
       const finalEmail = finalResponse.email || null;
@@ -533,12 +501,7 @@ export default function DemoSandbox() {
                   </>
                 )}
 
-                {loading && (
-                  <div className="flex flex-col items-center justify-center py-16">
-                    <div className="w-12 h-12 border-4 border-slate-200 border-t-brand-red rounded-full animate-spin mb-4" />
-                    <p className="text-sm font-medium text-slate-500">Generating your campaign...</p>
-                  </div>
-                )}
+                {loading && <GeneratingState />}
 
                 {!loading && campaign.length > 0 && (
                   <div className="animate-in fade-in slide-in-from-bottom-8">

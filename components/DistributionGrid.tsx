@@ -143,15 +143,32 @@ const fileInputRef = useRef<HTMLInputElement>(null);
     }
   };
 
-  const handleDownloadImage = (e: React.MouseEvent) => {
+  const handleDownloadImage = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!imageUrl) return;
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = `ozigi-campaign-day-${day}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    try {
+      // Fetch the image as a blob to handle cross-origin
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `ozigi-campaign-day-${day}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up blob URL
+      URL.revokeObjectURL(blobUrl);
+      toast.success("Image downloaded!");
+    } catch (err) {
+      console.error("Download failed:", err);
+      // Fallback: open in new tab
+      window.open(imageUrl, "_blank");
+      toast.info("Opening image in new tab");
+    }
   };
 
 const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -275,42 +292,66 @@ const handleRemoveImage = () => {
         </div>
       </div>
 
+      {/* Image Title Input */}
+      {planStatus?.imageGenLimit !== 0 && (
+        <div className="mb-3">
+          <input
+            type="text"
+            value={imageTitle}
+            onChange={(e) => setImageTitle(e.target.value)}
+            placeholder="Image headline (optional) - e.g., 'New Feature Launch'"
+            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-red/50 placeholder:text-slate-400"
+          />
+        </div>
+      )}
+
       <div className="mb-4 flex gap-2">
-  <button
-    onClick={() => fileInputRef.current?.click()}
-    disabled={isUploadingImg}
-    className="flex-1 py-2 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-red hover:border-brand-red hover:bg-red-50 transition-all flex items-center justify-center gap-2"
-  >
-    {isUploadingImg ? "📤 Uploading..." : <><ImagePlus size={12} /> Upload Image</>}
-  </button>
-  <input
-    type="file"
-    ref={fileInputRef}
-    className="hidden"
-    accept="image/*"
-    onChange={handleUploadImage}
-  />
-  {planStatus?.imageGenLimit !== 0 && (
-    <button
-      onClick={handleGenerateImage}
-      disabled={isGeneratingImg}
-      className="flex-1 py-2 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-red hover:border-brand-red hover:bg-red-50 transition-all flex items-center justify-center gap-2"
-    >
-      {isGeneratingImg ? "🎨 Painting..." : "🎨 Generate Graphic"}
-    </button>
-  )}
-</div>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploadingImg}
+          className="flex-1 py-2 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-red hover:border-brand-red hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+        >
+          {isUploadingImg ? "Uploading..." : <><ImagePlus size={12} /> Upload</>}
+        </button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleUploadImage}
+        />
+        {planStatus?.imageGenLimit !== 0 && (
+          <button
+            onClick={handleGenerateImage}
+            disabled={isGeneratingImg}
+            className="flex-1 py-2 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-red hover:border-brand-red hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+          >
+            {isGeneratingImg ? "Generating..." : "Generate Graphic"}
+          </button>
+        )}
+      </div>
 
 {imageUrl && (
-  <div className="relative mb-4">
+  <div className="relative mb-4 group">
     <img src={imageUrl} alt="Campaign image" className="w-full rounded-lg border border-slate-200" />
-    <button
-      onClick={handleRemoveImage}
-      className="absolute top-2 right-2 bg-white/80 rounded-full p-1 shadow-md hover:bg-red-100 transition-colors"
-      title="Remove image"
-    >
-      <X size={14} className="text-slate-600 hover:text-red-600" />
-    </button>
+    <div className="absolute top-2 right-2 flex gap-1.5">
+      <button
+        onClick={handleDownloadImage}
+        className="bg-white/90 rounded-full p-1.5 shadow-md hover:bg-blue-100 transition-colors"
+        title="Download image"
+      >
+        <svg className="w-3.5 h-3.5 text-slate-600 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+      </button>
+      <button
+        onClick={handleRemoveImage}
+        className="bg-white/90 rounded-full p-1.5 shadow-md hover:bg-red-100 transition-colors"
+        title="Remove image"
+      >
+        <X size={14} className="text-slate-600 hover:text-red-600" />
+      </button>
+    </div>
   </div>
 )}
 

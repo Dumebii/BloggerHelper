@@ -14,12 +14,14 @@ export async function POST(req: Request) {
     let negativePrompt = '';
 
     if (graphicTitle?.trim()) {
-      prompt = `A clean, modern, professional graphic. In the center, prominently featuring the exact text "${graphicTitle.trim()}" written in bold, highly legible, stylish modern typography. The background is a vibrant, minimalist conceptual design representing the theme of the text. Suitable for a ${platform} post. High resolution, professional design.`;
-      negativePrompt = 'spelling mistakes, typos, gibberish, messy fonts, unreadable text, extra letters, alien text, unreadable words';
+      // User provided a headline - create a graphic with that text
+      prompt = `A beautiful, eye-catching social media graphic for ${platform}. The design features the headline "${graphicTitle.trim()}" as the focal point, displayed in clean, modern, highly readable typography. The background complements the message with subtle gradients, soft colors, and minimal abstract elements. Professional, polished, and suitable for business or personal branding. High quality, sharp text.`;
+      negativePrompt = 'spelling mistakes, typos, blurry text, messy fonts, cluttered design, ugly colors';
     } else {
-      const cleanText = text.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').substring(0, 150);
-      prompt = `A sleek, professional, purely abstract conceptual graphic. Modern aesthetic with clean geometric shapes, harmonious vibrant color palette, high-tech gradients, and glowing data points. Highly conceptual minimalism, octane render quality. Suitable for a ${platform} post. High resolution, detailed textures, cinematic lighting. It does NOT contain any text.`;
-      negativePrompt = 'text, words, letters, characters, script, calligraphy, handwriting, alphabet, typography, watermark, signature, writing, scribble, squiggles, gibberish, alien text, unreadable text, messy text, messy fonts, number, figures, blurbs, titles, labels, captions, paragraphs, layout with text, text-boxes, placeholders for text, extra letters, misspelled words, extra words, blurred text';
+      // No headline - create a mood/aesthetic image based on the post content
+      const cleanText = text.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').substring(0, 200);
+      prompt = `Create a visually appealing, abstract background image for a ${platform} post about: "${cleanText}". The image should be modern, professional, and evoke the mood of the content. Use soft gradients, subtle patterns, or abstract shapes. No text or words in the image. Clean, minimal, aesthetic. Suitable for professional social media.`;
+      negativePrompt = 'text, words, letters, writing, watermark, ugly, cluttered, busy, low quality';
     }
 
     const client = await getVertexAIClient();

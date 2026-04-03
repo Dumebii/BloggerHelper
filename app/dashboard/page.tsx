@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
 import SkeletonGrid from "@/components/SkeletonGrid";
+import GeneratingState from "@/components/GeneratingState";
 import ScheduledPostsModal from "@/components/ScheduledPostsModal";
 import SettingsModal from "@/components/SettingsModal";
 import Sidebar from "@/components/dashboard/Sidebar";
@@ -58,7 +59,7 @@ export default function Dashboard() {
   const { personas, refreshPersonas } = usePersonas(session?.user?.id);
   const { pastCampaigns, fetchHistory, restoreCampaign } = useCampaignHistory(session?.user?.id);
   const { stats, isLoadingStats, refreshStats } = useStats(session?.user?.id);
-  const { needsEmail, setNeedsEmail, dismissBanner } = useEmailBanner(!session?.user?.email);
+  const { needsEmail, setNeedsEmail, dismissBanner } = useEmailBanner(session);
   const [campaignName, setCampaignName] = useState("");
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -169,7 +170,7 @@ const handleGenerate = async () => {
       },
     };
 
-    const response = await fetch("/api/generate-stream", {
+    const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -191,47 +192,15 @@ const handleGenerate = async () => {
       return;
     }
 
-    // Handle streaming response
-    const reader = response.body?.getReader();
-    if (!reader) {
-      setErrorMessage("Failed to read response stream.");
+    const data = await response.json();
+    if (data.error) {
+      setErrorMessage(data.error);
       setLoading(false);
       return;
     }
 
-    const decoder = new TextDecoder();
-    let fullText = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split("\n");
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const data = line.slice(6);
-          if (data === "[DONE]") continue;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.text) {
-              fullText += parsed.text;
-            }
-            if (parsed.error) {
-              setErrorMessage(parsed.error);
-              setLoading(false);
-              return;
-            }
-          } catch (e) {
-            // Ignore JSON parse errors for incomplete chunks
-          }
-        }
-      }
-    }
-
     // --- Robust JSON extraction ---
-    let jsonString = fullText;
+    let jsonString = data.output;
     let finalResponse;
 
     try {
@@ -255,7 +224,7 @@ const handleGenerate = async () => {
       finalResponse = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      console.error('Raw AI output that caused the crash:', fullText);
+      console.error('Raw AI output that caused the crash:', data.output);
       setErrorMessage("The AI returned an unexpected format. Please try again with different context.");
       setLoading(false);
       return;
@@ -444,8 +413,8 @@ return () => clearTimeout(t);
             )}
 
             {loading && (
-              <div className="mt-8 flex justify-center">
-                <SkeletonGrid />
+              <div className="mt-8">
+                <GeneratingState />
               </div>
             )}
 
