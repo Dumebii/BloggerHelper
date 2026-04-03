@@ -127,7 +127,6 @@ function DemoSidebar({
               className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold text-slate-400 hover:bg-slate-50 rounded-xl transition-colors cursor-not-allowed ${
                 isSidebarCollapsed ? "justify-center" : ""
               }`}
-              title={isSidebarCollapsed ? item.label : undefined}
             >
               <span className={`${isSidebarCollapsed ? "mx-auto" : ""} opacity-50`}>{item.icon}</span>
               {!isSidebarCollapsed && (
@@ -137,8 +136,10 @@ function DemoSidebar({
                 </>
               )}
             </button>
-            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 shadow-lg">
+            {/* Tooltip - positioned below on mobile, right on desktop */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 md:left-full md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:ml-2 md:mt-0 px-3 py-2 bg-slate-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-[100] shadow-xl">
               Sign up to unlock
+              <div className="absolute hidden md:block left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-900 rotate-45" />
             </div>
           </div>
         ))}
