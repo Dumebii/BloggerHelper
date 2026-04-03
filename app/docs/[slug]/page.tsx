@@ -190,7 +190,7 @@ export default async function DocArticlePage({ params }: { params: Promise<{ slu
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-    <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col scroll-smooth">
+      <div className="bg-[#fafafa] font-sans text-slate-900 min-h-screen flex flex-col scroll-smooth">
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-4 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-4 md:px-8">
           <Link href="/docs/deep-dives" className="flex items-center gap-2 group text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
@@ -256,8 +256,8 @@ export default async function DocArticlePage({ params }: { params: Promise<{ slu
           )}
         </main>
       </div>
-      <Footer />
-    </div>
+        <Footer />
+      </div>
     </>
   );
 }
