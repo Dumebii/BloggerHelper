@@ -48,8 +48,23 @@ const distributionSchema = {
   required: ['campaign'],
 };
 
-async function generateFromParts(parts: any[]) {
+async function generateFromParts(parts: any[], stream = false) {
   const client = await getVertexAIClient();
+  
+  if (stream) {
+    // Return streaming response
+    const streamingResult = await client.models.generateContentStream({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts }],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: distributionSchema,
+      },
+    });
+    return streamingResult;
+  }
+  
+  // Non-streaming response
   const response = await client.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: [{ role: 'user', parts }],
@@ -58,7 +73,23 @@ async function generateFromParts(parts: any[]) {
       responseSchema: distributionSchema,
     },
   });
-  return response.text;
+  
+  // Extract text from response - handle different response formats
+  let responseText = '';
+  if (response.text) {
+    responseText = typeof response.text === 'function' ? response.text() : response.text;
+  } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+    responseText = response.candidates[0].content.parts[0].text;
+  } else if (response.response?.text) {
+    responseText = typeof response.response.text === 'function' ? response.response.text() : response.response.text;
+  } else if (response.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+    responseText = response.response.candidates[0].content.parts[0].text;
+  } else {
+    console.error('[v0] Unexpected response format:', JSON.stringify(response, null, 2));
+    throw new Error('Unexpected response format from Vertex AI');
+  }
+  
+  return responseText;
 }
 
 export async function POST(req: Request) {

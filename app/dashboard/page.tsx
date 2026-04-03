@@ -169,7 +169,7 @@ const handleGenerate = async () => {
       },
     };
 
-    const response = await fetch("/api/generate", {
+    const response = await fetch("/api/generate-stream", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -191,15 +191,47 @@ const handleGenerate = async () => {
       return;
     }
 
-    const data = await response.json();
-    if (data.error) {
-      setErrorMessage(data.error);
+    // Handle streaming response
+    const reader = response.body?.getReader();
+    if (!reader) {
+      setErrorMessage("Failed to read response stream.");
       setLoading(false);
       return;
     }
 
+    const decoder = new TextDecoder();
+    let fullText = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split("\n");
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.text) {
+              fullText += parsed.text;
+            }
+            if (parsed.error) {
+              setErrorMessage(parsed.error);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            // Ignore JSON parse errors for incomplete chunks
+          }
+        }
+      }
+    }
+
     // --- Robust JSON extraction ---
-    let jsonString = data.output;
+    let jsonString = fullText;
     let finalResponse;
 
     try {
@@ -223,7 +255,7 @@ const handleGenerate = async () => {
       finalResponse = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      console.error('Raw AI output that caused the crash:', data.output);
+      console.error('Raw AI output that caused the crash:', fullText);
       setErrorMessage("The AI returned an unexpected format. Please try again with different context.");
       setLoading(false);
       return;
@@ -248,7 +280,6 @@ const handleGenerate = async () => {
     // Save to database and update stats – but don't show error if it fails
     if (session?.user) {
       try {
-        console.log('Inserting campaign for user:', session.user.id);
         const { error: insertError } = await supabase.from("campaigns").insert({
           user_id: session.user.id,
           source_url: url,
@@ -259,12 +290,9 @@ const handleGenerate = async () => {
         if (insertError) {
           console.error('Campaign insert error:', insertError);
           toast.error('Campaign saved locally but failed to sync to history.');
-        } else {
-          console.log('Campaign inserted successfully');
         }
 
-        // Increment stats (fire and forget)
-        await incrementCampaignGeneration(session.user.id);
+        // Refresh stats
         await new Promise((resolve) => setTimeout(resolve, 200));
         refreshStats();
         fetchHistory(session.user.id);
