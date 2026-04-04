@@ -14,9 +14,9 @@ const mailClient = new SendMailClient({
   token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
 });
 
-// Hardcoded sender - never use personal emails for welcome emails
-const WELCOME_FROM_ADDRESS = "hello@ozigi.app";
-const WELCOME_FROM_NAME = "Ozigi";
+// Welcome email sender - uses env variable or defaults to no-reply@ozigi.app
+const WELCOME_FROM_ADDRESS = process.env.WELCOME_EMAIL_FROM_ADDRESS || "no-reply@ozigi.app";
+const WELCOME_FROM_NAME = process.env.WELCOME_EMAIL_FROM_NAME || "Ozigi";
 
 // Secret to verify webhook calls (optional but recommended)
 const WEBHOOK_SECRET = process.env.WELCOME_EMAIL_WEBHOOK_SECRET;

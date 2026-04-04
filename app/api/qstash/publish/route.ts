@@ -16,11 +16,10 @@ const mailClient = new SendMailClient({
   token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
 });
 
-// Hardcoded senders - never use personal emails
-const EMAIL_FROM_ADDRESS = "hello@ozigi.app";
-const EMAIL_FROM_NAME = "Ozigi";
-const NEWSLETTER_FROM_ADDRESS = "hello@ozigi.app";
-const NEWSLETTER_FROM_NAME = "Ozigi";
+const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || "hello@ozigi.app";
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || "Ozigi";
+const NEWSLETTER_FROM_ADDRESS = process.env.NEWSLETTER_FROM_ADDRESS || "hello@ozigi.app";
+const NEWSLETTER_FROM_NAME = process.env.NEWSLETTER_FROM_NAME || "Ozigi";
 
 export async function POST(req: Request) {
   try {

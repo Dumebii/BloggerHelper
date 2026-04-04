@@ -10,9 +10,8 @@ const mailClient = new SendMailClient({
   token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
 });
 
-// Default sender - do NOT use personal emails
-const EMAIL_FROM_ADDRESS = 'hello@ozigi.app';
-const EMAIL_FROM_NAME = 'Ozigi';
+const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'hello@ozigi.app';
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi';
 
 export async function sendWelcomeEmail(to: string, name: string) {
   // In development, just log the email

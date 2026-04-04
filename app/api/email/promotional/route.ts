@@ -14,9 +14,8 @@ const mailClient = new SendMailClient({
   token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
 });
 
-// Hardcoded sender - never use personal emails for promotional emails
-const PROMO_FROM_ADDRESS = "hello@ozigi.app";
-const PROMO_FROM_NAME = "Ozigi";
+const PROMO_FROM_ADDRESS = process.env.PROMO_FROM_ADDRESS || "hello@ozigi.app";
+const PROMO_FROM_NAME = process.env.PROMO_FROM_NAME || "Ozigi";
 
 // Admin secret to authorize promotional email sends
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
