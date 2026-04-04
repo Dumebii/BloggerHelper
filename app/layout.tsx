@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -91,6 +92,7 @@ export default function RootLayout({
           <Toaster position="bottom-right" />
           {children}
         </ErrorBoundary>
+        <Analytics />
       </body>
     </html>
   );
