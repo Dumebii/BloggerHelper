@@ -339,32 +339,36 @@ export default function Hero() {
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
     >
-      {/* Before Content */}
+      {/* Before Content (Full width base) */}
       <div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 p-4 md:p-5 flex flex-col justify-center overflow-hidden">
         <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Generic AI</div>
-        <p className="text-xs text-slate-600 leading-tight">
-          The systematic approach to infrastructure optimization requires comprehensive evaluation of multiple interconnected components...
+        <p className="text-xs text-slate-600 leading-tight line-clamp-3">
+          The systematic approach to infrastructure optimization requires comprehensive evaluation of multiple interconnected components and operational efficiency metrics...
         </p>
       </div>
 
-      {/* After Content (Revealed by Slider) */}
+      {/* After Content (Revealed from right) */}
       <div
         className="absolute inset-0 bg-white p-4 md:p-5 flex flex-col justify-center overflow-hidden transition-all"
-        style={{ width: `${100 - sliderPosition}%`, right: 0 }}
+        style={{ 
+          width: `${sliderPosition}%`,
+          right: 0,
+          left: 'auto'
+        }}
       >
         <div className="text-xs font-bold text-brand-red uppercase tracking-wider mb-2">With OziGi</div>
-        <p className="text-xs text-slate-800 leading-tight font-medium">
-          Building real-time video in Next.js isn't just about the camera feed. We shipped a consultation app...
+        <p className="text-xs text-slate-800 leading-tight font-medium line-clamp-3">
+          Building real-time video in Next.js? Skip the fluff. We shipped a consultation app. Auth, data, video SDK—coordinated. That foundation matters.
         </p>
       </div>
 
       {/* Slider Handle */}
       <motion.div
-        className="absolute top-0 bottom-0 w-1 bg-gradient-to-r from-slate-300 to-brand-red cursor-col-resize shadow-lg"
+        className="absolute top-0 bottom-0 w-0.5 bg-gradient-to-r from-slate-300 to-brand-red cursor-col-resize shadow-lg"
         style={{ left: `${sliderPosition}%` }}
         transition={{ type: "tween", duration: 0, ease: "linear" }}
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-xl border-2 border-brand-red">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-xl border-2 border-brand-red hover:scale-110 transition-transform">
           <svg className="w-4 h-4 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7M15 5l7 7-7 7" />
           </svg>
@@ -377,39 +381,37 @@ export default function Hero() {
 </motion.div>
         </div>
 
-        {/* Social proof row */}
+        {/* Social proof row - Continuous Scroll */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-5 md:mt-8 flex flex-wrap justify-center gap-4 md:gap-8 text-center"
+          className="mt-8 md:mt-12 w-full"
         >
-          <div className="flex items-center gap-2">
-            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div className="text-left">
-              <div className="text-2xl font-black text-brand-navy">1,200+</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500">posts shipped</div>
-            </div>
+          <div className="text-xs uppercase font-bold text-slate-500 tracking-widest text-center mb-4">
+            Trusted by creators
           </div>
-          <div className="flex items-center gap-2">
-            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <div className="text-left">
-              <div className="text-2xl font-black text-brand-navy">10s</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500">content generation</div>
+          <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-white/50 backdrop-blur-sm py-4 shadow-sm">
+            {/* Scrolling container */}
+            <div className="flex animate-scroll gap-8 px-4">
+              {/* First set of items */}
+              {[
+                { icon: "✓", label: "1,200+ posts shipped", color: "text-brand-red" },
+                { icon: "⚡", label: "10s content generation", color: "text-brand-red" },
+                { icon: "😊", label: "0 AI-speak detected", color: "text-brand-red" },
+                { icon: "✓", label: "1,200+ posts shipped", color: "text-brand-red" },
+                { icon: "⚡", label: "10s content generation", color: "text-brand-red" },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 whitespace-nowrap flex-shrink-0">
+                  <span className={`text-lg font-bold ${item.color}`}>{item.icon}</span>
+                  <span className="text-sm font-semibold text-slate-700">{item.label}</span>
+                </div>
+              ))}
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <svg className="w-6 h-6 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div className="text-left">
-              <div className="text-2xl font-black text-brand-navy">0</div>
-              <div className="text-xs uppercase tracking-widest text-slate-500">AI-speak detected</div>
-            </div>
+            
+            {/* Fade edges for visual polish */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-brand-offwhite to-transparent pointer-events-none z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-brand-offwhite to-transparent pointer-events-none z-10" />
           </div>
         </motion.div>
       </div>
