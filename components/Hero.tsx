@@ -24,18 +24,20 @@ const cardData = [
         <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
       </svg>
     ),
-    content: `
-      <div class="tweet">
-        <p>Building real-time video in Next.js isn’t just about the camera feed. We shipped a consultation app. The real work began orchestrating auth, data, and Stream's SDK. That setup makes all the difference. Secure video calls start with bulletproof authentication.</p>
-      </div>
-      <div class="tweet">
-        <strong>Tweet 2:</strong> We used Clerk for our Next.js video consultation app. Handling user sessions, tokens, and roles became straightforward, letting us focus on the video experience itself. It's a critical layer.
-      </div>
-      <div class="tweet">
-        <strong>Tweet 3:</strong> Recording video calls adds a layer of legal and practical value. We built in session recording using Upload.io for our Next.js consultation app. Beyond that, Tinybird helps us track call duration and participant counts, giving real numbers on usage.
-      </div>
-    `,
-    type: "Thread (3 tweets)"
+    before: {
+      title: "Generic AI Output",
+      content: `
+        <p>Building real-time video communication systems requires careful architectural consideration. The integration of multiple services such as authentication providers, databases, and video SDKs necessitates thorough planning. Implementation of user authentication protocols combined with data persistence layers creates a comprehensive system. Security frameworks and session management protocols must be prioritized for optimal results.</p>
+      `
+    },
+    after: {
+      title: "With OziGi",
+      content: `
+        <p>Building real-time video in Next.js isn't just about the camera feed. We shipped a consultation app. The real work began orchestrating auth, data, and Stream's SDK. That setup makes all the difference. Secure video calls start with bulletproof authentication.</p>
+        <p style="margin-top: 12px;">We used Clerk for our Next.js video consultation app. Handling user sessions, tokens, and roles became straightforward, letting us focus on the video experience itself. It's a critical layer.</p>
+      `
+    },
+    type: "Thread"
   },
   {
     platform: "LinkedIn",
@@ -44,8 +46,15 @@ const cardData = [
         <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
       </svg>
     ),
-    content: "Putting together a video consultation app requires more than just a video library. We integrated Clerk for authentication, PlanetScale for user and appointment data, and Stream's Video SDK for the core real-time communication. This stack delivers a robust foundation. Deciding which components handle what part of the user journey—from pre-call checks to actual session management—is where the architecture choices become clear. Our Next.js API routes became the glue. Understanding the interplay between these services was key to a stable release.",
-    type: "long‑form"
+    before: {
+      title: "Generic AI Output",
+      content: "The implementation of video consultation systems necessitates comprehensive integration of multiple service providers. Authentication mechanisms, database infrastructure, and real-time communication protocols must be systematically orchestrated. The architectural framework requires meticulous attention to component interoperability and data flow management protocols."
+    },
+    after: {
+      title: "With OziGi",
+      content: "Putting together a video consultation app requires more than just a video library. We integrated Clerk for authentication, PlanetScale for user and appointment data, and Stream's Video SDK for the core real-time communication. This stack delivers a robust foundation. Our Next.js API routes became the glue holding everything together."
+    },
+    type: "Article"
   },
   {
     platform: "Discord",
@@ -54,8 +63,15 @@ const cardData = [
         <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77.7,77.7,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z" />
       </svg>
     ),
-    content: "Spent the morning integrating Clerk auth with our PlanetScale database for the video app. Getting user roles from Clerk to control access to consultation data in PlanetScale. The `webhooks` feature in Clerk is a good path for this. Anyone else doing similar setups with Next.js?",
-    type: "community update"
+    before: {
+      title: "Generic AI Output",
+      content: "The integration of authentication systems with persistent data storage mechanisms requires sophisticated configuration protocols. Role-based access control implementation in conjunction with webhook-based event management systems facilitates comprehensive data governance frameworks."
+    },
+    after: {
+      title: "With OziGi",
+      content: "Spent the morning integrating Clerk auth with our PlanetScale database for the video app. Getting user roles from Clerk to control access to consultation data in PlanetScale. The webhooks feature in Clerk is a good path for this. Anyone else doing similar setups with Next.js?"
+    },
+    type: "Discussion"
   }
 ];
 
@@ -64,7 +80,10 @@ export default function Hero() {
   const [session, setSession] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
   const prevSession = useRef<any>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
@@ -89,6 +108,42 @@ export default function Hero() {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleSliderDrag = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!sliderRef.current) return;
+    
+    const rect = sliderRef.current.getBoundingClientRect();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const position = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    setSliderPosition(position);
+  };
+
+  const handleMouseDown = () => setIsDragging(true);
+  const handleMouseUp = () => setIsDragging(false);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      handleSliderDrag(e as any);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      handleSliderDrag(e as any);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleMouseUp);
+    };
+  }, [isDragging]);
 
   return (
     <section className="relative overflow-hidden bg-brand-offwhite py-12 md:py-20 min-h-screen flex items-center">
@@ -199,15 +254,16 @@ export default function Hero() {
 </div>
           </motion.div>
 
-          {/* Right Column: Vertical Slider */}
+          {/* Right Column: Before/After Showcase */}
 
 <motion.div
   initial={{ opacity: 0, scale: 0.9 }}
   animate={{ opacity: 1, scale: 1 }}
   transition={{ duration: 0.7, delay: 0.2 }}
-  className="flex-1 relative flex justify-center items-center w-full"
+  className="flex-1 relative flex flex-col justify-center items-center w-full gap-8"
 >
-  <div className="relative w-full max-w-full md:max-w-md min-h-[340px] md:h-[340px]">
+  {/* Carousel: Platform-specific Before/After */}
+  <div className="relative w-full max-w-full md:max-w-md">
     <AnimatePresence mode="wait">
       <motion.div
         key={currentCard}
@@ -215,33 +271,108 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -30 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="hero-card absolute inset-0 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 md:p-6 overflow-y-auto pb-12"
+        className="space-y-3"
       >
-        <div className="flex items-center gap-3 mb-4">
-          {cardData[currentCard].icon}
-          <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-            {cardData[currentCard].platform} • {cardData[currentCard].type}
-          </span>
+        {/* Before Card */}
+        <div className="hero-card bg-slate-50 rounded-2xl border border-slate-200 p-4 md:p-6 shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              {cardData[currentCard].icon}
+              <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+                {cardData[currentCard].platform}
+              </span>
+            </div>
+            <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">
+              {cardData[currentCard].before.title}
+            </span>
+          </div>
+          <div
+            className="text-xs text-slate-600 leading-relaxed line-clamp-3"
+            dangerouslySetInnerHTML={{ __html: cardData[currentCard].before.content }}
+          />
         </div>
-        <div
-          className="text-sm text-slate-800 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: cardData[currentCard].content }}
-        />
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-          {cardData.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentCard(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                idx === currentCard ? "bg-brand-red w-4" : "bg-slate-300"
-              }`}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
+
+        {/* After Card */}
+        <div className="hero-card bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-lg">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              {cardData[currentCard].icon}
+              <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+                {cardData[currentCard].platform}
+              </span>
+            </div>
+            <span className="text-xs font-bold text-brand-red bg-brand-red/10 px-2 py-1 rounded">
+              {cardData[currentCard].after.title}
+            </span>
+          </div>
+          <div
+            className="text-xs text-slate-800 leading-relaxed font-medium"
+            dangerouslySetInnerHTML={{ __html: cardData[currentCard].after.content }}
+          />
         </div>
       </motion.div>
     </AnimatePresence>
+
+    {/* Navigation Dots */}
+    <div className="flex gap-2 justify-center mt-4">
+      {cardData.map((_, idx) => (
+        <button
+          key={idx}
+          onClick={() => setCurrentCard(idx)}
+          className={`w-2 h-2 rounded-full transition-all ${
+            idx === currentCard ? "bg-brand-red w-4" : "bg-slate-300 hover:bg-slate-400"
+          }`}
+          aria-label={`Go to platform ${idx + 1}`}
+        />
+      ))}
+    </div>
   </div>
+
+  {/* Interactive Draggable Slider */}
+  <div className="w-full max-w-full md:max-w-md">
+    <p className="text-xs uppercase font-bold text-slate-500 tracking-widest text-center mb-3">
+      Drag to reveal the difference
+    </p>
+    <div
+      ref={sliderRef}
+      className="relative h-40 rounded-2xl overflow-hidden border-2 border-slate-200 cursor-col-resize bg-white shadow-lg"
+      onMouseDown={handleMouseDown}
+      onTouchStart={handleMouseDown}
+    >
+      {/* Before Content */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 p-4 md:p-5 flex flex-col justify-center overflow-hidden">
+        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Generic AI</div>
+        <p className="text-xs text-slate-600 leading-tight">
+          The systematic approach to infrastructure optimization requires comprehensive evaluation of multiple interconnected components...
+        </p>
+      </div>
+
+      {/* After Content (Revealed by Slider) */}
+      <div
+        className="absolute inset-0 bg-white p-4 md:p-5 flex flex-col justify-center overflow-hidden transition-all"
+        style={{ width: `${100 - sliderPosition}%`, right: 0 }}
+      >
+        <div className="text-xs font-bold text-brand-red uppercase tracking-wider mb-2">With OziGi</div>
+        <p className="text-xs text-slate-800 leading-tight font-medium">
+          Building real-time video in Next.js isn't just about the camera feed. We shipped a consultation app...
+        </p>
+      </div>
+
+      {/* Slider Handle */}
+      <motion.div
+        className="absolute top-0 bottom-0 w-1 bg-gradient-to-r from-slate-300 to-brand-red cursor-col-resize shadow-lg"
+        style={{ left: `${sliderPosition}%` }}
+        transition={{ type: "tween", duration: 0, ease: "linear" }}
+      >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-xl border-2 border-brand-red">
+          <svg className="w-4 h-4 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7M15 5l7 7-7 7" />
+          </svg>
+        </div>
+      </motion.div>
+    </div>
+  </div>
+
   <div className="absolute -z-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-red/5 rounded-full blur-3xl" />
 </motion.div>
         </div>
