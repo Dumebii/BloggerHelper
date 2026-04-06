@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import Hero from "../components/Hero";
 import AuthModal from "../components/AuthModal";
 import PricingCards from "../components/PricingCards";
+import BeforeAfterSlider from "../components/BeforeAfterSlider";
 import { supabase } from "@/lib/supabase/client";
 
 const fadeUp: Variants = {
@@ -204,6 +205,14 @@ export default function Home() {
                 </div>
               </motion.div>
             </div>
+
+            {/* Interactive Drag-to-Reveal Slider */}
+            <motion.div variants={fadeUp} className="mt-12 md:mt-16 w-full">
+              <p className="text-xs uppercase font-bold text-slate-500 tracking-widest text-center mb-4">
+                Try it yourself — drag to reveal
+              </p>
+              <BeforeAfterSlider />
+            </motion.div>
           </motion.div>
         </section>
 
@@ -358,55 +367,97 @@ export default function Home() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="relative w-full overflow-hidden"
             >
-              {[
-                {
-                  name: "Priya Sharma",
-                  role: "Senior Developer Advocate",
-                  quote: "I paste my rough notes into Ozigi and get back a polished X thread that sounds like me, not a chatbot. It's the difference between shipping and not shipping.",
-                  image: "/testimonials/priya.jpg",
-                },
-                {
-                  name: "Marcus Chen",
-                  role: "Technical Founder",
-                  quote: "Before Ozigi, I'd spend two hours tweaking prompts and still sound like ChatGPT. Now I feed in rough thoughts and ship authentic posts in minutes.",
-                  image: "/testimonials/marcus.jpg",
-                },
-                {
-                  name: "Sarah Okonkwo",
-                  role: "DevRel Lead",
-                  quote: "Set my voice once. Now every post is on-brand, on-voice, and ready to go. My LinkedIn engagement tripled because I actually sound like me again.",
-                  image: "/testimonials/sarah.jpg",
-                },
-              ].map((testimonial, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={fadeUp}
-                  whileHover={{ y: -4 }}
-                  className="bg-white rounded-3xl border border-slate-200/60 p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 w-28 h-28 bg-brand-red/8 rounded-full blur-2xl group-hover:bg-brand-red/12 transition-colors" />
-                  <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 ring-2 ring-brand-red/20">
-                      <Image
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-brand-navy">{testimonial.name}</h4>
-                      <p className="text-xs text-slate-500">{testimonial.role}</p>
-                    </div>
-                  </div>
-                  <p className="text-slate-700 leading-relaxed italic relative z-10">"{testimonial.quote}"</p>
-                  <div className="mt-6 flex text-brand-red relative z-10">
-                    {"★".repeat(5)}
-                  </div>
-                </motion.div>
-              ))}
+              {/* Testimonials Scroll Container */}
+              <div className="relative w-full overflow-hidden rounded-2xl">
+                <div className="flex animate-scroll gap-6">
+                  {[
+                    {
+                      name: "Priya Sharma",
+                      role: "Senior Developer Advocate",
+                      quote: "I paste my rough notes into Ozigi and get back a polished X thread that sounds like me, not a chatbot. It's the difference between shipping and not shipping.",
+                      image: "/testimonials/priya.jpg",
+                    },
+                    {
+                      name: "Marcus Chen",
+                      role: "Technical Founder",
+                      quote: "Before Ozigi, I'd spend two hours tweaking prompts and still sound like ChatGPT. Now I feed in rough thoughts and ship authentic posts in minutes.",
+                      image: "/testimonials/marcus.jpg",
+                    },
+                    {
+                      name: "Sarah Okonkwo",
+                      role: "DevRel Lead",
+                      quote: "Set my voice once. Now every post is on-brand, on-voice, and ready to go. My LinkedIn engagement tripled because I actually sound like me again.",
+                      image: "/testimonials/sarah.jpg",
+                    },
+                    {
+                      name: "Alex Rivera",
+                      role: "Content Strategist",
+                      quote: "Ozigi turned my scattered thoughts into cohesive narratives. No more generic AI vibes. Every piece feels authentically me.",
+                      image: "/testimonials/alex.jpg",
+                    },
+                    {
+                      name: "Jordan Williams",
+                      role: "Engineering Manager",
+                      quote: "Our entire team uses Ozigi. We've cut content creation time in half and our voice is now consistent across all platforms.",
+                      image: "/testimonials/jordan.jpg",
+                    },
+                    {
+                      name: "Casey Kim",
+                      role: "Product Lead",
+                      quote: "Finally, AI that gets out of the way. Ozigi enhances my voice rather than replacing it. That's the difference.",
+                      image: "/testimonials/casey.jpg",
+                    },
+                  ]
+                    .concat([
+                      {
+                        name: "Priya Sharma",
+                        role: "Senior Developer Advocate",
+                        quote: "I paste my rough notes into Ozigi and get back a polished X thread that sounds like me, not a chatbot. It's the difference between shipping and not shipping.",
+                        image: "/testimonials/priya.jpg",
+                      },
+                      {
+                        name: "Marcus Chen",
+                        role: "Technical Founder",
+                        quote: "Before Ozigi, I'd spend two hours tweaking prompts and still sound like ChatGPT. Now I feed in rough thoughts and ship authentic posts in minutes.",
+                        image: "/testimonials/marcus.jpg",
+                      },
+                    ])
+                    .map((testimonial, idx) => (
+                      <div
+                        key={idx}
+                        className="min-w-[320px] md:min-w-[400px] bg-white rounded-2xl border border-slate-200/60 p-6 shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden flex-shrink-0"
+                      >
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-brand-red/8 rounded-full blur-2xl group-hover:bg-brand-red/12 transition-colors" />
+                        <div className="flex items-center gap-4 mb-6 relative z-10">
+                          <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 ring-2 ring-brand-red/20">
+                            <Image
+                              src={testimonial.image}
+                              alt={testimonial.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-brand-navy text-sm">{testimonial.name}</h4>
+                            <p className="text-xs text-slate-500">{testimonial.role}</p>
+                          </div>
+                        </div>
+                        <p className="text-slate-700 leading-relaxed italic relative z-10 text-sm line-clamp-4">
+                          "{testimonial.quote}"
+                        </p>
+                        <div className="mt-4 flex text-brand-red relative z-10 text-sm">
+                          {"★".repeat(5)}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Fade edges for smooth visual blending */}
+                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-brand-offwhite to-transparent pointer-events-none z-20" />
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-brand-offwhite to-transparent pointer-events-none z-20" />
+              </div>
             </motion.div>
           </div>
         </section>

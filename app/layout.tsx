@@ -17,9 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ozigi — Turn Raw Notes, PDFs & URLs Into Social Posts | Automated Content Generator for Creators",
-  description: "Drop in raw notes, a PDF, or a URL. Ozigi generates content for X, LinkedIn, Slack and Discord in your voice — without sounding like AI wrote them. Free to try.",
+  title: "Ozigi — Automated Content Generator for Creators",
+  description: "Automate social media content generation without sounding like an AI bot. Drop in raw notes, a PDF, or a URL. Ozigi generates content for X, LinkedIn, Slack and Discord in your voice. Free to try.",
   keywords: [
+    "AI content that doesn't sound like AI",
+    "Best Social Marketing Tool",
+    "Using AI in marketing",
     "AI content generator",
     "social media posts from notes",
     "AI content generator from PDF",

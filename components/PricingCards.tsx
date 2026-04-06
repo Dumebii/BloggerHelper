@@ -148,11 +148,11 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
 
   return (
     <div>
-      <div className="flex justify-center mb-12">
+      <div className="flex justify-center mb-8">
         <div className="inline-flex bg-white border border-slate-200 rounded-full p-1 shadow-sm">
           <button
             onClick={() => setBillingInterval("monthly")}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
               billingInterval === "monthly"
                 ? "bg-brand-navy text-white"
                 : "text-slate-600 hover:text-slate-900"
@@ -162,7 +162,7 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
           </button>
           <button
             onClick={() => setBillingInterval("yearly")}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
               billingInterval === "yearly"
                 ? "bg-brand-navy text-white"
                 : "text-slate-600 hover:text-slate-900"
@@ -174,7 +174,7 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
         {tiers.map((tier) => {
           const price = billingInterval === "monthly" ? tier.priceMonthly : tier.priceYearly;
           const priceDisplay = price === null ? "Custom" : `$${price}`;
@@ -186,36 +186,36 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
           return (
             <div
               key={tier.name}
-              className={`rounded-2xl p-6 flex flex-col h-full ${
+              className={`rounded-xl p-4 md:p-5 flex flex-col h-full transition-all ${
                 tier.popular
-                  ? "bg-brand-navy text-white ring-4 ring-brand-red shadow-xl scale-105 md:scale-110"
-                  : "bg-white border-2 border-slate-200 shadow-sm hover:shadow-lg transition-shadow"
+                  ? "bg-brand-navy text-white ring-2 ring-brand-red shadow-lg md:scale-105"
+                  : "bg-white border border-slate-200 shadow-sm hover:shadow-md"
               }`}
             >
               {tier.badge && (
-                <span className="inline-block text-xs font-bold uppercase tracking-widest bg-brand-red text-white px-3 py-1 rounded-full self-start mb-4">
+                <span className="inline-block text-xs font-bold uppercase tracking-widest bg-brand-red text-white px-2 py-0.5 rounded-full self-start mb-3">
                   {tier.badge}
                 </span>
               )}
-              <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">
+              <h3 className="text-lg font-black italic uppercase tracking-tighter mb-1">
                 {tier.name}
               </h3>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-black">{priceDisplay}</span>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-2xl font-black">{priceDisplay}</span>
                 {showPeriod && (
-                  <span className={`text-sm ${tier.popular ? "text-slate-300" : "text-slate-500"}`}>
+                  <span className={`text-xs ${tier.popular ? "text-slate-300" : "text-slate-500"}`}>
                     {periodDisplay}
                   </span>
                 )}
               </div>
-              <p className={`text-sm mt-3 ${tier.popular ? "text-slate-300" : "text-slate-500"}`}>
+              <p className={`text-xs mb-3 ${tier.popular ? "text-slate-300" : "text-slate-500"}`}>
                 {tier.description}
               </p>
-              <hr className={`my-6 ${tier.popular ? "border-slate-700" : "border-slate-100"}`} />
-              <ul className="space-y-3 flex-1">
+              <hr className={`my-3 ${tier.popular ? "border-slate-700" : "border-slate-100"}`} />
+              <ul className="space-y-2 flex-1 mb-4">
                 {tier.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm">
-                    <Check size={18} className={tier.popular ? "text-brand-red shrink-0 mt-0.5" : "text-brand-red shrink-0 mt-0.5"} />
+                  <li key={idx} className="flex items-start gap-2 text-xs">
+                    <Check size={14} className={`${tier.popular ? "text-brand-red" : "text-brand-red"} shrink-0 mt-0.5`} />
                     <span className={tier.popular ? "text-slate-200" : "text-slate-600"}>
                       {feature}
                     </span>
@@ -224,7 +224,7 @@ export default function PricingCards({ onOpenAuthModal }: PricingCardsProps) {
               </ul>
               <button
                 onClick={() => handleUpgrade(tier.planId, billingInterval)}
-                className={`mt-8 w-full py-3 rounded-xl font-black uppercase tracking-widest text-sm transition-all ${
+                className={`w-full py-2 rounded-lg font-bold uppercase tracking-widest text-xs transition-all ${
                   tier.popular
                     ? "bg-white text-brand-navy hover:bg-slate-100"
                     : isFree || isEnterprise
