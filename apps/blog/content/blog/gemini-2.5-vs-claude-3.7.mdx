@@ -215,7 +215,7 @@ FORMATTING RESTRAINT: You are limited to a MAXIMUM of 1 emoji per
 post. Use a maximum of 2 highly relevant hashtags per post.
 ```
 
-With these constraints active, Gemini's human cadence score jumps from 5.5 to 9.2 — within acceptable range of Claude's base 9.5.
+With these constraints active, Gemini's human cadence score jumps from 5.5 to 9.2 — within an acceptable range of Claude's base 9.5.
 
 The key insight: Claude's tone advantage is a *default* advantage, not an *absolute* one. Gemini's outputs are more malleable under prompt constraints. For a use case where tone control is the entire product, that malleability is worth more than a higher baseline.
 
@@ -229,7 +229,7 @@ The key insight: Claude's tone advantage is a *default* advantage, not an *absol
 
 ## Gemini vs Claude Models: The Cost Reality
 
-At this stage where Ozigi is a public sandbox, every anonymous page load that can trigger a generation is a billable API call absorbed by the product. Ozigi is at its pre-revenue stage, so this matters a lot.
+At this stage, where Ozigi is a public sandbox, every anonymous page load that can trigger a generation is a billable API call absorbed by the product. Ozigi is at its pre-revenue stage, so this matters a lot.
 
 | Model | Input Cost (per 1M tokens) | Output Cost (per 1M tokens) |
 |---|---|---|
@@ -242,19 +242,19 @@ At this stage where Ozigi is a public sandbox, every anonymous page load that ca
 
 Pricing sourced from [Google Cloud Vertex AI pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing) and [Anthropic API pricing](https://platform.claude.com/docs/en/about-claude/pricing). 
 
->Pro tip:Verify current rates before production decisions — both have changed multiple times in the past year.
+>Pro tip: Verify current rates before production decisions — both have changed multiple times in the past year.
 
 The input cost difference is 40x. The output cost difference is 50x. For a free-tier product with no revenue, the ability to run a public sandbox sustainably is the difference between having a conversion funnel and not having one.
 
 ---
 
-## Where Ozigi is Going and How it'd Change My Choice of Model, Moving Foward
+## Where Ozigi is Going and How it'd Change My Choice of Model, Moving Forward
 
 This is an honest [ADR](https://adr.github.io/). Here's what would change my answer.
 
-**When Ozigi finally moves behind a paywall**, latency and cost become secondary concerns. A signed-in user on a paid plan is more likely waiting 20 seconds for premium output is a different UX calculation than an anonymous user on a free demo. In that context, Claude's base tone quality becomes much more compelling. I'd be trading economics for output baseline, and the trade might be worth it.
+**When Ozigi finally moves behind a paywall**, latency and cost become secondary concerns. A signed-in user on a paid plan is more likely to wait 20 seconds for premium output, which is a different UX calculation than an anonymous user on a free demo. In that context, Claude's base tone quality becomes much more compelling. I'd be trading economics for output baseline, and the trade might be worth it.
 
-**When streaming gets implemented**, the latency argument against Claude weakens significantly. Claude 3.7 Sonnet's time-to-first-token via streaming is competitive. A user seeing the first post appear in 2-3 seconds experiences the product very differently than a user staring at a progress bar for 21 seconds. Streaming is on the roadmap.
+**When streaming gets implemented**, the latency argument against Claude weakens significantly. Claude 3.7 Sonnet's time-to-first-token via streaming is competitive. A user seeing the first post appear in 2-3 seconds experiences the product very differently from a user staring at a progress bar for 21 seconds. Streaming is on the roadmap.
 
 For an in-depth look at how we tested the pipeline that informs these decisions, see [how we E2E test AI agents with Playwright in Next.js](https://dev.to/dumebii/how-to-e2e-test-ai-agents-mocking-api-responses-with-playwright-in-nextjs-nic).
 
@@ -272,7 +272,7 @@ For an in-depth look at how we tested the pipeline that informs these decisions,
 | Cost per 1M input tokens | $0.075 | $3.00 | Gemini |
 
 
-Gemini won on five of six dimensions. Claude won on one — base tone — and that gap was closeable through prompt engineering.
+Gemini won on five of six dimensions. Claude won on one — base tone, and that gap was closeable through prompt engineering.
 
 ---
 
@@ -296,8 +296,8 @@ The best model for your product is rarely the one with the highest aggregate sco
 * The live context engine is at [ozigi.app](https://ozigi.app). 
 * The interactive version of this ADR [with Chart.js visualisations of each benchmark](https://ozigi.app/architecture).
 * Ozigi is currently looking for User Experience Testers to give honest Feedback on their experience using the product, and areas for improvement.
-* We have some [open issues](https://github.com/Dumebii/OziGi/issues) on Github that is welcome to contribution from the community. 
-_ps, this app has been entirely vibe coded so far, therefore we welcome vibe coded contributions too!_ 
+* We have some [open issues](https://github.com/Dumebii/OziGi/issues) on GitHub that are welcome to contributions from the community. 
+_ps, this app has been entirely vibe-coded so far, we welcome vibe-coded contributions too!_ 
 * Connect With Me On [LinkedIn](www.linkedin.com/in/dumebi-okolo)
-* Send me an email on okolodumebi@gmail.com.
-* Building osmething cool? Talk about it in the comments!
+* Send me an email at okolodumebi@gmail.com.
+* Building something cool? Talk about it in the comments!
