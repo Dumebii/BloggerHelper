@@ -1,0 +1,330 @@
+---
+title: "Building a Robust Webhook Handler in Node.js: Validation, Queuing, and Retry Logic"
+date: "2026-04-07"
+description: "This article covers the full picture: signature validation, idempotency, async queuing, and retry logic with exponential backoff."
+coverImage: "/images/blog/webhook-handler/cover-image.png"
+category: "Tutorial, Engineering"
+section: "Engineering"
+---
+
+Webhooks are everywhere. Stripe fires one when a payment succeeds. GitHub fires one when a PR is merged. Twilio fires one when an SMS lands. And when your handler is flaky — when it misses events, fails silently, or chokes under load — you lose data and trust.
+
+Most tutorials show you how to receive a webhook. Few show you how to handle it *properly*. This article covers the full picture: signature validation, idempotency, async queuing, and retry logic with exponential backoff.
+
+We'll use Node.js and Express throughout, with no external queue infrastructure required.
+
+---
+
+## What We're Building
+
+A webhook handler that:
+
+1. **Validates** the request signature (so only legitimate senders get through)
+2. **Acknowledges fast** (returns `200` immediately, does the work async)
+3. **Queues events** in-process so the work doesn't block the HTTP layer
+4. **Retries failures** with exponential backoff
+5. **Handles duplicates** with idempotency keys
+
+---
+
+## Step 1: Signature Validation
+
+Never trust an incoming webhook without verifying it came from who you think it came from. Most webhook providers (Stripe, GitHub, Shopify) sign their payloads using HMAC-SHA256 with a shared secret.
+
+```js
+const crypto = require('crypto');
+
+function verifySignature(payload, signature, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(payload, 'utf8')
+    .digest('hex');
+
+  // Use timingSafeEqual to prevent timing attacks
+  const expectedBuffer = Buffer.from(`sha256=${expected}`, 'utf8');
+  const signatureBuffer = Buffer.from(signature, 'utf8');
+
+  if (expectedBuffer.length !== signatureBuffer.length) return false;
+
+  return crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
+}
+```
+
+**Why `timingSafeEqual`?** A simple `===` check leaks timing information — an attacker can brute-force signatures by measuring how long the comparison takes. `timingSafeEqual` always takes the same amount of time regardless of where the strings differ.
+
+Now wire it into Express. A critical detail: you need the **raw body** for HMAC validation, not the parsed JSON. Express's `json()` middleware strips the raw body by default.
+
+```js
+const express = require('express');
+const app = express();
+
+// Store raw body before parsing
+app.use('/webhook', express.raw({ type: 'application/json' }));
+
+app.post('/webhook', (req, res) => {
+  const signature = req.headers['x-hub-signature-256']; // GitHub format
+  const rawBody = req.body; // Buffer, because of express.raw()
+
+  if (!verifySignature(rawBody, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  const event = JSON.parse(rawBody);
+
+  // Acknowledge immediately — do the work async
+  res.status(200).send('OK');
+
+  queue.enqueue(event);
+});
+```
+
+The key discipline here: **acknowledge before you process**. If your business logic takes 2 seconds and the sender has a 1-second timeout, you'll get duplicate events.
+
+---
+
+## Step 2: An In-Process Job Queue
+
+You don't always need Redis or BullMQ for a job queue. For many use cases, an in-process queue with controlled concurrency is enough — and it's simpler to reason about.
+
+```js
+class WebhookQueue {
+  constructor({ concurrency = 3, maxRetries = 5 } = {}) {
+    this.queue = [];
+    this.running = 0;
+    this.concurrency = concurrency;
+    this.maxRetries = maxRetries;
+  }
+
+  enqueue(event) {
+    this.queue.push({ event, attempts: 0 });
+    this.drain();
+  }
+
+  drain() {
+    while (this.running < this.concurrency && this.queue.length > 0) {
+      const job = this.queue.shift();
+      this.running++;
+      this.process(job).finally(() => {
+        this.running--;
+        this.drain(); // pick up the next job
+      });
+    }
+  }
+
+  async process(job) {
+    try {
+      await handleEvent(job.event);
+    } catch (err) {
+      job.attempts++;
+      if (job.attempts < this.maxRetries) {
+        const delay = this.backoff(job.attempts);
+        console.warn(`Retrying event ${job.event.id} in ${delay}ms (attempt ${job.attempts})`);
+        setTimeout(() => {
+          this.queue.push(job);
+          this.drain();
+        }, delay);
+      } else {
+        console.error(`Event ${job.event.id} failed after ${this.maxRetries} attempts`, err);
+        // Send to dead-letter store, alert, etc.
+      }
+    }
+  }
+
+  backoff(attempt) {
+    // Exponential backoff with jitter
+    const base = Math.min(1000 * 2 ** attempt, 30000);
+    const jitter = Math.random() * 1000;
+    return base + jitter;
+  }
+}
+
+const queue = new WebhookQueue({ concurrency: 3, maxRetries: 5 });
+```
+
+The `backoff` method uses **exponential backoff with jitter**. Without jitter, all retrying jobs fire at the same moment and create a thundering herd. Adding a random jitter spreads the load.
+
+---
+
+## Step 3: The Event Handler
+
+This is where your actual business logic lives. Keep it focused — one function per event type.
+
+```js
+async function handleEvent(event) {
+  switch (event.type) {
+    case 'payment.succeeded':
+      await handlePaymentSucceeded(event.data);
+      break;
+    case 'user.created':
+      await handleUserCreated(event.data);
+      break;
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+}
+
+async function handlePaymentSucceeded(data) {
+  // e.g., upgrade account, send receipt, update DB
+  await db.orders.update({ id: data.orderId, status: 'paid' });
+  await emailService.sendReceipt(data.customerEmail, data.amount);
+}
+```
+
+---
+
+## Step 4: Idempotency
+
+Webhook senders *will* send duplicates. Network timeouts, retries on their end, and at-least-once delivery guarantees mean you'll see the same event ID more than once.
+
+Your handler needs to be **idempotent** — processing the same event twice should have the same effect as processing it once.
+
+```js
+const processedEvents = new Set(); // Use Redis in production
+
+async function handleEvent(event) {
+  if (processedEvents.has(event.id)) {
+    console.log(`Skipping duplicate event: ${event.id}`);
+    return;
+  }
+
+  processedEvents.add(event.id);
+
+  switch (event.type) {
+    // ... your handlers
+  }
+}
+```
+
+In production, replace the in-memory `Set` with a Redis `SET NX EX` call so idempotency survives process restarts:
+
+```js
+const redis = require('ioredis');
+const client = new redis();
+
+async function isAlreadyProcessed(eventId) {
+  // SET key value NX EX seconds
+  // NX = only set if not exists; EX = expire after 24h
+  const result = await client.set(`event:${eventId}`, '1', 'NX', 'EX', 86400);
+  return result === null; // null means the key already existed
+}
+
+async function handleEvent(event) {
+  if (await isAlreadyProcessed(event.id)) {
+    return;
+  }
+  // process...
+}
+```
+
+---
+
+## Step 5: Putting It All Together
+
+```js
+const express = require('express');
+const crypto = require('crypto');
+
+const app = express();
+app.use('/webhook', express.raw({ type: 'application/json' }));
+
+// --- Signature verification ---
+function verifySignature(payload, signature, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  const expectedBuffer = Buffer.from(`sha256=${expected}`);
+  const sigBuffer = Buffer.from(signature);
+  if (expectedBuffer.length !== sigBuffer.length) return false;
+  return crypto.timingSafeEqual(expectedBuffer, sigBuffer);
+}
+
+// --- Queue ---
+class WebhookQueue {
+  constructor({ concurrency = 3, maxRetries = 5 } = {}) {
+    this.queue = [];
+    this.running = 0;
+    this.concurrency = concurrency;
+    this.maxRetries = maxRetries;
+  }
+  enqueue(event) { this.queue.push({ event, attempts: 0 }); this.drain(); }
+  drain() {
+    while (this.running < this.concurrency && this.queue.length > 0) {
+      const job = this.queue.shift();
+      this.running++;
+      this.process(job).finally(() => { this.running--; this.drain(); });
+    }
+  }
+  async process(job) {
+    try {
+      await handleEvent(job.event);
+    } catch (err) {
+      job.attempts++;
+      if (job.attempts < this.maxRetries) {
+        const delay = Math.min(1000 * 2 ** job.attempts, 30000) + Math.random() * 1000;
+        setTimeout(() => { this.queue.push(job); this.drain(); }, delay);
+      } else {
+        console.error(`Dead letter: ${job.event.id}`, err);
+      }
+    }
+  }
+}
+
+const queue = new WebhookQueue();
+
+// --- Idempotency ---
+const processed = new Set();
+
+// --- Handler ---
+async function handleEvent(event) {
+  if (processed.has(event.id)) return;
+  processed.add(event.id);
+  console.log(`Processing event: ${event.type} (${event.id})`);
+  // your business logic here
+}
+
+// --- Route ---
+app.post('/webhook', (req, res) => {
+  const sig = req.headers['x-hub-signature-256'];
+  if (!verifySignature(req.body, sig, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).send('Unauthorized');
+  }
+  res.status(200).send('OK'); // acknowledge immediately
+  queue.enqueue(JSON.parse(req.body));
+});
+
+app.listen(3000, () => console.log('Webhook server listening on :3000'));
+```
+
+---
+
+## When to Upgrade to a Real Queue
+
+The in-process queue above is solid for moderate throughput, but you'll want to graduate to BullMQ (Redis-backed) or SQS when:
+
+- You're running **multiple server instances** (in-process state won't be shared)
+- You need **event history** and visibility into failed jobs
+- Your event volume exceeds a few hundred per minute consistently
+- You need **scheduled retries** that survive process restarts
+
+The good news: the handler logic above (`handleEvent`, idempotency, backoff) carries over directly. You're just swapping the queue substrate.
+
+---
+
+## Summary
+
+| Concern | Solution |
+|---|---|
+| Fake webhook senders | HMAC-SHA256 signature verification with `timingSafeEqual` |
+| Slow handlers timing out | Acknowledge `200` immediately, process async |
+| Cascading failures | In-process queue with concurrency limit |
+| Transient errors | Exponential backoff with jitter |
+| Duplicate events | Idempotency keys via Set or Redis |
+
+Webhooks are one of those things that look simple until they aren't. Getting these five concerns right means you can receive events reliably at scale — without losing data, without duplicating side effects, and without taking down your server under a burst of retries.
+
+If you're building something that relies on real-time event delivery, these patterns are worth getting right from the start.
+
+---
+
+*What's your webhook setup look like? Drop a comment — especially if you've found a gotcha I haven't covered.*

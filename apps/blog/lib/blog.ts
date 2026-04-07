@@ -20,6 +20,7 @@ export interface BlogPost {
   author?: string;
   readTime?: string;
   categories?: string[];
+  section?: string;
   content: string;
   headings: Heading[];
   [key: string]: any;
@@ -69,6 +70,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       author: data.author,
       readTime: data.readTime,
       categories: parseCategories(data),
+      section: data.section || null,
       content,
       headings: extractHeadings(content),
       ...data,
@@ -94,6 +96,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
       author: data.author,
       readTime: data.readTime,
       categories: parseCategories(data),
+      section: data.section || null,
       content,
       headings: extractHeadings(content),
       ...data,
@@ -113,4 +116,13 @@ export async function getRelatedPosts(categories: string[], currentSlug: string)
       return post.categories.some(cat => categories.includes(cat));
     })
     .slice(0, 3);
+}
+
+export function getAllSections(): string[] {
+  return ["Engineering", "Marketing", "Content", "Tools Roundup", "Ozigi Focus"];
+}
+
+export async function getPostsBySection(section: string): Promise<BlogPost[]> {
+  const allPosts = await getAllPosts();
+  return allPosts.filter((post) => post.section === section);
 }
