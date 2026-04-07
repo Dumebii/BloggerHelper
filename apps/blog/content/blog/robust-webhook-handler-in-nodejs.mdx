@@ -2,7 +2,7 @@
 title: "Building a Robust Webhook Handler in Node.js: Validation, Queuing, and Retry Logic"
 date: "2026-04-07"
 description: "This article covers the full picture: signature validation, idempotency, async queuing, and retry logic with exponential backoff."
-coverImage: "/images/blog/webhook-handler/cover-image.png"
+coverImage: "/images/blog/webhook-handler/webhook_cover_v2.png"
 category: "Tutorial, Node.js, Backend"
 author: "Dumebi Okolo"
 readTime: "8 min read"
@@ -44,7 +44,7 @@ A webhook handler that:
 
 Never trust an incoming webhook without verifying it came from who you think it came from. Most webhook providers ([Stripe](https://stripe.com/docs/webhooks/signature-verification), [GitHub](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries), [Shopify](https://shopify.dev/docs/apps/build/webhooks/secure/validate-webhooks)) sign their payloads using [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC) with a shared secret.
 
-![Webhook pipeline flow — from incoming request through validation, queuing, handling, retry and dead letter](/images/blog/webhook-handler/webhook_pipeline_diagram.png)
+![Webhook pipeline flow — from incoming request through validation, queuing, handling, retry and dead letter](/images/blog/webhook-handler/webhook_pipeline_diagram_v2.png)
 
 ```js
 const crypto = require('crypto');
@@ -164,7 +164,7 @@ const queue = new WebhookQueue({ concurrency: 3, maxRetries: 5 });
 
 The `backoff` method uses **exponential backoff with jitter**. Without jitter, all retrying jobs fire at the same moment and create a [thundering herd](https://en.wikipedia.org/wiki/Thundering_herd_problem). Adding a random jitter spreads the load. See [AWS's writeup on backoff and jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) for a deeper look at why this matters at scale.
 
-![Exponential backoff with jitter — delay per retry attempt](/images/blog/webhook-handler/webhook_backoff_chart.png)
+![Exponential backoff with jitter — delay per retry attempt](/images/blog/webhook-handler/webhook_backoff_chart_v2.png)
 
 ---
 
