@@ -369,59 +369,43 @@ export default function Home() {
               variants={staggerContainer}
               className="relative w-full overflow-hidden"
             >
-              {/* Testimonials Scroll Container */}
+              {/* Testimonials Scroll Container - Anonymous, Quote-Focused */}
               <div className="relative w-full overflow-hidden rounded-2xl">
                 <div className="flex animate-scroll gap-6">
                   {[
                     {
-                      name: "Priya Sharma",
-                      role: "Senior Developer Advocate",
+                      role: "Developer Advocate",
                       quote: "I paste my rough notes into Ozigi and get back a polished X thread that sounds like me, not a chatbot. It's the difference between shipping and not shipping.",
-                      image: "/testimonials/priya.jpg",
                     },
                     {
-                      name: "Marcus Chen",
                       role: "Technical Founder",
                       quote: "Before Ozigi, I'd spend two hours tweaking prompts and still sound like ChatGPT. Now I feed in rough thoughts and ship authentic posts in minutes.",
-                      image: "/testimonials/marcus.jpg",
                     },
                     {
-                      name: "Sarah Okonkwo",
                       role: "DevRel Lead",
                       quote: "Set my voice once. Now every post is on-brand, on-voice, and ready to go. My LinkedIn engagement tripled because I actually sound like me again.",
-                      image: "/testimonials/sarah.jpg",
                     },
                     {
-                      name: "Alex Rivera",
                       role: "Content Strategist",
                       quote: "Ozigi turned my scattered thoughts into cohesive narratives. No more generic AI vibes. Every piece feels authentically me.",
-                      image: "/testimonials/alex.jpg",
                     },
                     {
-                      name: "Jordan Williams",
                       role: "Engineering Manager",
                       quote: "Our entire team uses Ozigi. We've cut content creation time in half and our voice is now consistent across all platforms.",
-                      image: "/testimonials/jordan.jpg",
                     },
                     {
-                      name: "Casey Kim",
                       role: "Product Lead",
                       quote: "Finally, AI that gets out of the way. Ozigi enhances my voice rather than replacing it. That's the difference.",
-                      image: "/testimonials/casey.jpg",
                     },
                   ]
                     .concat([
                       {
-                        name: "Priya Sharma",
-                        role: "Senior Developer Advocate",
+                        role: "Developer Advocate",
                         quote: "I paste my rough notes into Ozigi and get back a polished X thread that sounds like me, not a chatbot. It's the difference between shipping and not shipping.",
-                        image: "/testimonials/priya.jpg",
                       },
                       {
-                        name: "Marcus Chen",
                         role: "Technical Founder",
                         quote: "Before Ozigi, I'd spend two hours tweaking prompts and still sound like ChatGPT. Now I feed in rough thoughts and ship authentic posts in minutes.",
-                        image: "/testimonials/marcus.jpg",
                       },
                     ])
                     .map((testimonial, idx) => (
@@ -430,26 +414,18 @@ export default function Home() {
                         className="min-w-[320px] md:min-w-[400px] bg-white rounded-2xl border border-slate-200/60 p-6 shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden flex-shrink-0"
                       >
                         <div className="absolute top-0 right-0 w-28 h-28 bg-brand-red/8 rounded-full blur-2xl group-hover:bg-brand-red/12 transition-colors" />
-                        <div className="flex items-center gap-4 mb-6 relative z-10">
-                          <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 ring-2 ring-brand-red/20">
-                            <Image
-                              src={testimonial.image}
-                              alt={testimonial.name}
-                              fill
-                              className="object-cover"
-                            />
+                        {/* Quote icon instead of avatar */}
+                        <div className="flex items-center gap-3 mb-4 relative z-10">
+                          <div className="w-10 h-10 rounded-full bg-brand-red/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-brand-red" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                            </svg>
                           </div>
-                          <div>
-                            <h4 className="font-black text-brand-navy text-sm">{testimonial.name}</h4>
-                            <p className="text-xs text-slate-500">{testimonial.role}</p>
-                          </div>
+                          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{testimonial.role}</span>
                         </div>
-                        <p className="text-slate-700 leading-relaxed italic relative z-10 text-sm line-clamp-4">
-                          "{testimonial.quote}"
+                        <p className="text-slate-700 leading-relaxed relative z-10 text-sm">
+                          {testimonial.quote}
                         </p>
-                        <div className="mt-4 flex text-brand-red relative z-10 text-sm">
-                          {"★".repeat(5)}
-                        </div>
                       </div>
                     ))}
                 </div>

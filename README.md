@@ -47,8 +47,17 @@ Generate a single newsletter email that summarizes your 3‑day campaign. Write 
 ### 8. Ozigi Copilot
 A built‑in AI assistant that lives in your dashboard. Brainstorm ideas, refine drafts, and get tailored advice – all while keeping your context. Optionally search the web for up‑to‑date information.
 
-### 9. Pricing & Gating
-Free tier includes 5 campaigns/month. Team ($15/mo) unlocks 30 campaigns, image generation, email newsletter, and more. Organization ($39/mo) removes all limits and adds full Copilot access. Start with a 7‑day trial on the Team plan.
+### 9. Long-Form Content Generation
+Generate comprehensive blog posts, tutorials, and technical documentation. Available for Organization and Enterprise tiers. Choose tone, structure, and length – get MDX-ready output with proper headings, code blocks, and formatting.
+
+### 10. Persona Marketplace
+Choose from 8 pre-built personas designed for specific ICP types: Battle-Tested Engineer, DevRel Champion, Technical Founder, and more. Each persona has a distinct voice that produces meaningfully different output. Select one to instantly apply that voice to all your generations.
+
+### 11. Subscription Management
+Full subscription lifecycle support including plan upgrades with tailored welcome emails, and self-service cancellation with reason tracking for compliance.
+
+### 12. Pricing & Gating
+Free tier includes 5 campaigns/month. Team ($15/mo) unlocks 30 campaigns, image generation, email newsletter, blog distribution, and more. Organization ($39/mo) removes all limits, adds full Copilot access, and enables long-form content generation. Start with a 7‑day trial on the Team plan.
 
 ---
 
