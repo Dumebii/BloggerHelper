@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/blog";
 import ServerTableOfContents from "@/components/blog/ServerTableOfContents";
+import AuthorBio from "@/components/AuthorBio";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import CodeBlock from "@/components/blog/CodeBlock";
@@ -100,6 +101,15 @@ const hasHeadings = post.headings && post.headings.length > 0;
             <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
               {post.title}
             </h1>
+
+            <AuthorBio
+              author={post.author}
+              authorImage={post.authorImage}
+              authorBio={post.authorBio}
+              authorUrl={post.authorUrl}
+              authorHandle={post.authorHandle}
+              variant="inline"
+            />
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-8 pb-8 border-b border-slate-200">
               <span>{format(new Date(post.date), "MMMM dd, yyyy")}</span>
@@ -211,6 +221,15 @@ const hasHeadings = post.headings && post.headings.length > 0;
                 {post.content}
               </ReactMarkdown>
             </div>
+
+            <AuthorBio
+              author={post.author}
+              authorImage={post.authorImage}
+              authorBio={post.authorBio}
+              authorUrl={post.authorUrl}
+              authorHandle={post.authorHandle}
+              variant="full"
+            />
 
             {relatedPosts.length > 0 && (
               <div className="mt-16 pt-8 border-t border-slate-200">

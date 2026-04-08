@@ -18,6 +18,10 @@ export interface BlogPost {
   description?: string;
   coverImage?: string;
   author?: string;
+  authorImage?: string;
+  authorBio?: string;
+  authorUrl?: string;
+  authorHandle?: string;
   readTime?: string;
   categories?: string[];
   section?: string;
@@ -68,6 +72,10 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       description: data.description || data.excerpt,
       coverImage: data.coverImage || null,
       author: data.author,
+      authorImage: data.authorImage || null,
+      authorBio: data.authorBio || null,
+      authorUrl: data.authorUrl || null,
+      authorHandle: data.authorHandle || null,
       readTime: data.readTime,
       categories: parseCategories(data),
       section: data.section || null,
@@ -94,6 +102,10 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
       description: data.description || data.excerpt,
       coverImage: data.coverImage || null,
       author: data.author,
+      authorImage: data.authorImage || null,
+      authorBio: data.authorBio || null,
+      authorUrl: data.authorUrl || null,
+      authorHandle: data.authorHandle || null,
       readTime: data.readTime,
       categories: parseCategories(data),
       section: data.section || null,
@@ -121,6 +133,76 @@ export async function getRelatedPosts(categories: string[], currentSlug: string)
 export function getAllSections(): string[] {
   return ["Engineering", "Marketing", "Content", "Tools Roundup", "Ozigi Focus"];
 }
+
+export interface SectionMeta {
+  title: string;
+  description: string;
+  examples: string[];
+  wordCount: string;
+}
+
+export const SECTION_META: Record<string, SectionMeta> = {
+  "Engineering": {
+    title: "Engineering",
+    description: "Technical deep dives, architecture decisions, and how we build Ozigi. Share your engineering insights, best practices, and technical lessons learned.",
+    examples: [
+      "Building scalable systems",
+      "API design patterns",
+      "Performance optimization",
+      "Database architecture",
+      "DevOps & deployment"
+    ],
+    wordCount: "1,500-3,000 words"
+  },
+  "Marketing": {
+    title: "Marketing",
+    description: "Growth strategies, go-to-market playbooks, and how to build authentic marketing that resonates. Share what's working in your marketing.",
+    examples: [
+      "Launch strategies",
+      "Growth hacking",
+      "Community building",
+      "Viral content tactics",
+      "Paid advertising insights"
+    ],
+    wordCount: "1,200-2,500 words"
+  },
+  "Content": {
+    title: "Content",
+    description: "Content strategy, copywriting, and the craft of communicating ideas. Share frameworks for creating engaging content at scale.",
+    examples: [
+      "Content strategy frameworks",
+      "Writing better copy",
+      "Storytelling techniques",
+      "Audience research",
+      "Content distribution"
+    ],
+    wordCount: "1,000-2,000 words"
+  },
+  "Tools Roundup": {
+    title: "Tools Roundup",
+    description: "Reviews of developer tools, SaaS products, and platforms. Share honest assessments of what works and what doesn't.",
+    examples: [
+      "API platform reviews",
+      "DevOps tool comparisons",
+      "SaaS product deep dives",
+      "Open source alternatives",
+      "Developer tooling updates"
+    ],
+    wordCount: "1,500-2,500 words"
+  },
+  "Ozigi Focus": {
+    title: "Ozigi Focus",
+    description: "Product updates, changelogs, roadmap insights, and how we're building Ozigi. Behind-the-scenes looks at product development.",
+    examples: [
+      "Feature releases",
+      "Product roadmap",
+      "Technical implementations",
+      "User stories",
+      "Lessons learned"
+    ],
+    wordCount: "1,000-2,000 words"
+  }
+};
 
 export async function getPostsBySection(section: string): Promise<BlogPost[]> {
   const allPosts = await getAllPosts();

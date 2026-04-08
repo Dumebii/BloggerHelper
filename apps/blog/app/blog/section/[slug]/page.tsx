@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getAllPosts, getAllSections, getPostsBySection } from "@/lib/blog";
+import { getAllPosts, getAllSections, getPostsBySection, SECTION_META } from "@/lib/blog";
 import { format } from "date-fns";
 
 export async function generateStaticParams() {
@@ -76,7 +76,31 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
           })}
         </div>
 
-        {/* Posts Grid or Empty State */}
+        {/* Section Intro */}
+        {SECTION_META[sectionName] && (
+          <div className="mb-12 bg-white rounded-2xl border border-slate-200 p-8">
+            <h2 className="text-2xl font-black uppercase tracking-tighter mb-3">
+              About this section
+            </h2>
+            <p className="text-slate-700 mb-6 leading-relaxed">
+              {SECTION_META[sectionName].description}
+            </p>
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                Example topics
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SECTION_META[sectionName].examples.map((example, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-slate-100 rounded-full text-sm text-slate-700">
+                    {example}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section Posts */}
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
@@ -123,6 +147,23 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
             </Link>
           </div>
         )}
+
+        {/* Write for Ozigi CTA */}
+        <div className="mt-16 py-12 bg-gradient-to-r from-brand-red/10 to-brand-red/5 rounded-2xl border border-brand-red/20 px-8 text-center">
+          <h3 className="text-2xl font-black uppercase tracking-tighter mb-3">
+            Want to write for Ozigi?
+          </h3>
+          <p className="text-slate-700 mb-6 max-w-2xl mx-auto">
+            We&apos;re looking for {sectionName.toLowerCase()} writers to share insights with our community.
+            Contributors earn a stipend and get featured on our platform.
+          </p>
+          <Link
+            href="/write"
+            className="inline-block px-6 py-3 bg-brand-red text-white font-bold uppercase tracking-widest text-sm rounded-lg hover:bg-brand-red/90 transition-colors"
+          >
+            Apply to write
+          </Link>
+        </div>
       </div>
     </div>
   );

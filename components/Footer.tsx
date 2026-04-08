@@ -63,6 +63,9 @@ export default function Footer() {
               <a href="https://blog.ozigi.app" className="text-sm font-semibold text-slate-600 hover:text-brand-red transition">
                 Blog
               </a>
+              <Link href="/write" className="text-sm text-slate-500 hover:text-brand-red transition-colors font-semibold">
+                Write for Ozigi
+              </Link>
               <a
                 href="https://linkedin.com/in/dumebi-okolo"
                 target="_blank"
