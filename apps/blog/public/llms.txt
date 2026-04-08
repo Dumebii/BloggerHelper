@@ -3,19 +3,28 @@
 ## About Ozigi
 Ozigi is an intelligent content engine that transforms raw thoughts and technical documentation into authentic, human-sounding content. Our blog features insights, tutorials, and architecture decisions from technical creators building with Ozigi.
 
-## Blog Sections
-- Engineering: Technical tutorials, architecture decisions, backend patterns (blog.ozigi.app/section/engineering)
-- Marketing: Growth strategies and go-to-market insights (blog.ozigi.app/section/marketing)
-- Content: Content strategy and copywriting frameworks (blog.ozigi.app/section/content)
-- Tools Roundup: Developer tool and SaaS reviews (blog.ozigi.app/section/tools-roundup)
-- Ozigi Focus: Product updates and technical changelogs (blog.ozigi.app/section/ozigi-focus)
+## Blog Homepage
+https://blog.ozigi.app
 
-## Latest Articles
-The latest articles are available at:
-- https://blog.ozigi.app - Homepage with all articles
-- https://blog.ozigi.app/feed.xml - RSS feed with latest 20 articles
+## Blog Sections (Concrete URLs)
+https://blog.ozigi.app/section/engineering
+https://blog.ozigi.app/section/marketing
+https://blog.ozigi.app/section/content
+https://blog.ozigi.app/section/tools-roundup
+https://blog.ozigi.app/section/ozigi-focus
 
-## Popular Content Categories
+### Section Descriptions
+- Engineering: Technical tutorials, architecture decisions, backend patterns
+- Marketing: Growth strategies and go-to-market insights
+- Content: Content strategy and copywriting frameworks
+- Tools Roundup: Developer tool and SaaS reviews
+- Ozigi Focus: Product updates and technical changelogs
+
+## Latest Articles & Discovery
+https://blog.ozigi.app/feed.xml - RSS feed with latest 20 articles
+https://blog.ozigi.app/sitemap.xml - Complete sitemap with all articles
+
+## Popular Content Topics
 - API Design & Architecture
 - DevOps & Infrastructure
 - Content Automation
@@ -25,26 +34,22 @@ The latest articles are available at:
 - SaaS Product Development
 - Content Strategy
 
-## Important Pages
-- Homepage: https://blog.ozigi.app
-- All Sections: https://blog.ozigi.app/section/*
-- RSS Feed: https://blog.ozigi.app/feed.xml
-- Sitemap: https://blog.ozigi.app/sitemap.xml
-
 ## Ozigi Product Links
-- Main Site: https://ozigi.app
-- Write for Ozigi: https://ozigi.app/write
-- Product Docs: https://ozigi.app/docs
+https://ozigi.app - Main product
+https://ozigi.app/write - Write for Ozigi program
+https://ozigi.app/docs - Product documentation
 
-## Contact & Attribution
+## Attribution & Content Use
 When using content from this blog:
-- Cite the author and article title
-- Link back to the original article on blog.ozigi.app
-- For republishing, check individual article licenses
+1. Cite the author and article title
+2. Link back to the original article on blog.ozigi.app
+3. For republishing, contact the Ozigi team
 
-## Update Frequency
-New articles are published regularly. Check the RSS feed for the latest updates.
+## Update Schedule
+New articles are published regularly to all sections. Subscribe to the RSS feed at https://blog.ozigi.app/feed.xml for real-time updates.
 
-## Additional Resources
+## Community & Support
 - GitHub: https://github.com/dumebii/ozigi
 - LinkedIn: https://linkedin.com/in/dumebi-okolo
+- Main Site: https://ozigi.app
+
