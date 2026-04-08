@@ -102,7 +102,7 @@ export default function WritePage() {
   const faqs = [
     {
       question: "How much do you pay?",
-      answer: "We offer $100-500 per article depending on quality, depth, and word count. We also promote your work across our community of 50k+ subscribers.",
+      answer: "We currently do not have the structure to support international payments. However, internet stipends are provided for Nigerian authors. We will be explanding for foreign payment soon!",
     },
     {
       question: "What's the timeline?",
@@ -139,45 +139,28 @@ export default function WritePage() {
               Write for Ozigi
             </h1>
             <p className="text-xl text-slate-700 mb-8 leading-relaxed">
-              Share your expertise with our community of 50k+ developers, marketers, and creators. Get paid, get featured, and reach an engaged audience.
+              Share your expertise with our growing community of developers, marketers, and creators. Get paid, get featured, and reach an engaged audience.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://forms.gle/WPYUSC8EDuuhrtuQ9"
+                href="/writer-guide.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-brand-red text-white font-bold uppercase tracking-widest text-sm rounded-lg hover:bg-brand-red/90 transition-colors"
               >
-                Submit Your Pitch
+                Download writer guide
               </a>
-              <Link
-                href="#how-it-works"
+              <a
+                href="https://forms.gle/WPYUSC8EDuuhrtuQ9"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="px-6 py-3 bg-white border border-slate-200 text-brand-navy font-bold uppercase tracking-widest text-sm rounded-lg hover:border-brand-red hover:text-brand-red transition-colors"
               >
-                Learn more
-              </Link>
+                Submit your pitch
+              </a>
             </div>
           </motion.div>
         </div>
-      </section>
-
-      {/* Stipend Callout */}
-      <section className="py-12 px-6 bg-brand-navy">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeUp}
-          className="max-w-4xl mx-auto text-center text-white"
-        >
-          <p className="text-sm font-bold uppercase tracking-widest mb-2 opacity-90">Compensation</p>
-          <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-3">
-            $100—$500 per article
-          </h2>
-          <p className="text-lg opacity-90">
-            Plus promotion to 50k+ subscribers and backlinks from your author bio.
-          </p>
-        </motion.div>
       </section>
 
       {/* Sections We Publish */}
@@ -190,7 +173,7 @@ export default function WritePage() {
             variants={fadeUp}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
+            <h2 className="text-4xl md:text-5xl text-brand-navy italic uppercase tracking-tighter mb-4">
               What we publish
             </h2>
             <p className="text-lg text-slate-700 max-w-2xl mx-auto">
@@ -208,7 +191,7 @@ export default function WritePage() {
             {sections.map((section, idx) => (
               <motion.div key={idx} variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
                 <div className="text-4xl mb-4">{section.icon}</div>
-                <h3 className="text-lg font-black uppercase tracking-tighter mb-2">{section.title}</h3>
+                <h3 className="text-lg text-brand-slate uppercase tracking-tighter mb-2">{section.title}</h3>
                 <p className="text-sm text-slate-600 mb-4 line-clamp-3">{section.description}</p>
                 <div className="pt-4 border-t border-slate-200">
                   <span className="text-xs font-bold text-brand-red">{section.wordCount} words</span>
@@ -229,7 +212,7 @@ export default function WritePage() {
             variants={fadeUp}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
+            <h2 className="text-4xl md:text-5xl text-brand-navy italic uppercase tracking-tighter mb-4">
               What we look for
             </h2>
             <p className="text-lg text-slate-700 max-w-2xl mx-auto">
@@ -249,7 +232,7 @@ export default function WritePage() {
                 <div className="w-12 h-12 rounded-full bg-brand-red/10 flex items-center justify-center">
                   <span className="text-2xl font-black text-brand-red">{idx + 1}</span>
                 </div>
-                <h3 className="text-xl font-black uppercase tracking-tighter">{criterion.title}</h3>
+                <h3 className="text-xl text-brand-slate uppercase tracking-tighter">{criterion.title}</h3>
                 <p className="text-slate-700 leading-relaxed">{criterion.description}</p>
               </motion.div>
             ))}
@@ -267,7 +250,7 @@ export default function WritePage() {
             variants={fadeUp}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
+            <h2 className="text-4xl md:text-5xl text-brand-navy italic uppercase tracking-tighter mb-4">
               How it works
             </h2>
             <p className="text-lg text-slate-700 max-w-2xl mx-auto">
@@ -294,7 +277,7 @@ export default function WritePage() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-black uppercase tracking-tighter mb-2">{step.title}</h3>
+                  <h3 className="text-2xl text-brand-slate uppercase tracking-tighter mb-2">{step.title}</h3>
                   <p className="text-slate-700 leading-relaxed">{step.description}</p>
                 </div>
               </motion.div>
@@ -313,7 +296,7 @@ export default function WritePage() {
             variants={fadeUp}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
+            <h2 className="text-4xl md:text-5xl text-brand-navy italic uppercase tracking-tighter mb-4">
               Frequently asked questions
             </h2>
           </motion.div>
@@ -329,7 +312,7 @@ export default function WritePage() {
               <motion.div key={idx} variants={fadeUp} className="border border-slate-200 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
-                  className="w-full text-left p-6 hover:bg-slate-50 transition-colors font-bold uppercase tracking-tighter flex items-center justify-between"
+                  className="w-full text-left p-6 hover:bg-slate-50 transition-colors font-bold uppercase text-brand-navy tracking-tighter flex items-center justify-between"
                 >
                   {faq.question}
                   <span className={`text-brand-red text-xl transition-transform ${expandedFaq === idx ? "rotate-180" : ""}`}>
@@ -356,20 +339,54 @@ export default function WritePage() {
           variants={fadeUp}
           className="max-w-3xl mx-auto text-center"
         >
-          <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-6">
+          <h2 className="text-4xl md:text-5xl font-black italic text-brand-navy uppercase tracking-tighter mb-6">
             Ready to share your knowledge?
           </h2>
           <p className="text-lg text-slate-700 mb-8">
             We&apos;re excited to hear your ideas. Submit your pitch below and let&apos;s build something great together.
           </p>
-          <a
-            href="https://forms.gle/WPYUSC8EDuuhrtuQ9"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-8 py-4 bg-brand-red text-white font-bold uppercase tracking-widest rounded-lg hover:bg-brand-red/90 transition-colors"
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/writer-guide.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-8 py-4 bg-brand-red text-white font-bold uppercase tracking-widest rounded-lg hover:bg-brand-red/90 transition-colors"
+            >
+              Download writer guide
+            </a>
+            <a
+              href="https://forms.gle/WPYUSC8EDuuhrtuQ9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-8 py-4 bg-white border border-brand-red text-brand-red font-bold uppercase tracking-widest rounded-lg hover:bg-brand-red hover:text-white transition-colors"
+            >
+              Submit your pitch
+            </a>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Use Ozigi CTA */}
+      <section className="py-16 md:py-24 px-6 bg-white">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <h2 className="text-3xl md:text-4xl font-black italic text-brand-navy uppercase tracking-tighter mb-6">
+            Use Ozigi to write better content
+          </h2>
+          <p className="text-lg text-slate-700 mb-8">
+            Many of our best contributors use Ozigi to draft, refine, and perfect their articles. Transform your rough ideas into polished, authentic pieces that sound like you.
+          </p>
+          <Link
+            href="https://ozigi.app/dashboard"
+            className="inline-block px-8 py-4 bg-brand-navy text-white font-bold uppercase tracking-widest rounded-lg hover:bg-brand-navy/90 transition-colors"
           >
-            Submit your pitch now
-          </a>
+            Try Ozigi free
+          </Link>
         </motion.div>
       </section>
     </div>
