@@ -25,6 +25,7 @@ export interface BlogPost {
   readTime?: string;
   categories?: string[];
   section?: string;
+  keywords?: string[];
   content: string;
   headings: Heading[];
   [key: string]: any;
@@ -54,6 +55,28 @@ function parseCategories(data: any): string[] {
     return data.category.split(',').map((c: string) => c.trim());
   }
   return [];
+}
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+export function calculateWordCount(content: string): number {
+  const plainText = content
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`[^`]*`/g, "")
+    .replace(/[#*_\[\]()]/g, "");
+  return plainText.split(/\s+/).filter(word => word.length > 0).length;
+}
+
+export function estimateReadTime(content: string, readSpeed: number = 200): string {
+  const wordCount = calculateWordCount(content);
+  const minutes = Math.ceil(wordCount / readSpeed);
+  return `${minutes} min read`;
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {

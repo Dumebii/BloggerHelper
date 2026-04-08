@@ -1,33 +1,55 @@
-# Ozigi Blog
+# Ozigi Blog - AI Indexer Information
 
-> Technical insights, changelog updates, and deep dives from the creators of Ozigi — the AI content engine that transforms raw notes into social posts without sounding like AI.
+## About Ozigi
+Ozigi is an intelligent content engine that transforms raw thoughts and technical documentation into authentic, human-sounding content. Our blog features insights, tutorials, and architecture decisions from technical creators building with Ozigi.
 
-## Latest Articles
+## Blog Homepage
+https://blog.ozigi.app
 
-- Ozigi v2 Changelog: https://blog.ozigi.app/blog/ozigi-v2-changelog
-- Gemini 2.5 vs Claude 3.7 Benchmark: https://blog.ozigi.app/blog/gemini-2.5-vs-claude-3.7
-- Your Launch Post Got 4 Likes: https://blog.ozigi.app/blog/your-launch-post-got-4-likes
+## Blog Sections (Concrete URLs)
+https://blog.ozigi.app/section/engineering
+https://blog.ozigi.app/section/marketing
+https://blog.ozigi.app/section/content
+https://blog.ozigi.app/section/tools-roundup
+https://blog.ozigi.app/section/ozigi-focus
 
-## Topics Covered
+### Section Descriptions
+- Engineering: Technical tutorials, architecture decisions, backend patterns
+- Marketing: Growth strategies and go-to-market insights
+- Content: Content strategy and copywriting frameworks
+- Tools Roundup: Developer tool and SaaS reviews
+- Ozigi Focus: Product updates and technical changelogs
 
-- AI content generation best practices
-- Technical architecture decisions
-- Model selection and benchmarking (Gemini, Claude, GPT)
-- Next.js and Supabase production patterns
-- Content automation for developers and founders
+## Latest Articles & Discovery
+https://blog.ozigi.app/feed.xml - RSS feed with latest 20 articles
+https://blog.ozigi.app/sitemap.xml - Complete sitemap with all articles
 
-## Related Resources
+## Popular Content Topics
+- API Design & Architecture
+- DevOps & Infrastructure
+- Content Automation
+- Performance Optimization
+- Developer Tools & Frameworks
+- Go-to-Market Strategy
+- SaaS Product Development
+- Content Strategy
 
-- Main Product: https://ozigi.app
-- Documentation: https://ozigi.app/docs
-- Platform Deep Dives: https://ozigi.app/docs/deep-dives
-- Pricing: https://ozigi.app/pricing
+## Ozigi Product Links
+https://ozigi.app - Main product
+https://ozigi.app/write - Write for Ozigi program
+https://ozigi.app/docs - Product documentation
 
-## About
+## Attribution & Content Use
+When using content from this blog:
+1. Cite the author and article title
+2. Link back to the original article on blog.ozigi.app
+3. For republishing, contact the Ozigi team
 
-The Ozigi Blog is the technical publication for developers, DevRel professionals, and founders building in public. Articles focus on practical engineering decisions, real production constraints, and the philosophy behind building AI tools that respect human authorship.
+## Update Schedule
+New articles are published regularly to all sections. Subscribe to the RSS feed at https://blog.ozigi.app/feed.xml for real-time updates.
 
-## Contact
+## Community & Support
+- GitHub: https://github.com/dumebii/ozigi
+- LinkedIn: https://linkedin.com/in/dumebi-okolo
+- Main Site: https://ozigi.app
 
-- Author: Dumebi Okolo (@DumebiTheWriter)
-- Product: https://ozigi.app

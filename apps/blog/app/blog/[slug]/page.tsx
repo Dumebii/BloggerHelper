@@ -4,7 +4,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/blog";
+import { getAllPosts, getPostBySlug, getRelatedPosts, calculateWordCount } from "@/lib/blog";
 import ServerTableOfContents from "@/components/blog/ServerTableOfContents";
 import AuthorBio from "@/components/AuthorBio";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -23,23 +23,46 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Not Found" };
 
+  const baseUrl = "https://blog.ozigi.app";
+  const postUrl = `${baseUrl}/blog/${slug}`;
+  const wordCount = calculateWordCount(post.content);
+  const ogImage = post.coverImage || "/images/og-default.png";
+  
   return {
     title: `${post.title} | Ozigi Blog`,
     description: post.description || post.excerpt || "",
-    keywords: post.keywords,
+    keywords: post.keywords ? (Array.isArray(post.keywords) ? post.keywords : post.keywords.split(",").map(k => k.trim())) : [],
+    authors: post.author ? [{ name: post.author }] : [],
+    canonical: postUrl,
+    alternates: {
+      canonical: postUrl,
+    },
     openGraph: {
       title: post.title,
       description: post.description || post.excerpt || "",
-      images: post.coverImage ? [{ url: post.coverImage }] : [],
+      url: postUrl,
       type: "article",
       publishedTime: post.date,
+      modifiedTime: post.modifiedTime || post.date,
       authors: post.author ? [post.author] : [],
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        }
+      ],
+      section: post.section || "Blog",
+      tags: post.keywords || post.categories || [],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description || post.excerpt || "",
-      images: post.coverImage ? [post.coverImage] : [],
+      images: [ogImage],
+      creator: post.authorHandle || "@ozigi_app",
+      site: "@ozigi_app",
     },
   };
 }
@@ -56,9 +79,78 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   };
 
 const hasHeadings = post.headings && post.headings.length > 0;
+  const wordCount = calculateWordCount(post.content);
+  const baseUrl = "https://blog.ozigi.app";
+
+  // Article JSON-LD Schema
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description || post.excerpt,
+    image: post.coverImage || "/images/og-default.png",
+    datePublished: post.date,
+    dateModified: post.modifiedTime || post.date,
+    author: post.author ? {
+      "@type": "Person",
+      name: post.author,
+      url: post.authorUrl || undefined,
+    } : undefined,
+    publisher: {
+      "@type": "Organization",
+      name: "Ozigi",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://ozigi.app/logo.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/blog/${slug}`,
+    },
+    wordCount: wordCount,
+    timeRequired: `PT${Math.ceil(wordCount / 200)}M`,
+    articleSection: post.section || "Blog",
+    keywords: post.keywords || post.categories || [],
+  };
+
+  // Breadcrumb JSON-LD Schema
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Blog",
+        item: `${baseUrl}`,
+      },
+      ...(post.section ? [{
+        "@type": "ListItem",
+        position: 2,
+        name: post.section,
+        item: `${baseUrl}/section/${post.section.toLowerCase().replace(/\s+/g, "-")}`,
+      }] : []),
+      {
+        "@type": "ListItem",
+        position: post.section ? 3 : 2,
+        name: post.title,
+        item: `${baseUrl}/blog/${slug}`,
+      },
+    ],
+  };
 
   return (
-    <div className="px-6 py-12">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <div className="px-6 py-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <Link
@@ -272,5 +364,6 @@ const hasHeadings = post.headings && post.headings.length > 0;
         </div>
       </div>
     </div>
+    </>
   );
 }

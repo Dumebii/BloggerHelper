@@ -77,13 +77,20 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <Link href="https://ozigi.app/privacy-policy" className="text-sm text-slate-500 hover:text-white transition-colors">
               Privacy Policy
             </Link>
             <Link href="https://ozigi.app/terms" className="text-sm text-slate-500 hover:text-white transition-colors">
               Terms of Service
             </Link>
+            <a href="/feed.xml" target="_blank" rel="noreferrer" className="text-sm text-slate-500 hover:text-brand-red transition-colors flex items-center gap-1" title="Subscribe to RSS feed">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="6.18" cy="17.82" r="2.18"/>
+                <path d="M4 4.44v2.83c5.33 0 9.67 4.34 9.67 9.67h2.83c0-7.07-5.76-12.5-12.5-12.5zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.53-4.37-9.9-9.9-9.9z"/>
+              </svg>
+              RSS
+            </a>
           </div>
           <p className="text-xs text-slate-600">© 2026 Ozigi. All rights reserved.</p>
         </div>
