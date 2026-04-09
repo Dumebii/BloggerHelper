@@ -47,7 +47,44 @@ export function useStats(userId?: string) {
 
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+
+    // Set up realtime subscription for stats changes
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`user_stats_${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_stats',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          console.log('[Stats] Realtime update detected, refreshing stats');
+          fetchStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'scheduled_posts',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          console.log('[Stats] Scheduled posts updated, refreshing stats');
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchStats, userId]);
 
   const refreshStats = useCallback(() => {
     setIsLoadingStats(true);
