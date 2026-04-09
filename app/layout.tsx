@@ -96,6 +96,7 @@ export default function RootLayout({
           {children}
         </ErrorBoundary>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
