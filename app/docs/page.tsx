@@ -558,7 +558,7 @@ export default function DocsPage() {
                 11. Long-Form Content Generation
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers from 500 to 8,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
+                Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers. Powered by Gemini 2.5 Flash, it produces SEO-friendly, deeply researched content with configurable structure and tone.
               </p>
 
               <div className="bg-slate-900 text-white p-6 rounded-2xl mb-6">
@@ -575,7 +575,7 @@ export default function DocsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white border border-slate-200 p-5 rounded-xl">
                   <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Target Length</h3>
-                  <p className="text-sm text-slate-600">Choose from 500 to 8,000 words. The AI adjusts depth and detail accordingly.</p>
+                  <p className="text-sm text-slate-600"><strong>Currently available:</strong> ~1,500 words (6–8 minute read). Additional length tiers (800, 2,500, 4,000+ words) coming soon.</p>
                 </div>
                 <div className="bg-white border border-slate-200 p-5 rounded-xl">
                   <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Tone & Style</h3>
@@ -592,14 +592,23 @@ export default function DocsPage() {
                 <ol className="space-y-3 text-sm text-slate-600">
                   <li><strong>1. Go to Long-Form:</strong> Click "Long-Form Content" in your sidebar.</li>
                   <li><strong>2. Add Context:</strong> Paste an article, research notes, a URL, or raw ideas (minimum 50 characters).</li>
-                  <li><strong>3. Configure:</strong> Choose target length (500–8,000 words), tone, structure, and optional instructions.</li>
+                  <li><strong>3. Configure:</strong> Choose your content structure (narrative, listicle, how-to, opinion, or analysis) and tone (professional, casual, technical, or storytelling).</li>
                   <li><strong>4. Select Persona:</strong> Pick a saved persona to inject your voice into the content.</li>
                   <li><strong>5. Generate:</strong> Click "Generate Article". The engine processes in 30–90 seconds.</li>
                   <li><strong>6. Edit & Export:</strong> Each section is editable. Copy to clipboard or download as Markdown.</li>
                 </ol>
               </div>
 
-              <div className="bg-red-50 border border-red-100 p-5 rounded-2xl">
+              <div className="bg-blue-50 border border-blue-200 p-5 rounded-2xl mb-4">
+                <h3 className="font-black text-slate-900 mb-2">ℹ️ Current Limitations & Roadmap</h3>
+                <p className="text-sm text-slate-700 mb-3">We're actively optimizing long-form generation to support all planned length tiers:</p>
+                <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">
+                  <li><strong>Currently Supported:</strong> ~1,500 words (standard article)</li>
+                  <li><strong>Coming Soon:</strong> 800 words (quick read), 2,500 words (deep dive), 4,000+ words (comprehensive)</li>
+                  <li><strong>Processing Time:</strong> 30–60 seconds for 1,500-word articles</li>
+                  <li><strong>Optimization:</strong> We're continuously improving model configuration to reduce latency and support longer formats</li>
+                </ul>
+              </div>
                 <h3 className="font-black text-slate-900 mb-2">⚠️ Rate Limiting & Quota</h3>
                 <p className="text-sm text-slate-700 mb-3">Long-form generation is intentionally throttled to prevent abuse and ensure quality output.</p>
                 <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">

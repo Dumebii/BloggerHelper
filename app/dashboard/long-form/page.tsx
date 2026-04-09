@@ -54,10 +54,10 @@ const STRUCTURE_OPTIONS = [
 ];
 
 const LENGTH_OPTIONS = [
-  { value: 800, label: "Short (~800 words)", desc: "Quick read, 3-4 min" },
+  { value: 800, label: "Short (~800 words)", desc: "Quick read, 3-4 min", disabled: true, tooltip: "Coming soon" },
   { value: 1500, label: "Medium (~1500 words)", desc: "Standard article, 6-8 min" },
-  { value: 2500, label: "Long (~2500 words)", desc: "Deep dive, 10-12 min" },
-  { value: 4000, label: "Extended (~4000 words)", desc: "Comprehensive, 15-20 min" },
+  { value: 2500, label: "Long (~2500 words)", desc: "Deep dive, 10-12 min", disabled: true, tooltip: "Coming soon" },
+  { value: 4000, label: "Extended (~4000 words)", desc: "Comprehensive, 15-20 min", disabled: true, tooltip: "Coming soon" },
 ];
 
 export default function LongFormPage() {
@@ -346,17 +346,25 @@ export default function LongFormPage() {
                       <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">
                         Target Length
                       </label>
-                      <select
-                        value={targetLength}
-                        onChange={(e) => setTargetLength(Number(e.target.value))}
-                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white text-brand-slate"
-                      >
-                        {LENGTH_OPTIONS.map((l) => (
-                          <option key={l.value} value={l.value}>
-                            {l.label}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={targetLength}
+                          onChange={(e) => setTargetLength(Number(e.target.value))}
+                          className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white text-brand-slate"
+                        >
+                          {LENGTH_OPTIONS.map((l) => (
+                            <option key={l.value} value={l.value} disabled={l.disabled}>
+                              {l.label}
+                              {l.disabled ? ` - ${l.tooltip}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
