@@ -96,6 +96,17 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       try {
         const slug = filename.replace(/\.mdx?$/, "");
         const filePath = path.join(postsDirectory, filename);
+                const fileContent = fs.readFileSync(filePath, "utf-8");
+        const { data, content } = matter(fileContent);
+
+        // Validate required fields
+        if (!data.title) {
+          console.warn(`Post ${slug} is missing a title`);
+        }
+
+        return {
+          slug,
+          title: data.title || 'Untitled',
           date: data.date || new Date().toISOString().split('T')[0],
           excerpt: data.excerpt || data.description,
           description: data.description || data.excerpt,
