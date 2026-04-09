@@ -435,14 +435,14 @@ export default function DocsPage() {
                 <p className="text-xs mt-2">• Discord / Slack: webhook URLs stored in your profile – posts go straight to your chosen channel.</p>
               </div>
               <div className="bg-white border-2 border-slate-200 p-6 sm:p-8 rounded-[2rem] shadow-sm">
-  <h3 className="text-lg font-black uppercase tracking-widest text-slate-900 mb-4 flex items-center gap-2">
-    <Link href="/docs/webhooks" className="text-xs font-bold text-brand-red hover:underline">
-See full webhook guide →
-    </Link>  </h3>
+                <h3 className="text-lg font-black uppercase tracking-widest text-slate-900 mb-4 flex items-center gap-2">
+                  <Link href="/docs/webhooks" className="text-xs font-bold text-brand-red hover:underline">
+                    See full webhook guide →
+                  </Link>  </h3>
 
 
 
-</div>
+              </div>
             </section>
 
             {/* 9. Scheduling & Reminders */}
@@ -560,7 +560,7 @@ See full webhook guide →
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
                 Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers from 500 to 8,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
               </p>
-              
+
               <div className="bg-slate-900 text-white p-6 rounded-2xl mb-6">
                 <h3 className="font-black uppercase tracking-widest text-sm mb-4 flex items-center gap-2">
                   <span>🚀</span> Available on Organization & Enterprise Plans
@@ -782,18 +782,6 @@ See full webhook guide →
                     <li>You'll be redirected back to Ozigi. The LinkedIn button should now show your name.</li>
                   </ol>
                   <p className="text-xs text-slate-500 mt-3 italic"><strong>Note:</strong> LinkedIn OAuth tokens expire after 60 days. You'll receive an email when reconnection is needed.</p>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
-                  <h3 className="font-bold text-slate-900 mb-3">ZeptoMail — Email Newsletter Setup</h3>
-                  <p className="text-sm text-slate-600 mb-3">To send newsletters from Ozigi, you need a verified sending domain in ZeptoMail.</p>
-                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
-                    <li>Create a ZeptoMail account at zeptomail.com and complete domain verification for your domain.</li>
-                    <li>In ZeptoMail, go to <strong>Mail Agents → Send Mail</strong> and copy your API token.</li>
-                    <li>In Ozigi Settings → Email, paste your ZeptoMail API token and set your sending email address.</li>
-                    <li>Add your subscriber list via CSV upload or manual entry.</li>
-                    <li>Test by sending a campaign to yourself before your full list.</li>
-                  </ol>
                 </div>
               </div>
             </section>
