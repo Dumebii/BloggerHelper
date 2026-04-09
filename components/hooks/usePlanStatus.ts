@@ -15,6 +15,7 @@ export interface PlanStatus {
   emailSendsUsed: number;
   emailSendsLimit: number;
   hasCopilot: boolean;
+  hasLongForm: boolean;
   isEnterprise: boolean;
 }
 

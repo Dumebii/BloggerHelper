@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${post.title} | Ozigi Blog`,
     description: post.description || post.excerpt || "",
-    keywords: post.keywords ? (Array.isArray(post.keywords) ? post.keywords : post.keywords.split(",").map(k => k.trim())) : [],
+    keywords: post.keywords || [],
     authors: post.author ? [{ name: post.author }] : [],
     canonical: postUrl,
     alternates: {

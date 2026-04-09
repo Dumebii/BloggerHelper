@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, Sparkles, User } from "lucide-react";
+import { Mail, Sparkles, User, FileText, Store } from "lucide-react";
 import Distillery from "@/components/ContextEngine";
 import DistributionGrid from "@/components/DistributionGrid";
 import GuestModeBanner from "@/components/GuestModeBanner";
@@ -108,6 +108,16 @@ function DashboardContent() {
       icon: <User className="w-5 h-5 opacity-70" />,
       onClick: () => setIsPersonasOpen(true),
     },
+    {
+      label: "Persona Marketplace",
+      icon: <Store className="w-5 h-5 opacity-70" />,
+      onClick: () => router.push("/dashboard/personas/marketplace"),
+    },
+    ...(planStatus?.hasLongForm ? [{
+      label: "Long-Form Content",
+      icon: <FileText className="w-5 h-5 opacity-70" />,
+      onClick: () => router.push("/dashboard/long-form"),
+    }] : []),
     {
       label: "Settings & Integrations",
       icon: (

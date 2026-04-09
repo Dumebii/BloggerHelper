@@ -25,6 +25,8 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
 
   // Features dropdown items
   const features = [
+    { name: "Persona Marketplace", href: "/dashboard/personas/marketplace" },
+    { name: "Long-Form Content", href: "/dashboard/long-form" },
     { name: "Multimodal Ingestion", href: "/docs/multimodal-pipeline" },
     { name: "Banned Lexicon", href: "/docs/the-banned-lexicon" },
     { name: "System Personas", href: "/docs/system-personas" },

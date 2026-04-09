@@ -15,6 +15,7 @@ export interface PlanStatus {
   emailSendsUsed: number;
   emailSendsLimit: number;
   hasCopilot: boolean;
+  hasLongForm: boolean;
   isEnterprise: boolean;
 }
 
@@ -41,6 +42,13 @@ const EMAIL_SEND_LIMITS: Record<Plan, number> = {
 };
 
 const COPILOT_ACCESS: Record<Plan, boolean> = {
+  free: false,
+  team: false,
+  organization: true,
+  enterprise: true,
+};
+
+const LONG_FORM_ACCESS: Record<Plan, boolean> = {
   free: false,
   team: false,
   organization: true,
@@ -82,6 +90,7 @@ export async function getPlanStatus(userId: string): Promise<PlanStatus> {
       emailSendsUsed: 0,
       emailSendsLimit: -1,
       hasCopilot: true,
+      hasLongForm: true,
       isEnterprise: false,
     };
   }
@@ -136,6 +145,7 @@ export async function getPlanStatus(userId: string): Promise<PlanStatus> {
   const imageGenLimit = IMAGE_GEN_LIMITS[effectivePlan];
   const emailSendsLimit = EMAIL_SEND_LIMITS[effectivePlan];
   const hasCopilot = COPILOT_ACCESS[effectivePlan];
+  const hasLongForm = LONG_FORM_ACCESS[effectivePlan];
 
   // Fetch usage stats
   let stats: {
@@ -205,6 +215,7 @@ export async function getPlanStatus(userId: string): Promise<PlanStatus> {
     emailSendsUsed: stats.email_sends_this_month,
     emailSendsLimit: emailSendsLimit === -1 ? -1 : emailSendsLimit,
     hasCopilot,
+    hasLongForm,
     isEnterprise: effectivePlan === "enterprise",
   };
 }

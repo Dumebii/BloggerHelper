@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 import { OAUTH_PROVIDERS, OAUTH_SCOPES } from "@/lib/platforms";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CancellationModal from "@/components/CancellationModal";
+import Link from "next/link";
 
 interface SettingsModalProps {
   session: any;
@@ -392,27 +393,51 @@ const handleConnectGitHub = async () => {
           {/* SUBSCRIPTION MANAGEMENT */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 border-b-2 border-slate-100 pb-2">
-              Subscription
+              Subscription & Billing
             </h3>
-            <div className="flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-slate-50">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-900">
-                  Current Plan: <span className="text-brand-red capitalize">{userPlan}</span>
-                </span>
-                {userPlan !== 'free' && (
-                  <span className="text-[10px] text-slate-500">
-                    Manage your subscription below
+            <div className="p-4 border border-slate-200 rounded-2xl bg-slate-50 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-black uppercase tracking-widest text-slate-900">
+                    Current Plan: <span className="text-brand-red capitalize">{userPlan === 'organization' ? 'Organization' : userPlan === 'team' ? 'Team' : userPlan}</span>
                   </span>
+                  {userPlan !== 'free' && (
+                    <span className="text-[10px] text-slate-500">
+                      Manage your subscription and view payment history
+                    </span>
+                  )}
+                </div>
+                {userPlan !== 'free' && (
+                  <button
+                    onClick={() => setShowCancellationModal(true)}
+                    className="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-all border border-red-200"
+                  >
+                    Cancel Plan
+                  </button>
                 )}
               </div>
-              {userPlan !== 'free' && (
-                <button
-                  onClick={() => setShowCancellationModal(true)}
-                  className="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-all border border-red-200"
-                >
-                  Cancel Plan
-                </button>
-              )}
+              
+              {/* Billing & Payment History Link */}
+              <Link
+                href="/dashboard/billing"
+                onClick={onClose}
+                className="flex items-center justify-between w-full p-3 bg-white border border-slate-200 rounded-xl hover:border-brand-red/50 hover:bg-brand-red/5 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-slate-100 group-hover:bg-brand-red/10 rounded-lg flex items-center justify-center transition-colors">
+                    <svg className="w-4 h-4 text-slate-500 group-hover:text-brand-red transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 group-hover:text-brand-red transition-colors">View Payment History</span>
+                    <p className="text-[10px] text-slate-500">Invoices, receipts & billing details</p>
+                  </div>
+                </div>
+                <svg className="w-4 h-4 text-slate-400 group-hover:text-brand-red transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             </div>
           </div>
 

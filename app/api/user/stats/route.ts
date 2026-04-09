@@ -60,6 +60,7 @@ export async function GET(req: Request) {
     emailSendsUsed: planStatus.emailSendsUsed,
     emailSendsLimit: planStatus.emailSendsLimit,
     hasCopilot: planStatus.hasCopilot,
+    hasLongForm: planStatus.hasLongForm,
     // Stats
     campaignsGenerated: statsResult.data?.campaigns_generated || 0,
     postsPublished: statsResult.data?.posts_published || 0,
