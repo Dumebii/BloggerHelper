@@ -33,6 +33,8 @@ coverImage: "/images/blog/your-folder/cover-image.png"
 category: "Primary Category, Optional Secondary"
 section: "Engineering"
 author: "Author Name"
+authorUrl: "https://www.linkedin.com/in/firstname-lastname"
+authorImage: "/images/authors/firstname-lastname.jpg"
 readTime: "5 min read"
 keywords: ["keyword1", "keyword2", "keyword3"]
 ---
@@ -75,6 +77,8 @@ coverImage: "/images/blog/webhook-handler/cover-image.png"
 category: "Tutorial, Engineering"
 section: "Engineering"
 author: "Your Name"
+authorUrl: "https://www.linkedin.com/in/firstname-lastname"
+authorImage: "/images/authors/firstname-lastname.jpg"
 readTime: "8 min read"
 keywords: ["webhooks", "Node.js", "backend", "reliability"]
 ---

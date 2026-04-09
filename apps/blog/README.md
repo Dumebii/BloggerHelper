@@ -72,9 +72,9 @@ title: "Your Article Title"
 date: "2026-04-09"
 description: "A brief description for SEO and social sharing."
 coverImage: "/images/blog/your-article/cover.png"
-author: "Dumebi Okolo"
-authorUrl: "https://www.linkedin.com/in/dumebi-okolo"
-authorImage: "/images/authors/dumebi-okolo.jpg"
+author: "FirstName LastName"
+authorUrl: "https://www.linkedin.com/in/firstname-lastname"
+authorImage: "/images/authors/firstname-lastname.jpg"
 readTime: "5 min read"
 section: "Engineering"
 keywords: ["keyword1", "keyword2"]
@@ -85,10 +85,10 @@ Your article content here...
 
 ## Contributing
 
-Want to write for Ozigi? Visit [ozigi.app/write](https://ozigi.app/write) to apply.
+Want to write for Ozigi? Visit [Write for Ozigi](https://ozigi.app/write) to apply.
 
 ## Related
 
 - [Main Ozigi App](https://ozigi.app)
 - [Ozigi Documentation](https://ozigi.app/docs)
-- [Writer Guide](https://ozigi.app/docs/writer-guide)
+- [Writer Guide](https://ozigi.app/write)
