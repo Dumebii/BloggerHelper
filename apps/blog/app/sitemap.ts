@@ -29,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic blog post pages with image metadata
   const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
+    lastModified: new Date(post.date + "T00:00:00Z"),
     changeFrequency: "monthly" as const,
     priority: 0.9,
     ...(post.coverImage && {
