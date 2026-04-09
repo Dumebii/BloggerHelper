@@ -19,7 +19,7 @@ const redis = new Redis({
 // Rate limits: 5/day for Org, unlimited for Enterprise
 const orgRatelimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(7, '24 h'),
+  limiter: Ratelimit.slidingWindow(15, '24 h'),
   prefix: 'longform:org',
 });
 
