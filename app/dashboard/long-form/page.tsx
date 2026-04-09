@@ -63,7 +63,7 @@ const LENGTH_OPTIONS = [
 export default function LongFormPage() {
   const router = useRouter();
   const { session, sessionLoading } = useSession();
-  const { planStatus, loading: planLoading } = usePlanStatus();
+  const { planStatus, stats, isLoading: planLoading } = usePlanStatus(session);
   const { personas } = usePersonas(session?.user?.id);
 
   // Form state
@@ -181,12 +181,13 @@ export default function LongFormPage() {
       <div className="flex flex-1 relative">
         <Sidebar
           navItems={[]}
-          stats={null}
-          isLoadingStats={false}
-          isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={() => setIsMobileSidebarOpen(false)}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          stats={stats || { campaignsGenerated: 0, scheduledCount: 0, personasSaved: 0 }}
+          planStatus={planStatus}
+          isLoadingStats={planLoading}
+          isMobileSidebarOpen={isMobileSidebarOpen}
+          setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
         />
 
         <main className={`flex-1 p-4 md:p-8 transition-all duration-300 ${

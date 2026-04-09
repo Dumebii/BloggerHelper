@@ -15,6 +15,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "@/components/hooks/useSession";
+import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 import { getMarketplacePersonas, savePersonaAndRedirect, type MarketplacePersona } from "@/lib/supabase/personas";
 
 // Persona card icons - simple colored backgrounds
@@ -32,6 +33,7 @@ const PERSONA_COLORS: Record<string, string> = {
 export default function PersonaMarketplacePage() {
   const router = useRouter();
   const { session, sessionLoading } = useSession();
+  const { planStatus, stats, isLoading: isLoadingStats } = usePlanStatus(session);
 
   const [personas, setPersonas] = useState<MarketplacePersona[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,12 +111,13 @@ export default function PersonaMarketplacePage() {
       <div className="flex flex-1 relative">
         <Sidebar
           navItems={[]}
-          stats={null}
-          isLoadingStats={false}
-          isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={() => setIsMobileSidebarOpen(false)}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          stats={stats || { campaignsGenerated: 0, scheduledCount: 0, personasSaved: 0 }}
+          planStatus={planStatus}
+          isLoadingStats={isLoadingStats}
+          isMobileSidebarOpen={isMobileSidebarOpen}
+          setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
         />
 
         <main className={`flex-1 p-4 md:p-8 transition-all duration-300 ${
