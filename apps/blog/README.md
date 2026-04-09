@@ -12,13 +12,13 @@ The Ozigi Blog is a Next.js 15 application serving as the technical publication 
 
 ## Features
 
-- **MDX Content** - Write articles in MDX with full React component support
-- **Section-based Organization** - Engineering, Marketing, Content, Tools Roundup, Ozigi Focus
-- **Rich Metadata & SEO** - Full Open Graph, Twitter Cards, JSON-LD structured data
-- **RSS Feed** - Available at `/feed.xml` for aggregator discovery
-- **AI Indexer Support** - `robots.txt` allowing AI crawlers, `llms.txt` for AI model citation
-- **Author Profiles** - Linked author bios with social URLs and images
-- **Responsive Design** - Mobile-first with Tailwind CSS
+- **MDX Content** - Write articles in MDX with full React component support.
+- **Section-based Organization** - Engineering, Marketing, Content, Tools Roundup, Ozigi Focus.
+- **Rich Metadata & SEO** - Full Open Graph, Twitter Cards, JSON-LD structured data.
+- **RSS Feed** - Available at `/feed.xml` for aggregator discovery.
+- **AI Indexer Support** - `robots.txt` allowing AI crawlers, `llms.txt` for AI model citation.
+- **Author Profiles** - Linked author bios with social URLs and images.
+- **Responsive Design** - Mobile-first with Tailwind CSS.
 
 ## Tech Stack
 
