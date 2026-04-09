@@ -10,7 +10,8 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+// Only apply Sentry config if auth token is available
+const sentryConfig = {
   org: "ozigi",
   project: "javascript-nextjs",
   silent: !process.env.CI,
@@ -19,9 +20,9 @@ export default withSentryConfig(nextConfig, {
   automaticVercelMonitors: true,
   hideSourceMaps: false,
   disableLogger: true,
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
-  },
-});
+  // Skip source map upload if no auth token (prevents build failures)
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  telemetry: false,
+};
+
+export default withSentryConfig(nextConfig, sentryConfig);
