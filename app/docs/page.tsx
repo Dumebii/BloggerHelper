@@ -498,7 +498,7 @@ See full webhook guide →
                 11. Long-Form Content Generation
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers from 500 to 10,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
+                Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers from 500 to 8,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
               </p>
               
               <div className="bg-slate-900 text-white p-6 rounded-2xl mb-6">
@@ -515,7 +515,7 @@ See full webhook guide →
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white border border-slate-200 p-5 rounded-xl">
                   <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Target Length</h3>
-                  <p className="text-sm text-slate-600">Choose from 500 to 10,000 words. The AI adjusts depth and detail accordingly.</p>
+                  <p className="text-sm text-slate-600">Choose from 500 to 8,000 words. The AI adjusts depth and detail accordingly.</p>
                 </div>
                 <div className="bg-white border border-slate-200 p-5 rounded-xl">
                   <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Tone & Style</h3>
@@ -532,7 +532,7 @@ See full webhook guide →
                 <ol className="space-y-3 text-sm text-slate-600">
                   <li><strong>1. Go to Long-Form:</strong> Click "Long-Form Content" in your sidebar.</li>
                   <li><strong>2. Add Context:</strong> Paste an article, research notes, a URL, or raw ideas (minimum 50 characters).</li>
-                  <li><strong>3. Configure:</strong> Choose target length (500–10,000 words), tone, structure, and optional instructions.</li>
+                  <li><strong>3. Configure:</strong> Choose target length (500–8,000 words), tone, structure, and optional instructions.</li>
                   <li><strong>4. Select Persona:</strong> Pick a saved persona to inject your voice into the content.</li>
                   <li><strong>5. Generate:</strong> Click "Generate Article". The engine processes in 30–90 seconds.</li>
                   <li><strong>6. Edit & Export:</strong> Each section is editable. Copy to clipboard or download as Markdown.</li>

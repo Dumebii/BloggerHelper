@@ -126,9 +126,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (targetLength < 500 || targetLength > 10000) {
+    if (targetLength < 500 || targetLength > 8000) {
       return NextResponse.json(
-        { error: 'Target length must be between 500 and 10,000 words' },
+        { error: 'Target length must be between 500 and 8,000 words' },
         { status: 400 }
       );
     }
@@ -153,7 +153,7 @@ export async function POST(req: Request) {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: {
         temperature: 0.7,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 4096,
       },
     });
 

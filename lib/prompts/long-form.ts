@@ -120,80 +120,30 @@ export function buildLongFormPrompt({
   const structureInstructions = STRUCTURE_INSTRUCTIONS[structure];
 
   const personaSection = personaVoice
-    ? `
-## Your Voice & Persona
-${personaVoice}
-
-Write everything in this voice. Maintain this persona consistently throughout the entire piece.
-`
+    ? `## Your Voice: ${personaVoice.substring(0, 100)}`
     : '';
 
-  return `
-# LONG-FORM CONTENT GENERATION
-
-You are an expert content writer creating a ${targetLength}-word ${structure} article.
+  return `# LONG-FORM ARTICLE (~${targetLength} words, ${structure})
 
 ${personaSection}
 
-## Context & Source Material
-Analyze this context and use it as the foundation for your article:
-
-<context>
+## Context:
 ${context}
-</context>
 
-## Tone Guidelines
+## Tone: ${tone}
 ${toneInstructions}
 
-## Structure Requirements
+## Structure: ${structure}
 ${structureInstructions}
 
-## Output Requirements
-
-1. **Length**: Target approximately ${targetLength} words. Can vary by ±15% but stay close.
-
-2. **Format**: Return valid JSON matching this structure:
+## JSON Output (no intro text):
 \`\`\`json
-{
-  "title": "Compelling, SEO-friendly title",
-  "subtitle": "Optional subtitle or deck",
-  "sections": [
-    {
-      "heading": "Section heading (use ## in markdown)",
-      "content": "Full markdown content for this section",
-      "wordCount": 250
-    }
-  ],
-  "totalWordCount": 1500
-}
+{"title":"","subtitle":"","sections":[{"heading":"","content":"","wordCount":0}],"totalWordCount":0}
 \`\`\`
 
-3. **Markdown**: Use proper markdown in the content field:
-   - **Bold** for emphasis
-   - \`code\` for technical terms
-   - > for quotes
-   - Lists where appropriate
-   - DO NOT include the section heading in the content (it's in the heading field)
+${additionalInstructions ? `## Requirements:\n${additionalInstructions}` : ''}
 
-4. **Quality Standards**:
-   - Every sentence should add value
-   - No filler phrases like "In today's world..." or "As we all know..."
-   - Be specific and concrete
-   - Include original insights, not just summaries
-   - Cite sources from the context when relevant
-
-${additionalInstructions ? `## Additional Instructions\n${additionalInstructions}` : ''}
-
-## Final Check
-Before responding, verify:
-- [ ] Total word count is within range
-- [ ] Structure matches the ${structure} format
-- [ ] Tone is consistent throughout
-- [ ] Content is grounded in the provided context
-- [ ] JSON is valid and properly escaped
-
-Return ONLY the JSON object, no additional text.
-`.trim();
+Return ONLY valid JSON. ~${targetLength} words total.`.trim();
 }
 
 /**
