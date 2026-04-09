@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-const postsDirectory = path.join(process.cwd(), "apps", "blog", "content", "blog");
+const postsDirectory = path.join(__dirname, "..", "content", "blog");
 
 export interface Heading {
   text: string;
