@@ -473,23 +473,83 @@ See full webhook guide →
                 10. Email Newsletters
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                Ozigi can generate a standalone email newsletter that summarises your campaign. It’s perfect for reaching subscribers who prefer long‑form content.
+                Ozigi supports email newsletter delivery to your subscribers. Manage your email list, send newsletters to multiple recipients, and configure your email sender information—all from the dashboard.
               </p>
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-4">
-                <div className="bg-slate-50 p-3 rounded-xl text-xs font-mono text-slate-700">
-                  <p><strong>Subject:</strong> The hidden cost of CI flakiness</p>
-                  <p className="mt-2">After 4 hours debugging a rate‑limit bug, I realized: we were checking limits at the wrong layer. Moved it to the edge. Now clients can burst 2x across the boundary.</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="bg-white border border-slate-200 p-5 rounded-xl">
+                  <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Email Setup</h3>
+                  <p className="text-sm text-slate-600">Configure sender name, reply-to email, and email address for scheduling reminders in Settings → Workspace Preferences.</p>
                 </div>
-                <p className="text-xs text-slate-500 mt-3">The newsletter is written in your persona’s voice and can be edited with the rich‑text editor before sending.</p>
+                <div className="bg-white border border-slate-200 p-5 rounded-xl">
+                  <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Subscriber List</h3>
+                  <p className="text-sm text-slate-600">Add subscribers manually, upload CSV files, or import lists. All emails are validated before sending.</p>
+                </div>
               </div>
-              <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                <strong>No email setup needed.</strong> Ozigi handles delivery using its own infrastructure (ZeptoMail / SMTP). You just manage your subscriber list from the dashboard – import CSV, add manually, and track unsubscribe.
-              </p>
-              <ul className="list-disc pl-6 space-y-2 text-slate-600 font-medium">
-                <li>Subscribers stored in Supabase, with unique tokens for one‑click unsubscribe.</li>
-                <li>Send limits per plan (500/mo for Team, unlimited for Organization).</li>
-                <li>Rich‑text editor lets you add images, headings, and links before scheduling.</li>
-              </ul>
+
+              <div className="bg-slate-900 text-white p-6 rounded-2xl mb-6">
+                <h3 className="font-black uppercase tracking-widest text-sm mb-4">Email Features</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>• <strong>Subscriber Management:</strong> Add, remove, and manage your email list from the Subscribers page</li>
+                  <li>• <strong>CSV Upload:</strong> Import multiple subscribers at once (Team: max 500/upload, Org: unlimited)</li>
+                  <li>• <strong>Scheduled Delivery:</strong> Schedule newsletters to send at a specific date and time</li>
+                  <li>• <strong>Rich Editor:</strong> Edit emails with markdown support before scheduling</li>
+                  <li>• <strong>Per-Plan Limits:</strong> Team (500/month), Organization (unlimited)</li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-900">How to Send an Email Newsletter</h3>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h4 className="font-bold text-slate-900 mb-3">Step 1: Configure Email Settings</h4>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>Go to <strong>Settings</strong> (gear icon)</li>
+                    <li>In <strong>Workspace Preferences</strong>, find the "Email" section</li>
+                    <li>Enter:
+                      <ul className="list-disc pl-5 mt-1 space-y-1">
+                        <li><strong>Email Address:</strong> For scheduling reminders (optional)</li>
+                        <li><strong>Newsletter Sender Name:</strong> How your emails will appear in inboxes (e.g., "Ozigi Weekly")</li>
+                        <li><strong>Reply-to Email:</strong> Where subscriber replies go (defaults to your account email)</li>
+                      </ul>
+                    </li>
+                    <li>Click <strong>Save Workspace Settings</strong></li>
+                  </ol>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h4 className="font-bold text-slate-900 mb-3">Step 2: Add Subscribers</h4>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>Go to <strong>Subscribers</strong> in the sidebar</li>
+                    <li>Choose how to add emails:
+                      <ul className="list-disc pl-5 mt-1 space-y-1">
+                        <li><strong>Manual:</strong> Paste emails (one per line) and click "Add Emails"</li>
+                        <li><strong>CSV:</strong> Click "📁 Upload CSV" with one email per row</li>
+                      </ul>
+                    </li>
+                    <li>Verify the count updates in "Your Subscribers"</li>
+                  </ol>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h4 className="font-bold text-slate-900 mb-3">Step 3: Schedule an Email</h4>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>After generating a campaign, click the <strong>Email</strong> platform icon</li>
+                    <li>Choose a send time and click <strong>Schedule</strong></li>
+                    <li>The email will be sent to all active subscribers at the scheduled time</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div className="bg-indigo-50 border border-indigo-200 p-5 rounded-2xl mt-4">
+                <h4 className="font-black text-slate-900 mb-2">📧 Subscriber Management Tips</h4>
+                <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">
+                  <li>Subscribers have a unique unsubscribe token for one-click opt-out</li>
+                  <li>Team plan: max 500 subscribers per upload and 500 emails/month total send limit</li>
+                  <li>Organization plan: unlimited subscribers and unlimited email sends</li>
+                  <li>Remove individual subscribers anytime by clicking the ✕ button next to their email</li>
+                </ul>
+              </div>
             </section>
 
             {/* 11. Long-Form Content Generation */}

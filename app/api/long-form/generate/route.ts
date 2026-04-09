@@ -153,7 +153,7 @@ export async function POST(req: Request) {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: {
         temperature: 0.7,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 6144,
       },
     });
 
