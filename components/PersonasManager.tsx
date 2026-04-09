@@ -105,6 +105,11 @@ export default function PersonasManager({ session }: PersonasManagerProps) {
           >
             {isSaving ? "Saving..." : "Create Persona"}
           </button>
+          <div className="bg-brand-red/5 border border-brand-red/20 rounded-xl p-3">
+            <p className="text-xs text-slate-600">
+              <span className="font-black text-brand-red">💡 Tip:</span> Browse the <a href="/dashboard/personas/marketplace" className="font-bold text-brand-red hover:underline">Persona Marketplace</a> for pre-built voices from industry experts. You can import any persona and customize it to your needs.
+            </p>
+          </div>
         </div>
       </div>
 

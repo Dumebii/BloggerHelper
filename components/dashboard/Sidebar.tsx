@@ -71,6 +71,7 @@ export default function Sidebar({
     case "Scheduled Posts": tourId = "sidebar-scheduled"; break;
     case "Subscribers": tourId = "sidebar-subscribers"; break;
     case "Personas": tourId = "sidebar-personas"; break;
+    case "Persona Marketplace": tourId = "sidebar-personas-marketplace"; break;
     case "Long-Form Content": tourId = "sidebar-long-form"; break;
     case "Email Lists": tourId = "sidebar-email-lists"; break;
     case "Settings & Integrations": tourId = "sidebar-settings"; break;

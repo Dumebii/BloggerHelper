@@ -126,9 +126,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (targetLength < 500 || targetLength > 5000) {
+    if (targetLength < 500 || targetLength > 10000) {
       return NextResponse.json(
-        { error: 'Target length must be between 500 and 5000 words' },
+        { error: 'Target length must be between 500 and 10,000 words' },
         { status: 400 }
       );
     }

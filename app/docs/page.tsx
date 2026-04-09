@@ -50,8 +50,11 @@ export default function DocsPage() {
                 <li><a href="#publishing" className="hover:text-slate-900 transition-colors block">8. Publishing Integrations</a></li>
                 <li><a href="#scheduling" className="hover:text-slate-900 transition-colors block">9. Scheduling & Reminders</a></li>
                 <li><a href="#email" className="hover:text-slate-900 transition-colors block">10. Email Newsletters</a></li>
-                <li><a href="#copilot" className="hover:text-slate-900 transition-colors block">11. Ozigi Copilot</a></li>
-                <li><a href="#pricing" className="hover:text-slate-900 transition-colors block">12. Pricing & Gating</a></li>
+                <li><a href="#longform" className="hover:text-slate-900 transition-colors block">11. Long-Form Content</a></li>
+                <li><a href="#copilot" className="hover:text-slate-900 transition-colors block">12. Ozigi Copilot</a></li>
+                <li><a href="#pricing" className="hover:text-slate-900 transition-colors block">13. Pricing & Gating</a></li>
+                <li><a href="#troubleshooting" className="hover:text-slate-900 transition-colors block">14. Troubleshooting</a></li>
+                <li><a href="#integrations" className="hover:text-slate-900 transition-colors block">15. Integration Setup</a></li>
               </ul>
             </nav>
           </div>
@@ -489,10 +492,69 @@ See full webhook guide →
               </ul>
             </section>
 
-            {/* 11. Ozigi Copilot */}
+            {/* 11. Long-Form Content Generation */}
+            <section id="longform" className="scroll-mt-28">
+              <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+                11. Long-Form Content Generation
+              </h2>
+              <p className="text-slate-600 font-medium leading-relaxed mb-4">
+                Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers from 500 to 10,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
+              </p>
+              
+              <div className="bg-slate-900 text-white p-6 rounded-2xl mb-6">
+                <h3 className="font-black uppercase tracking-widest text-sm mb-4 flex items-center gap-2">
+                  <span>🚀</span> Available on Organization & Enterprise Plans
+                </h3>
+                <ul className="space-y-2 text-sm">
+                  <li>• <strong>Rate Limit:</strong> 5 articles per 24 hours (Organization), unlimited (Enterprise)</li>
+                  <li>• <strong>Processing:</strong> Takes 30-90 seconds depending on length and complexity</li>
+                  <li>• <strong>Output:</strong> Structured sections with intro, body, conclusion</li>
+                </ul>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white border border-slate-200 p-5 rounded-xl">
+                  <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Target Length</h3>
+                  <p className="text-sm text-slate-600">Choose from 500 to 10,000 words. The AI adjusts depth and detail accordingly.</p>
+                </div>
+                <div className="bg-white border border-slate-200 p-5 rounded-xl">
+                  <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Tone & Style</h3>
+                  <p className="text-sm text-slate-600">Select from professional, casual, technical, or storytelling. Mix with your custom persona.</p>
+                </div>
+                <div className="bg-white border border-slate-200 p-5 rounded-xl">
+                  <h3 className="font-black text-sm uppercase tracking-widest text-brand-red mb-2">Structure</h3>
+                  <p className="text-sm text-slate-600">Choose narrative, listicle, how-to, opinion, or analysis. Each has its own flow.</p>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 p-6 rounded-2xl mb-4">
+                <h3 className="font-bold text-slate-900 mb-3">How to Generate Long-Form Content</h3>
+                <ol className="space-y-3 text-sm text-slate-600">
+                  <li><strong>1. Go to Long-Form:</strong> Click "Long-Form Content" in your sidebar.</li>
+                  <li><strong>2. Add Context:</strong> Paste an article, research notes, a URL, or raw ideas (minimum 50 characters).</li>
+                  <li><strong>3. Configure:</strong> Choose target length (500–10,000 words), tone, structure, and optional instructions.</li>
+                  <li><strong>4. Select Persona:</strong> Pick a saved persona to inject your voice into the content.</li>
+                  <li><strong>5. Generate:</strong> Click "Generate Article". The engine processes in 30–90 seconds.</li>
+                  <li><strong>6. Edit & Export:</strong> Each section is editable. Copy to clipboard or download as Markdown.</li>
+                </ol>
+              </div>
+
+              <div className="bg-red-50 border border-red-100 p-5 rounded-2xl">
+                <h3 className="font-black text-slate-900 mb-2">⚠️ Rate Limiting & Quota</h3>
+                <p className="text-sm text-slate-700 mb-3">Long-form generation is intentionally throttled to prevent abuse and ensure quality output.</p>
+                <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">
+                  <li><strong>Organization Plan:</strong> 5 articles per 24-hour rolling window</li>
+                  <li><strong>Enterprise Plan:</strong> Unlimited long-form generation with priority processing</li>
+                  <li><strong>Billing:</strong> Rate limits reset at the same time each day based on your timezone</li>
+                  <li><strong>Upgrade:</strong> Running out of quota? Contact us for higher limits or enterprise access</li>
+                </ul>
+              </div>
+            </section>
+
+            {/* 12. Ozigi Copilot */}
             <section id="copilot" className="scroll-mt-28">
               <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-                11. Ozigi Copilot
+                12. Ozigi Copilot
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
                 Your personal AI assistant lives in the dashboard. Ask questions, brainstorm ideas, or refine drafts – the Copilot has access to your saved persona context and can optionally search the web.
@@ -516,7 +578,7 @@ See full webhook guide →
             {/* 12. Pricing & Gating */}
             <section id="pricing" className="scroll-mt-28">
               <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-                12. Pricing & Gating
+                13. Pricing & Gating
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
                 Ozigi offers tiered plans to match your volume. Every new user gets a <strong>7‑day trial of the Team plan</strong> – no credit card required.
@@ -555,6 +617,125 @@ See full webhook guide →
               <p className="text-slate-600 font-medium leading-relaxed mt-4">
                 Enterprise plans available – <a href="mailto:hello@ozigi.app" className="text-brand-red underline">contact us</a> for custom quotas, SLA, and team management.
               </p>
+            </section>
+
+            {/* 14. Troubleshooting */}
+            <section id="troubleshooting" className="scroll-mt-28">
+              <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+                14. Troubleshooting
+              </h2>
+
+              <div className="space-y-6">
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-2">Generation fails or returns an error</h3>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Symptom:</strong> Clicking Generate shows an error message or the spinner runs indefinitely.</p>
+                  <p className="text-sm text-slate-600 font-medium mb-2"><strong>Check first:</strong></p>
+                  <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">
+                    <li>Is your context field empty? Generation requires at least some input.</li>
+                    <li>Is the URL you pasted publicly accessible? Ozigi cannot scrape pages behind login walls or paywalls.</li>
+                    <li>Does your input contain special characters or very long text? Try trimming to under 5,000 words.</li>
+                  </ul>
+                  <p className="text-sm text-slate-600 mt-3"><strong>If the error persists:</strong> Email <a href="mailto:hello@ozigi.app" className="text-brand-red font-medium">hello@ozigi.app</a> with the URL or context you were using and we'll investigate.</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-2">The generated content doesn't match my context</h3>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Symptom:</strong> The campaign seems generic or ignores key details from the source material.</p>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Fix:</strong> Your System Persona is the most common cause. A vague persona produces generic output. Edit your persona to be more specific about the domain, the writing style, and what to prioritize. See Section 3 — System Personas.</p>
+                  <p className="text-sm text-slate-600"><strong>Also check:</strong> If you pasted a URL, open the URL in a private browser window to confirm it's publicly accessible. If the page requires JavaScript to render content, Ozigi may receive limited data. Paste the key text directly instead.</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-2">X (Twitter) publishing isn't working</h3>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Symptom:</strong> Clicking the X publish button opens a blank tab or the pre-filled tweet is missing content.</p>
+                  <p className="text-sm text-slate-600 mb-3"><strong>How X publishing works:</strong> Ozigi uses X Web Intents — it opens a new tab with your post pre-loaded in the X compose window. This requires you to be logged into X in your browser.</p>
+                  <p className="text-sm text-slate-600"><strong>Fix:</strong> Log into X in the same browser before clicking publish. If content is missing from the compose window, copy it manually from the campaign card using the Copy button.</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-2">Discord messages aren't appearing in my server</h3>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Symptom:</strong> Clicking the Discord publish button shows success but nothing appears in the channel.</p>
+                  <p className="text-sm text-slate-600 font-medium mb-2"><strong>Check:</strong></p>
+                  <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">
+                    <li>Is the webhook URL in your Ozigi Settings modal correct and complete? It should start with <code className="bg-slate-100 px-1 rounded">https://discord.com/api/webhooks/</code></li>
+                    <li>Was the webhook deleted or disabled in your Discord server settings? Go to Server Settings → Integrations → Webhooks to verify.</li>
+                    <li>Does the bot have permission to post in that specific channel?</li>
+                  </ul>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-2">LinkedIn publishing fails with an auth error</h3>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Symptom:</strong> LinkedIn OAuth shows an error or your posts aren't publishing.</p>
+                  <p className="text-sm text-slate-600"><strong>Fix:</strong> Go to Settings → Integrations → Disconnect LinkedIn, then reconnect. LinkedIn OAuth tokens expire — reconnecting refreshes them. If the error continues, email hello@ozigi.app.</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-2">Email reminders for scheduled posts aren't arriving</h3>
+                  <p className="text-sm text-slate-600 mb-3"><strong>Symptom:</strong> You scheduled a post but didn't receive the email reminder at the scheduled time.</p>
+                  <p className="text-sm text-slate-600 font-medium mb-2"><strong>Check:</strong></p>
+                  <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">
+                    <li>Did you sign up with X OAuth? If so, add your email address in Settings → Account to enable email reminders.</li>
+                    <li>Check your spam folder — reminder emails come from <code className="bg-slate-100 px-1 rounded">no-reply@ozigi.app</code>.</li>
+                    <li>Is your scheduled time in the future? Scheduling in the past is ignored silently.</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            {/* 15. Integration Setup */}
+            <section id="integrations" className="scroll-mt-28">
+              <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
+                15. Integration Setup Walkthroughs
+              </h2>
+
+              <div className="space-y-6">
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-3">Discord — 60-Second Setup</h3>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>Open your Discord server and go to <strong>Server Settings</strong> (gear icon).</li>
+                    <li>Click <strong>Integrations</strong> in the left sidebar.</li>
+                    <li>Click <strong>Webhooks</strong> and then <strong>New Webhook</strong>.</li>
+                    <li>Name it "Ozigi" and select the channel where posts should appear.</li>
+                    <li>Click <strong>Copy Webhook URL</strong> and paste it into Settings → Integrations → Discord Webhook in Ozigi.</li>
+                    <li>Save. Now your campaigns publish directly to that Discord channel.</li>
+                  </ol>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-3">Slack — 60-Second Setup</h3>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>Open your Slack workspace and go to <strong>Apps</strong> in the left sidebar.</li>
+                    <li>Search for <strong>Incoming Webhooks</strong> and click Add to Slack.</li>
+                    <li>Choose the channel where Ozigi should post and click <strong>Authorize</strong>.</li>
+                    <li>Copy the <strong>Webhook URL</strong> shown on the confirmation page (starts with <code className="bg-slate-100 px-1 rounded">https://hooks.slack.com/services/</code>).</li>
+                    <li>Paste it into Settings → Integrations → Slack Webhook URL in your Ozigi dashboard.</li>
+                  </ol>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-3">LinkedIn OAuth — Step by Step</h3>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>Go to <strong>Settings → Integrations</strong> in your Ozigi dashboard.</li>
+                    <li>Click <strong>Connect LinkedIn</strong>.</li>
+                    <li>You'll be redirected to LinkedIn's authorization page. Sign in if prompted.</li>
+                    <li>Click <strong>Allow</strong> to grant Ozigi permission to post on your behalf.</li>
+                    <li>You'll be redirected back to Ozigi. The LinkedIn button should now show your name.</li>
+                  </ol>
+                  <p className="text-xs text-slate-500 mt-3 italic"><strong>Note:</strong> LinkedIn OAuth tokens expire after 60 days. You'll receive an email when reconnection is needed.</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl">
+                  <h3 className="font-bold text-slate-900 mb-3">ZeptoMail — Email Newsletter Setup</h3>
+                  <p className="text-sm text-slate-600 mb-3">To send newsletters from Ozigi, you need a verified sending domain in ZeptoMail.</p>
+                  <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+                    <li>Create a ZeptoMail account at zeptomail.com and complete domain verification for your domain.</li>
+                    <li>In ZeptoMail, go to <strong>Mail Agents → Send Mail</strong> and copy your API token.</li>
+                    <li>In Ozigi Settings → Email, paste your ZeptoMail API token and set your sending email address.</li>
+                    <li>Add your subscriber list via CSV upload or manual entry.</li>
+                    <li>Test by sending a campaign to yourself before your full list.</li>
+                  </ol>
+                </div>
+              </div>
             </section>
           </div>
 

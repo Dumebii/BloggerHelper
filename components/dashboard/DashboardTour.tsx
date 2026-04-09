@@ -82,10 +82,18 @@ const allSteps: TourStep[] = [
     position: "right",
   },
   {
+    target: "[data-tour='sidebar-personas-marketplace']",
+    title: "Personas Marketplace",
+    description:
+      "Browse and import pre-built personas from industry experts. Customize any marketplace persona to match your voice.",
+    position: "right",
+    optional: true,
+  },
+  {
     target: "[data-tour='sidebar-long-form']",
     title: "Long-Form Content",
     description:
-      "Generate in-depth articles and blog posts (1,500-5,000 words) with AI. Perfect for thought leadership and detailed guides.",
+      "Generate in-depth articles and blog posts (500-10,000 words) with AI. Perfect for thought leadership and detailed guides.",
     position: "right",
     optional: true,
   },
