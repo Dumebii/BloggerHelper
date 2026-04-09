@@ -210,17 +210,44 @@ export function parseLongFormResponse(response: string): LongFormOutput | null {
       jsonStr = codeBlockMatch[1].trim();
     }
     
-    // Also try to extract if JSON is embedded in text
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (jsonMatch && !jsonStr.startsWith('{')) {
-      jsonStr = jsonMatch[0];
+    // Try to find the first complete JSON object
+    const firstBrace = jsonStr.indexOf('{');
+    if (firstBrace === -1) {
+      console.error('[LongForm] No JSON object found in response');
+      return null;
     }
+    
+    // Find matching closing brace by counting braces
+    let braceCount = 0;
+    let lastBrace = -1;
+    for (let i = firstBrace; i < jsonStr.length; i++) {
+      if (jsonStr[i] === '{') braceCount++;
+      if (jsonStr[i] === '}') {
+        braceCount--;
+        if (braceCount === 0) {
+          lastBrace = i;
+          break;
+        }
+      }
+    }
+    
+    if (lastBrace === -1) {
+      console.error('[LongForm] Incomplete JSON object - missing closing brace');
+      return null;
+    }
+    
+    // Extract the complete JSON object
+    jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+    
+    // Clean up common JSON issues
+    // Remove trailing commas before closing braces/brackets
+    jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
     
     const parsed = JSON.parse(jsonStr);
     
     // Validate required fields
     if (!parsed.title || !Array.isArray(parsed.sections)) {
-      console.error('[LongForm] Invalid response structure');
+      console.error('[LongForm] Invalid response structure - missing title or sections');
       return null;
     }
     

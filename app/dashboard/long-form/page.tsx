@@ -277,7 +277,7 @@ export default function LongFormPage() {
                       value={context}
                       onChange={(e) => setContext(e.target.value)}
                       placeholder="Paste your source material here: articles, notes, research, URLs content, etc. The more context you provide, the better the output."
-                      className="w-full h-48 p-4 border border-slate-200 rounded-xl text-sm resize-none focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none"
+                      className="w-full h-48 p-4 border border-slate-200 rounded-xl text-sm resize-none focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-brand-slate placeholder:text-slate-400"
                     />
                     <p className="text-xs text-slate-400 mt-1">
                       {context.length} characters ({context.length < 50 ? "min 50 required" : "ready"})
@@ -294,7 +294,7 @@ export default function LongFormPage() {
                       <select
                         value={selectedPersonaId}
                         onChange={(e) => setSelectedPersonaId(e.target.value)}
-                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white"
+                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white text-brand-slate"
                       >
                         <option value="default">Default (no specific voice)</option>
                         {personas?.map((p) => (
@@ -313,7 +313,7 @@ export default function LongFormPage() {
                       <select
                         value={tone}
                         onChange={(e) => setTone(e.target.value)}
-                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white"
+                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white text-brand-slate"
                       >
                         {TONE_OPTIONS.map((t) => (
                           <option key={t.value} value={t.value}>
@@ -331,7 +331,7 @@ export default function LongFormPage() {
                       <select
                         value={structure}
                         onChange={(e) => setStructure(e.target.value)}
-                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white"
+                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white text-brand-slate"
                       >
                         {STRUCTURE_OPTIONS.map((s) => (
                           <option key={s.value} value={s.value}>
@@ -349,7 +349,7 @@ export default function LongFormPage() {
                       <select
                         value={targetLength}
                         onChange={(e) => setTargetLength(Number(e.target.value))}
-                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white"
+                        className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:border-brand-red outline-none appearance-none bg-white text-brand-slate"
                       >
                         {LENGTH_OPTIONS.map((l) => (
                           <option key={l.value} value={l.value}>
@@ -369,7 +369,7 @@ export default function LongFormPage() {
                       value={additionalInstructions}
                       onChange={(e) => setAdditionalInstructions(e.target.value)}
                       placeholder="Any specific requirements, focus areas, or constraints..."
-                      className="w-full h-24 p-4 border border-slate-200 rounded-xl text-sm resize-none focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none"
+                      className="w-full h-24 p-4 border border-slate-200 rounded-xl text-sm resize-none focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-brand-slate placeholder:text-slate-400"
                     />
                   </div>
 
@@ -454,9 +454,6 @@ export default function LongFormPage() {
                         <div className="prose prose-slate prose-sm max-w-none">
                 <p className="whitespace-pre-wrap text-brand-slate leading-relaxed">
                   {section.content}
-                </p>
-                <p className="text-xs text-slate-400 mt-4">
-                  ~{section.wordCount} words
                 </p>
                         </div>
                         <p className="text-xs text-slate-400 mt-4">

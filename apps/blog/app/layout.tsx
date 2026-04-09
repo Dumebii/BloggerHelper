@@ -18,7 +18,6 @@ export const metadata: Metadata = {
     "DevRel",
   ],
   metadataBase: new URL("https://blog.ozigi.app"),
-  canonical: "https://blog.ozigi.app",
   openGraph: {
     title: "Ozigi Blog",
     description: "Technical insights, tutorials, and architecture decisions from the Ozigi team.",
@@ -55,6 +54,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
+    canonical: "https://blog.ozigi.app",
     types: {
       "application/rss+xml": [
         {
