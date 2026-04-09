@@ -108,7 +108,13 @@ export async function getAllPosts(): Promise<BlogPost[]> {
     };
   });
 
-  return posts.sort((a, b) => new Date(b.date + "T00:00:00Z").getTime() - new Date(a.date + "T00:00:00Z").getTime());
+  return posts
+    .filter((post) => post.date) // Filter out posts without dates
+    .sort((a, b) => {
+      const dateA = new Date(a.date + "T00:00:00Z").getTime();
+      const dateB = new Date(b.date + "T00:00:00Z").getTime();
+      return dateB - dateA;
+    });
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
