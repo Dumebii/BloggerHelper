@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Sparkles, User } from "lucide-react";
 import Distillery from "@/components/ContextEngine";
@@ -34,7 +34,7 @@ import { incrementCampaignGeneration } from "@/lib/plan";
 import { toast } from "sonner";
 import { PLATFORMS } from "@/lib/platforms";
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { session, sessionLoading } = useSession();
@@ -530,5 +530,13 @@ useEffect(() => {
       )}
 <DashboardTour isReady={isTourReady} hasCopilot={planStatus?.hasCopilot ?? false} />
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

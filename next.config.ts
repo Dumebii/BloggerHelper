@@ -14,15 +14,21 @@ const nextConfig = {
 const sentryConfig = {
   org: "ozigi",
   project: "javascript-nextjs",
-  silent: !process.env.CI,
+  silent: true,
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
   automaticVercelMonitors: true,
   hideSourceMaps: false,
   disableLogger: true,
-  // Skip source map upload if no auth token (prevents build failures)
-  authToken: process.env.SENTRY_AUTH_TOKEN,
   telemetry: false,
+  // Disable source map upload entirely when no auth token
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+  release: {
+    create: !!process.env.SENTRY_AUTH_TOKEN,
+    finalize: !!process.env.SENTRY_AUTH_TOKEN,
+  },
 };
 
 export default withSentryConfig(nextConfig, sentryConfig);

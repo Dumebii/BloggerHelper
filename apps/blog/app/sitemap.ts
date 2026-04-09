@@ -27,26 +27,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
   
   // Dynamic blog post pages with image metadata
-  const blogPages: MetadataRoute.Sitemap = posts.map((post) => {
-    const entry: any = {
-      url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: new Date(post.date),
-      changeFrequency: "monthly" as const,
-      priority: 0.9,
-    };
-    
-    // Add image metadata if cover image exists
-    if (post.coverImage) {
-      entry.images = [
-        {
-          url: post.coverImage,
-          title: post.title,
-        },
-      ];
-    }
-    
-    return entry;
-  });
+  const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: "monthly" as const,
+    priority: 0.9,
+    ...(post.coverImage && {
+      images: [post.coverImage],
+    }),
+  }));
   
   return [...staticPages, ...sectionPages, ...blogPages];
 }

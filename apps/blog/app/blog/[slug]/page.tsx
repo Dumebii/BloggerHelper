@@ -4,11 +4,9 @@ import Link from "next/link";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { getAllPosts, getPostBySlug, getRelatedPosts, calculateWordCount } from "@/lib/blog";
+import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/blog";
 import ServerTableOfContents from "@/components/blog/ServerTableOfContents";
 import AuthorBio from "@/components/AuthorBio";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import CodeBlock from "@/components/blog/CodeBlock";
 
 
@@ -25,7 +23,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const baseUrl = "https://blog.ozigi.app";
   const postUrl = `${baseUrl}/blog/${slug}`;
-  const wordCount = calculateWordCount(post.content);
   const ogImage = post.coverImage || "/images/og-default.png";
   
   return {
@@ -293,7 +290,7 @@ const hasHeadings = post.headings && post.headings.length > 0;
                       </a>
                     );
                   },
-                  code: ({ node, inline, className, children, ...props }: any) => {
+                  code: ({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) => {
       const match = /language-(\w+)/.exec(className || '');
       const language = match ? match[1] : 'text';
       const codeString = String(children).replace(/\n$/, '');

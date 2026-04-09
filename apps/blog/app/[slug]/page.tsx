@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getAllPosts, getAllSections, getPostsBySection, SECTION_META } from "@/lib/blog";
+import { getAllSections, getPostsBySection, SECTION_META } from "@/lib/blog";
 import { format } from "date-fns";
 
 export async function generateStaticParams() {
