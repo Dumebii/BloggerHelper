@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -8,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
-              <img src="/logo.png" alt="Ozigi Logo" className="h-8 w-auto logo-spin" />
+              <Image src="/logo.png" alt="Ozigi Logo" width={32} height={32} className="h-8 w-auto logo-spin" />
               <span className="text-lg font-black italic uppercase tracking-tighter text-white">
                 Ozigi
               </span>

@@ -28,7 +28,7 @@ export interface BlogPost {
   keywords?: string[];
   content: string;
   headings: Heading[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function extractHeadings(content: string): Heading[] {
@@ -47,12 +47,12 @@ export function extractHeadings(content: string): Heading[] {
   return headings;
 }
 
-function parseCategories(data: any): string[] {
+function parseCategories(data: Record<string, unknown>): string[] {
   if (data.categories) {
-    return Array.isArray(data.categories) ? data.categories : [data.categories];
+    return Array.isArray(data.categories) ? data.categories : [String(data.categories)];
   }
   if (data.category) {
-    return data.category.split(',').map((c: string) => c.trim());
+    return String(data.category).split(',').map((c: string) => c.trim());
   }
   return [];
 }

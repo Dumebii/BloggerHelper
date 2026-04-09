@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Ozigi" className="h-8 w-auto logo-spin" />
+            <Image src="/logo.png" alt="Ozigi" width={32} height={32} className="h-8 w-auto logo-spin" />
             <span className="text-2xl font-black text-brand-navy tracking-tighter">
               Ozigi
             </span>
