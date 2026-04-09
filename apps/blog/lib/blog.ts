@@ -90,7 +90,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
     return {
       slug,
       title: data.title,
-      date: data.date && typeof data.date === 'string' ? data.date : new Date().toISOString().split('T')[0],
+      date: data.date,
       excerpt: data.excerpt || data.description,
       description: data.description || data.excerpt,
       coverImage: data.coverImage || null,
