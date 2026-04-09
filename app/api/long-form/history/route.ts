@@ -9,30 +9,31 @@ export async function GET(req: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    const supabase = createClient(
+
+    // Use anon client only to verify the token / identify the user
+    const supabaseAuth = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        },
-      }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Get current user
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser(token);
+    } = await supabaseAuth.auth.getUser(token);
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Use the service-role admin client for the DB query so RLS cannot
+    // block rows that were written by the same admin client during generation.
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // Fetch all long-form generations for this user
-    const { data: articles, error: fetchError } = await supabase
+    const { data: articles, error: fetchError } = await supabaseAdmin
       .from("scheduled_posts")
       .select("id, caption, content, metadata, longform_sections, created_at")
       .eq("user_id", user.id)

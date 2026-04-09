@@ -108,13 +108,11 @@ export async function getAllPosts(): Promise<BlogPost[]> {
     };
   });
 
-  return posts
-    .filter((post) => post.date) // Filter out posts without dates
-    .sort((a, b) => {
-      const dateA = new Date(a.date + "T00:00:00Z").getTime();
-      const dateB = new Date(b.date + "T00:00:00Z").getTime();
-      return dateB - dateA;
-    });
+  return posts.sort((a, b) => {
+    const dateA = a.date ? new Date(a.date + "T00:00:00Z").getTime() : 0;
+    const dateB = b.date ? new Date(b.date + "T00:00:00Z").getTime() : 0;
+    return dateB - dateA;
+  });
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {

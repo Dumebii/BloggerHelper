@@ -252,33 +252,42 @@ export async function POST(req: Request) {
         sections_count: parsed.sections.length,
       });
 
-      const { error: saveError } = await supabaseAdmin
+      const insertPayload: Record<string, any> = {
+        user_id: user.id,
+        platform: 'long-form',
+        content: fullContent,
+        caption: parsed.title,
+        hashtags: [],
+        status: 'draft',
+        longform_sections: parsed.sections,
+        is_longform: true,
+        metadata: {
+          type: 'long-form',
+          subtitle: parsed.subtitle,
+          totalWordCount: parsed.totalWordCount,
+          tone,
+          structure,
+        },
+      };
+      // Intentionally omit campaign_id and scheduled_for so the DB uses
+      // its defaults — passing null violates NOT NULL / FK constraints.
+
+      const { data: savedRow, error: saveError } = await supabaseAdmin
         .from('scheduled_posts')
-        .insert({
-          user_id: user.id,
-          campaign_id: null, // Long-form is standalone, not tied to a campaign
-          platform: 'long-form',
-          content: fullContent,
-          caption: parsed.title,
-          hashtags: [],
-          scheduled_for: null, // Not scheduled, just saved
-          status: 'draft',
-          longform_sections: parsed.sections, // Save full sections to the dedicated column
-          is_longform: true,
-          metadata: {
-            type: 'long-form',
-            subtitle: parsed.subtitle,
-            totalWordCount: parsed.totalWordCount,
-            tone,
-            structure,
-          },
-        });
+        .insert(insertPayload)
+        .select('id')
+        .single();
 
       if (saveError) {
-        console.error('[LongForm] Failed to save to database:', saveError);
-        // Don't fail the request, just log the error
+        console.error('[LongForm] Failed to save to database:', JSON.stringify(saveError));
+        // Surface the error as a non-fatal warning in the response
+        return NextResponse.json({
+          success: true,
+          article: parsed,
+          warning: `Article generated but could not be saved to history: ${saveError.message}`,
+        });
       } else {
-        console.log('[LongForm] Saved to database successfully');
+        console.log('[LongForm] Saved to database successfully, id:', savedRow?.id);
       }
     } catch (saveErr) {
       console.error('[LongForm] Database save error:', saveErr);
