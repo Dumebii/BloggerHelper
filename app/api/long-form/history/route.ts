@@ -40,6 +40,10 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(50);
 
+    console.log("[LongForm History] Fetch query - user_id:", user.id);
+    console.log("[LongForm History] Fetch result - articles count:", articles?.length);
+    console.log("[LongForm History] Fetch error:", fetchError);
+
     if (fetchError) {
       console.error("[LongForm History] Fetch error:", fetchError);
       return NextResponse.json(
@@ -71,6 +75,14 @@ export async function GET(req: NextRequest) {
         sections,
         createdAt: article.created_at,
       };
+    });
+
+    console.log("[LongForm History] Formatted articles:", {
+      count: formattedArticles.length,
+      sample: formattedArticles[0] ? {
+        title: formattedArticles[0].title,
+        sections_count: formattedArticles[0].sections.length,
+      } : null,
     });
 
     return NextResponse.json({

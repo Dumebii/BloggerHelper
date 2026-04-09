@@ -94,11 +94,18 @@ export default function LongFormPage() {
     if (!session) return;
     setIsLoadingHistory(true);
     try {
+      console.log("[v0] Fetching history with token:", session.access_token?.substring(0, 20));
       const response = await fetch("/api/long-form/history", {
         headers: { "Authorization": `Bearer ${session.access_token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch history");
+      console.log("[v0] History response status:", response.status);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("[v0] History error response:", errorData);
+        throw new Error(errorData.error || "Failed to fetch history");
+      }
       const data = await response.json();
+      console.log("[v0] History data received:", data);
       setHistory(data.articles || []);
     } catch (error) {
       console.error("[LongForm] History fetch error:", error);

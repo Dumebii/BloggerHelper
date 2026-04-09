@@ -233,6 +233,13 @@ export async function POST(req: Request) {
     try {
       const fullContent = parsed.sections.map(s => `## ${s.heading}\n\n${s.content}`).join('\n\n');
       
+      console.log('[LongForm] Saving article with:', {
+        user_id: user.id,
+        platform: 'long-form',
+        caption: parsed.title,
+        sections_count: parsed.sections.length,
+      });
+
       const { error: saveError } = await supabaseAdmin
         .from('scheduled_posts')
         .insert({
