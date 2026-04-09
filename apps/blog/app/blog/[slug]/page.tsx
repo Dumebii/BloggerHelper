@@ -198,7 +198,7 @@ const hasHeadings = post.headings && post.headings.length > 0;
             />
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-8 pb-8 border-b border-slate-200">
-              <span>{format(new Date(post.date), "MMMM dd, yyyy")}</span>
+              <span>{format(new Date(post.date + "T00:00:00Z"), "MMMM dd, yyyy")}</span>
               <span>•</span>
               <span>{post.readTime || "5 min read"}</span>
               {post.author && (
@@ -344,7 +344,7 @@ const hasHeadings = post.headings && post.headings.length > 0;
                           {related.title}
                         </h4>
                         <p className="text-xs text-slate-500 mt-2">
-                          {format(new Date(related.date), "MMM dd, yyyy")}
+                          {format(new Date(related.date + "T00:00:00Z"), "MMM dd, yyyy")}
                         </p>
                       </div>
                     </Link>
