@@ -76,7 +76,6 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   };
 
 const hasHeadings = post.headings && post.headings.length > 0;
-  const wordCount = calculateWordCount(post.content);
   const baseUrl = "https://blog.ozigi.app";
 
   // Article JSON-LD Schema
@@ -105,8 +104,6 @@ const hasHeadings = post.headings && post.headings.length > 0;
       "@type": "WebPage",
       "@id": `${baseUrl}/blog/${slug}`,
     },
-    wordCount: wordCount,
-    timeRequired: `PT${Math.ceil(wordCount / 200)}M`,
     articleSection: post.section || "Blog",
     keywords: post.keywords || post.categories || [],
   };
