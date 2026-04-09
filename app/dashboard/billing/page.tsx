@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
-import { useSession } from "@/components/SessionProvider";
+import { useSession } from "@/components/hooks/useSession";
 import { format } from "date-fns";
 import Link from "next/link";
 
