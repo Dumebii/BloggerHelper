@@ -4,7 +4,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { getAllPosts, getPostBySlug, getRelatedPosts, calculateWordCount } from "@/lib/blog";
+import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/blog";
 import ServerTableOfContents from "@/components/blog/ServerTableOfContents";
 import AuthorBio from "@/components/AuthorBio";
 import CodeBlock from "@/components/blog/CodeBlock";
