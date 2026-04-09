@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     // Fetch all long-form generations for this user
     const { data: articles, error: fetchError } = await supabase
       .from("scheduled_posts")
-      .select("id, caption, content, metadata, created_at")
+      .select("id, caption, content, metadata, longform_sections, created_at")
       .eq("user_id", user.id)
       .eq("platform", "long-form")
       .order("created_at", { ascending: false })
@@ -52,9 +52,9 @@ export async function GET(req: NextRequest) {
     const formattedArticles = (articles || []).map((article: any) => {
       let sections = [];
       try {
-        // Parse sections from metadata if available
-        if (article.metadata?.sections) {
-          sections = article.metadata.sections;
+        // Get sections from the dedicated longform_sections column
+        if (article.longform_sections && Array.isArray(article.longform_sections)) {
+          sections = article.longform_sections;
         }
       } catch (e) {
         console.error("[LongForm History] Parse error:", e);

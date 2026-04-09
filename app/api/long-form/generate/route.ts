@@ -244,13 +244,14 @@ export async function POST(req: Request) {
           hashtags: [],
           scheduled_for: null, // Not scheduled, just saved
           status: 'draft',
+          longform_sections: parsed.sections, // Save full sections to the dedicated column
+          is_longform: true,
           metadata: {
             type: 'long-form',
             subtitle: parsed.subtitle,
             totalWordCount: parsed.totalWordCount,
             tone,
             structure,
-            sections: parsed.sections.length,
           },
         });
 

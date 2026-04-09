@@ -236,7 +236,7 @@ export default function LongFormPage() {
                 Long-Form Content
               </h1>
             </div>
-            <p className="text-slate-500">Generate 1,500-word articles optimized for your audience</p>
+            <p className="text-slate-500">Generate articles optimized for your audience</p>
           </div>
 
           {!hasAccess ? (
@@ -291,6 +291,10 @@ export default function LongFormPage() {
                     <p className="text-xs text-slate-400 mt-1">
                       {context.length} characters ({context.length < 50 ? "min 50 required" : "ready"})
                     </p>
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-xs font-semibold text-amber-900 mb-1">💡 Pro Tip:</p>
+                      <p className="text-xs text-amber-700">Avoid overly verbose or repetitive context/briefs as they can confuse the model and break the generation cycle. Keep your input concise and focused.</p>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
