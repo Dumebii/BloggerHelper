@@ -105,19 +105,19 @@ More content...
 
 Your article will be available at:
 
-- **Main blog:** `blog.ozigi.app/robust-webhook-handler-in-nodejs`
-- **Section page:** `blog.ozigi.app/blog/section/engineering` (shows all Engineering articles)
+- **Main blog:** `blog.ozigi.app/blog/robust-webhook-handler-in-nodejs`
+- **Section page:** `blog.ozigi.app/engineering` (shows all Engineering articles)
 - **All articles:** `blog.ozigi.app/` (shows latest articles with section tabs)
 
 ## Section Pages
 
-Each section has its own dedicated page where readers can browse all articles in that section:
+Each section has its own dedicated page at the top level for better SEO:
 
-- `blog.ozigi.app/blog/section/engineering`
-- `blog.ozigi.app/blog/section/marketing`
-- `blog.ozigi.app/blog/section/content`
-- `blog.ozigi.app/blog/section/tools-roundup`
-- `blog.ozigi.app/blog/section/ozigi-focus`
+- `blog.ozigi.app/engineering`
+- `blog.ozigi.app/marketing`
+- `blog.ozigi.app/content`
+- `blog.ozigi.app/tools-roundup`
+- `blog.ozigi.app/ozigi-focus`
 
 ## Current Articles by Section
 

@@ -49,8 +49,8 @@ Open [http://localhost:3001](http://localhost:3001) to view the blog.
 ```
 apps/blog/
 ├── app/                    # Next.js App Router
+│   ├── [slug]/            # Section pages (top-level for SEO)
 │   ├── blog/[slug]/       # Individual article pages
-│   ├── blog/section/[slug]/ # Section listing pages
 │   ├── feed.xml/          # RSS feed
 │   ├── robots.ts          # SEO robots
 │   └── sitemap.ts         # Dynamic sitemap
@@ -61,6 +61,16 @@ apps/blog/
     ├── images/            # Article images
     └── llms.txt           # AI indexer file
 ```
+
+## Section URLs
+
+Sections are at the top level for better SEO:
+
+- `blog.ozigi.app/engineering`
+- `blog.ozigi.app/marketing`
+- `blog.ozigi.app/content`
+- `blog.ozigi.app/tools-roundup`
+- `blog.ozigi.app/ozigi-focus`
 
 ## Writing Articles
 

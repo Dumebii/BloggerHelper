@@ -62,7 +62,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
                 href={
                   isActive
                     ? "#"
-                    : `/blog/section/${section.toLowerCase().replace(/\s+/g, "-")}`
+                    : `/${section.toLowerCase().replace(/\s+/g, "-")}`
                 }
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                   isActive

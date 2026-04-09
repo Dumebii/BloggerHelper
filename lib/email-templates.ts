@@ -335,6 +335,153 @@ export function buildUpgradeWelcomeEmail({ userName, plan }: UpgradeEmailConfig)
   `;
 }
 
+// ==========================================
+// PAYMENT RECEIPT EMAIL
+// ==========================================
+
+interface ReceiptEmailConfig {
+  userName: string;
+  plan: string;
+  amount: number;
+  currency: string;
+  paymentId: string;
+  paymentDate: Date;
+  billingPeriod: 'monthly' | 'yearly';
+  nextBillingDate?: Date;
+}
+
+export function buildPaymentReceiptEmail(config: ReceiptEmailConfig): string {
+  const appUrl = process.env.APP_URL || 'https://ozigi.app';
+  const {
+    userName,
+    plan,
+    amount,
+    currency,
+    paymentId,
+    paymentDate,
+    billingPeriod,
+    nextBillingDate,
+  } = config;
+
+  const displayName = userName || 'there';
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+  }).format(amount / 100); // Assuming amount is in cents
+
+  const formattedDate = paymentDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const formattedNextDate = nextBillingDate
+    ? nextBillingDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="background: #0f172a; padding: 32px; text-align: center;">
+            <img src="https://ozigi.app/logo.png" alt="Ozigi" style="height: 40px; margin-bottom: 16px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Payment Receipt</h1>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 32px;">
+            <p style="font-size: 16px; color: #0f172a; margin: 0 0 24px 0;">
+              Hi ${escapeHtmlSafe(displayName)},
+            </p>
+            <p style="font-size: 16px; color: #475569; line-height: 1.6; margin: 0 0 32px 0;">
+              Thank you for your payment. Here&apos;s your receipt for your records.
+            </p>
+            
+            <!-- Receipt Box -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                    <span style="color: #64748b; font-size: 14px;">Plan</span>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
+                    <span style="color: #0f172a; font-size: 14px; font-weight: 600;">${plan.charAt(0).toUpperCase() + plan.slice(1)} (${billingPeriod})</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                    <span style="color: #64748b; font-size: 14px;">Amount</span>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
+                    <span style="color: #0f172a; font-size: 14px; font-weight: 600;">${formattedAmount}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                    <span style="color: #64748b; font-size: 14px;">Payment Date</span>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
+                    <span style="color: #0f172a; font-size: 14px; font-weight: 600;">${formattedDate}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                    <span style="color: #64748b; font-size: 14px;">Payment ID</span>
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
+                    <span style="color: #0f172a; font-size: 12px; font-family: monospace;">${paymentId}</span>
+                  </td>
+                </tr>
+                ${formattedNextDate ? `
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <span style="color: #64748b; font-size: 14px;">Next Billing Date</span>
+                  </td>
+                  <td style="padding: 12px 0; text-align: right;">
+                    <span style="color: #0f172a; font-size: 14px; font-weight: 600;">${formattedNextDate}</span>
+                  </td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+            
+            <!-- CTA -->
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${appUrl}/dashboard/billing" style="background: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">
+                View Payment History
+              </a>
+            </div>
+            
+            <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin: 24px 0 0 0; text-align: center;">
+              Questions about your billing? Reply to this email or contact us at <a href="mailto:support@ozigi.app" style="color: #0f172a;">support@ozigi.app</a>
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-size: 12px; margin: 0;">
+              This receipt is for your records. Please save it for your accounting purposes.<br>
+              &copy; ${new Date().getFullYear()} Ozigi. Made with care.
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
 export function buildPromotionalEmail(
   subject: string,
   headline: string,

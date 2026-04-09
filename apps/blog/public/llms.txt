@@ -7,11 +7,11 @@ Ozigi is an intelligent content engine that transforms raw thoughts and technica
 https://blog.ozigi.app
 
 ## Blog Sections (Concrete URLs)
-https://blog.ozigi.app/section/engineering
-https://blog.ozigi.app/section/marketing
-https://blog.ozigi.app/section/content
-https://blog.ozigi.app/section/tools-roundup
-https://blog.ozigi.app/section/ozigi-focus
+https://blog.ozigi.app/engineering
+https://blog.ozigi.app/marketing
+https://blog.ozigi.app/content
+https://blog.ozigi.app/tools-roundup
+https://blog.ozigi.app/ozigi-focus
 
 ### Section Descriptions
 - Engineering: Technical tutorials, architecture decisions, backend patterns

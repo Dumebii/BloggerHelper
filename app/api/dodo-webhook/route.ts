@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
-import { buildUpgradeWelcomeEmail } from '@/lib/email-templates';
+import { buildUpgradeWelcomeEmail, buildPaymentReceiptEmail } from '@/lib/email-templates';
 import { SendMailClient } from 'zeptomail';
 import nodemailer from 'nodemailer';
 
@@ -114,6 +114,133 @@ export async function POST(req: Request) {
       }
     }
 
+    // Map product IDs to billing periods
+    const productToBillingPeriod: Record<string, 'monthly' | 'yearly'> = {
+      'pdt_0Nb2mk6p1FU3JGdzuNUzt': 'monthly',     // team monthly
+      'pdt_0Nb2varb5A2JQeOENmlfH': 'yearly',      // team yearly
+      'pdt_0Nb2wrZKVoi4PDNwOMbbw': 'monthly',     // org monthly
+      'pdt_0Nb2ydRec1WCRdZdQS6QW': 'yearly',      // org yearly
+    };
+
+    // Helper to record payment and send receipt
+    async function recordPaymentAndSendReceipt(
+      userId: string,
+      paymentData: {
+        paymentId: string;
+        subscriptionId?: string;
+        plan: string;
+        amount: number;
+        currency: string;
+        productId?: string;
+      }
+    ) {
+      try {
+        const billingPeriod = paymentData.productId 
+          ? productToBillingPeriod[paymentData.productId] || 'monthly'
+          : 'monthly';
+
+        // Calculate next billing date
+        const paymentDate = new Date();
+        const nextBillingDate = new Date(paymentDate);
+        if (billingPeriod === 'yearly') {
+          nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
+        } else {
+          nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+        }
+
+        // Record payment in payment_history table
+        const { error: insertError } = await supabaseAdmin
+          .from('payment_history')
+          .upsert({
+            user_id: userId,
+            payment_id: paymentData.paymentId,
+            subscription_id: paymentData.subscriptionId,
+            plan: paymentData.plan,
+            amount: paymentData.amount,
+            currency: paymentData.currency || 'usd',
+            billing_period: billingPeriod,
+            status: 'succeeded',
+            payment_date: paymentDate.toISOString(),
+            next_billing_date: nextBillingDate.toISOString(),
+            receipt_email_sent: false,
+          }, {
+            onConflict: 'payment_id',
+          });
+
+        if (insertError) {
+          console.error('[Dodo Webhook] Failed to record payment:', insertError);
+          return;
+        }
+
+        console.log('[Dodo Webhook] Payment recorded:', paymentData.paymentId);
+
+        // Get user profile for receipt email
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('email, display_name')
+          .eq('id', userId)
+          .single();
+
+        if (!profile?.email) {
+          console.warn('[Dodo Webhook] No email for receipt:', userId);
+          return;
+        }
+
+        // Send receipt email
+        const receiptHtml = buildPaymentReceiptEmail({
+          userName: profile.display_name || profile.email?.split('@')[0],
+          plan: paymentData.plan,
+          amount: paymentData.amount,
+          currency: paymentData.currency || 'usd',
+          paymentId: paymentData.paymentId,
+          paymentDate,
+          billingPeriod,
+          nextBillingDate,
+        });
+
+        const subject = `Your Ozigi Receipt - ${new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: (paymentData.currency || 'usd').toUpperCase(),
+        }).format(paymentData.amount / 100)}`;
+
+        if (USE_SMTP) {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT),
+            secure: true,
+            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+          });
+          await transporter.sendMail({
+            from: '"Ozigi" <hello@ozigi.app>',
+            to: profile.email,
+            subject,
+            html: receiptHtml,
+          });
+        } else {
+          const mailClient = new SendMailClient({
+            url: ZEPTOMAIL_BASE_URL,
+            token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
+          });
+          await mailClient.sendMail({
+            from: { address: 'hello@ozigi.app', name: 'Ozigi' },
+            to: [{ email_address: { address: profile.email, name: profile.display_name || '' } }],
+            subject,
+            htmlbody: receiptHtml,
+          });
+        }
+
+        // Mark receipt as sent
+        await supabaseAdmin
+          .from('payment_history')
+          .update({ receipt_email_sent: true })
+          .eq('payment_id', paymentData.paymentId);
+
+        console.log('[Dodo Webhook] Receipt sent to', profile.email);
+      } catch (error) {
+        console.error('[Dodo Webhook] Failed to record/send receipt:', error);
+      }
+    }
+
     // Helper to upgrade user plan
     async function upgradePlan(userId: string, plan: string) {
       console.log('[Dodo Webhook] Upgrading user', userId, 'to plan:', plan);
@@ -143,14 +270,29 @@ export async function POST(req: Request) {
       return true;
     }
 
-    // Handle payment success (instant upgrade)
+    // Handle payment success (instant upgrade + receipt)
     if (event.type === 'payment.succeeded' || event.type === 'payment.completed') {
       const metadata = event.data?.metadata;
       const userId = metadata?.user_id;
       const planFromMetadata = metadata?.plan; // We pass this in create-checkout
+      const paymentId = event.data?.payment_id || event.data?.id || `pay_${Date.now()}`;
+      const subscriptionId = event.data?.subscription_id;
+      const amount = event.data?.amount || event.data?.total_amount || 0;
+      const currency = event.data?.currency || 'usd';
+      const productId = event.data?.product_id || metadata?.product_id;
 
       if (userId && planFromMetadata) {
         await upgradePlan(userId, planFromMetadata);
+        
+        // Record payment and send receipt
+        await recordPaymentAndSendReceipt(userId, {
+          paymentId,
+          subscriptionId,
+          plan: planFromMetadata,
+          amount,
+          currency,
+          productId,
+        });
       } else {
         console.warn('[Dodo Webhook] Payment succeeded but missing user_id or plan in metadata:', metadata);
       }

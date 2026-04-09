@@ -14,21 +14,21 @@ blog.ozigi.app/
 │   ├── ozigi-v2-changelog
 │   └── your-launch-post-got-4-likes
 │
-└── /blog/section/[section-slug]        (Section landing pages)
-    ├── engineering                      (2 articles)
-    │   ├── robust-webhook-handler-in-nodejs (NEW)
+└── /[section-slug]                     (Section landing pages - top level for SEO)
+    ├── /engineering                     (2 articles)
+    │   ├── robust-webhook-handler-in-nodejs
     │   └── gemini-2.5-vs-claude-3.7
-    ├── marketing                        (0 articles - coming soon)
-    ├── content                          (1 article)
+    ├── /marketing                       (0 articles - coming soon)
+    ├── /content                         (1 article)
     │   └── your-launch-post-got-4-likes
-    ├── tools-roundup                    (0 articles - coming soon)
-    └── ozigi-focus                      (1 article)
+    ├── /tools-roundup                   (0 articles - coming soon)
+    └── /ozigi-focus                     (1 article)
         └── ozigi-v2-changelog
 ```
 
 ## Five Blog Sections Explained
 
-### 1. Engineering (`/blog/section/engineering`)
+### 1. Engineering (`/engineering`)
 **Target Audience:** Backend developers, DevOps engineers, infrastructure teams
 
 **Article Types:**
@@ -49,7 +49,7 @@ blog.ozigi.app/
 
 ---
 
-### 2. Marketing (`/blog/section/marketing`)
+### 2. Marketing (`/marketing`)
 **Target Audience:** Growth marketers, product marketers, founders
 
 **Article Types:**
@@ -69,7 +69,7 @@ blog.ozigi.app/
 
 ---
 
-### 3. Content (`/blog/section/content`)
+### 3. Content (`/content`)
 **Target Audience:** Content creators, DevRel, technical writers, founders
 
 **Article Types:**
@@ -89,7 +89,7 @@ blog.ozigi.app/
 
 ---
 
-### 4. Tools Roundup (`/blog/section/tools-roundup`)
+### 4. Tools Roundup (`/tools-roundup`)
 **Target Audience:** Developers, product teams, technical decision-makers
 
 **Article Types:**
@@ -107,7 +107,7 @@ blog.ozigi.app/
 
 ---
 
-### 5. Ozigi Focus (`/blog/section/ozigi-focus`)
+### 5. Ozigi Focus (`/ozigi-focus`)
 **Target Audience:** Ozigi users, product enthusiasts, people interested in our journey
 
 **Article Types:**
@@ -170,9 +170,9 @@ blog.ozigi.app/
 │
 ├── app/
 │   ├── page.tsx                               (Blog home with section tabs)
+│   ├── [slug]/page.tsx                        (Section landing - top level)
 │   └── blog/
-│       ├── [slug]/page.tsx                    (Individual article)
-│       └── section/[slug]/page.tsx            ← NEW (Section landing)
+│       └── [slug]/page.tsx                    (Individual article)
 │
 └── lib/blog.ts                                (Updated with section support)
 ```
