@@ -409,7 +409,7 @@ export default function LongFormPage() {
                         </div>
                         <button
                           onClick={handleCopyAll}
-                          className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-brand-slate hover:text-white rounded-lg text-sm font-medium transition-colors"
                         >
                           <Copy className="w-4 h-4" />
                           Copy All
@@ -436,11 +436,11 @@ export default function LongFormPage() {
                           </h3>
                           <button
                             onClick={() => handleCopySection(index, `## ${section.heading}\n\n${section.content}`)}
-                            className="opacity-0 group-hover:opacity-100 flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-medium transition-all"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-brand-slate hover:text-white rounded-lg text-xs font-medium transition-colors"
                           >
                             {copiedSection === index ? (
                               <>
-                                <Check className="w-3 h-3 text-green-600" />
+                                <Check className="w-3 h-3 text-green-400" />
                                 Copied
                               </>
                             ) : (
