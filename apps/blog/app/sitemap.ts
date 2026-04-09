@@ -30,10 +30,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogPages: MetadataRoute.Sitemap = posts
     .filter((post) => post.date) // Filter out posts without dates
     .map((post) => {
-      const dateString = post.date + "T00:00:00Z";
-      const dateObj = new Date(dateString);
-      // Fallback to current date if parsing fails
-      const lastModified = isNaN(dateObj.getTime()) ? new Date() : dateObj;
+      // Ensure date string is properly formatted
+      let lastModified: Date;
+      try {
+        // Check if date already has time component
+        const dateString = post.date.includes('T') ? post.date : `${post.date}T00:00:00Z`;
+        const dateObj = new Date(dateString);
+        
+        // Validate the date is valid
+        if (isNaN(dateObj.getTime())) {
+          console.warn(`Invalid date for post ${post.slug}: ${post.date}, using current date`);
+          lastModified = new Date();
+        } else {
+          lastModified = dateObj;
+        }
+      } catch (error) {
+        console.warn(`Error parsing date for post ${post.slug}: ${post.date}, using current date`);
+        lastModified = new Date();
+      }
       
       return {
         url: `${baseUrl}/blog/${post.slug}`,

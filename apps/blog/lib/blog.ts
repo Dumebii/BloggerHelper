@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-const postsDirectory = path.join(__dirname, "..", "content", "blog");
+const postsDirectory = path.join(process.cwd(), "content", "blog");
 
 export interface Heading {
   text: string;
@@ -83,38 +83,66 @@ export function estimateReadTime(content: string, readSpeed: number = 200): stri
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
-  const files = fs.readdirSync(postsDirectory);
-  const posts = files.map((filename) => {
-    const slug = filename.replace(/\.mdx?$/, "");
-    const filePath = path.join(postsDirectory, filename);
-    const fileContent = fs.readFileSync(filePath, "utf-8");
-    const { data, content } = matter(fileContent);
+  // Check if directory exists
+  if (!fs.existsSync(postsDirectory)) {
+    console.error(`Blog posts directory not found: ${postsDirectory}`);
+    return [];
+  }
 
-    return {
-      slug,
-      title: data.title,
-      date: data.date,
-      excerpt: data.excerpt || data.description,
-      description: data.description || data.excerpt,
-      coverImage: data.coverImage || null,
-      author: data.author,
-      authorImage: data.authorImage || null,
-      authorBio: data.authorBio || null,
-      authorUrl: data.authorUrl || null,
-      authorHandle: data.authorHandle || null,
-      readTime: data.readTime,
-      categories: parseCategories(data),
-      section: data.section || null,
-      content,
-      headings: extractHeadings(content),
-      ...data,
-    };
-  });
+  const files = fs.readdirSync(postsDirectory);
+  const posts = files
+    .filter((filename) => filename.endsWith('.md') || filename.endsWith('.mdx'))
+    .map((filename) => {
+      try {
+        const slug = filename.replace(/\.mdx?$/, "");
+        const filePath = path.join(postsDirectory, filename);
+        const fileContent = fs.readFileSync(filePath, "utf-8");
+        const { data, content } = matter(fileContent);
+
+        // Validate required fields
+        if (!data.title) {
+          console.warn(`Post ${slug} is missing a title`);
+        }
+
+        return {
+          slug,
+          title: data.title || 'Untitled',
+          date: data.date || new Date().toISOString().split('T')[0],
+          excerpt: data.excerpt || data.description,
+          description: data.description || data.excerpt,
+          coverImage: data.coverImage || null,
+          author: data.author,
+          authorImage: data.authorImage || null,
+          authorBio: data.authorBio || null,
+          authorUrl: data.authorUrl || null,
+          authorHandle: data.authorHandle || null,
+          readTime: data.readTime,
+          categories: parseCategories(data),
+          section: data.section || null,
+          content,
+          headings: extractHeadings(content),
+          ...data,
+        };
+      } catch (error) {
+        console.error(`Error processing blog post ${filename}:`, error);
+        return null;
+      }
+    })
+    .filter((post): post is BlogPost => post !== null);
 
   return posts.sort((a, b) => {
-    const dateA = a.date ? new Date(a.date + "T00:00:00Z").getTime() : 0;
-    const dateB = b.date ? new Date(b.date + "T00:00:00Z").getTime() : 0;
-    return dateB - dateA;
+    try {
+      const dateStringA = a.date ? (a.date.includes('T') ? a.date : `${a.date}T00:00:00Z`) : null;
+      const dateStringB = b.date ? (b.date.includes('T') ? b.date : `${b.date}T00:00:00Z`) : null;
+      
+      const dateA = dateStringA ? new Date(dateStringA).getTime() : 0;
+      const dateB = dateStringB ? new Date(dateStringB).getTime() : 0;
+      
+      return dateB - dateA;
+    } catch (error) {
+      console.warn('Error sorting posts by date:', error);
+      return 0;
+    }
   });
 }
 

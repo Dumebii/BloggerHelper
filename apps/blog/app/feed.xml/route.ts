@@ -15,21 +15,32 @@ export async function GET() {
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <docs>https://www.rssboard.org/rss-specification</docs>
     <generator>Ozigi Blog RSS Generator</generator>
-    ${latestPosts.map(post => `
+    ${latestPosts.map(post => {
+      // Safely parse date
+      let pubDate: string;
+      try {
+        const dateString = post.date.includes('T') ? post.date : `${post.date}T00:00:00Z`;
+        pubDate = new Date(dateString).toUTCString();
+      } catch (error) {
+        pubDate = new Date().toUTCString();
+      }
+      
+      return `
     <item>
       <title>${escapeXml(post.title)}</title>
       <link>${baseUrl}/blog/${post.slug}</link>
       <guid isPermaLink="true">${baseUrl}/blog/${post.slug}</guid>
       <description>${escapeXml(post.description || post.excerpt || "")}</description>
       <content:encoded><![CDATA[${post.description || post.excerpt || ""}]]></content:encoded>
-      <pubDate>${new Date(post.date).toUTCString()}</pubDate>
+      <pubDate>${pubDate}</pubDate>
       <author>${post.author ? `${post.author}@ozigi.app` : "blog@ozigi.app"}</author>
       ${post.section ? `<category>${escapeXml(post.section)}</category>` : ""}
       ${post.keywords && post.keywords.length > 0 ? post.keywords.map((keyword: string) => `<category>${escapeXml(keyword)}</category>`).join("\n      ") : ""}
       ${post.coverImage ? `<media:content url="${escapeXml(post.coverImage)}" medium="image"><media:title>${escapeXml(post.title)}</media:title></media:content>` : ""}
       <source url="${baseUrl}/feed.xml">Ozigi Blog</source>
     </item>
-    `).join("")}
+    `;
+    }).join("")}
   </channel>
 </rss>`;
 
