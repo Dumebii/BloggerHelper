@@ -56,7 +56,7 @@ const LONG_FORM_ACCESS: Record<Plan, boolean> = {
 };
 
 export async function getPlanStatus(userId: string): Promise<PlanStatus> {
-  const ADMIN_EMAILS = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',') : [];
+  const ADMIN_EMAILS = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

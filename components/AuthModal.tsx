@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Provider } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { OAUTH_PROVIDERS, OAUTH_SCOPES } from "@/lib/platforms";
-import { X, Mail, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, Mail, ArrowRight, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 type AuthView = "signin" | "signup";
 
@@ -24,6 +24,7 @@ export default function AuthModal({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleOAuthSignIn = async (provider: Provider) => {
     setLoadingProvider(provider);
@@ -267,14 +268,24 @@ export default function AuthModal({
                   placeholder="Email address"
                   required
                 />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 text-sm transition-all"
-                  placeholder="Password"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-slate-50 rounded-xl px-4 py-3 pr-10 border border-slate-200 outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 text-sm transition-all"
+                    placeholder="Password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -318,15 +329,25 @@ export default function AuthModal({
                   placeholder="Email address"
                   required
                 />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 text-sm transition-all"
-                  placeholder="Password (min 6 characters)"
-                  required
-                  minLength={6}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-slate-50 rounded-xl px-4 py-3 pr-10 border border-slate-200 outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 text-sm transition-all"
+                    placeholder="Password (min 6 characters)"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 <button
                   type="submit"
                   disabled={isLoading}
