@@ -174,12 +174,48 @@ export async function POST(req: Request) {
     }
 
     // Parse the response
-    const parsed = parseLongFormResponse(responseText);
+    let parsed = parseLongFormResponse(responseText);
+
+    // If parsing failed and response seems incomplete, try to recover
+    if (!parsed && responseText.length > 1000) {
+      console.log("[LongForm] First parse failed, attempting JSON recovery...");
+      
+      // Try to close any unclosed JSON structures by adding closing braces
+      let recovered = responseText.trim();
+      
+      // Count open braces and brackets
+      let braceCount = 0;
+      let bracketCount = 0;
+      for (const char of recovered) {
+        if (char === '{') braceCount++;
+        if (char === '}') braceCount--;
+        if (char === '[') bracketCount++;
+        if (char === ']') bracketCount--;
+      }
+      
+      // Add missing closing characters
+      while (braceCount > 0) {
+        recovered += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        recovered += ']';
+        bracketCount--;
+      }
+      
+      parsed = parseLongFormResponse(recovered);
+      
+      if (parsed) {
+        console.log("[LongForm] JSON recovery successful!");
+      } else {
+        console.error("[LongForm] JSON recovery also failed");
+      }
+    }
 
     if (!parsed) {
       console.error('[LongForm] Failed to parse response:', responseText.substring(0, 500));
       return NextResponse.json(
-        { error: 'Failed to parse generated content. Please try again.' },
+        { error: 'Failed to parse generated content. The response may have been cut off. Try reducing the target length or simplifying the context.' },
         { status: 500 }
       );
     }

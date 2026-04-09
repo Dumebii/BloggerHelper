@@ -46,14 +46,14 @@ export async function savePersonaAndRedirect(
     // Check if user already has this persona saved
     const { data: existing } = await supabase
       .from("user_personas")
-      .select("uuid")
+      .select("id")
       .eq("user_id", userId)
       .eq("name", personaName)
       .maybeSingle();
 
     if (existing) {
       // Already saved, just return the ID
-      return { success: true, personaId: existing.uuid };
+      return { success: true, personaId: existing.id };
     }
 
     // Insert new persona
@@ -64,7 +64,7 @@ export async function savePersonaAndRedirect(
         name: personaName,
         prompt: personaPrompt,
       })
-      .select("uuid")
+      .select("id")
       .single();
 
     if (insertError) {
@@ -77,7 +77,7 @@ export async function savePersonaAndRedirect(
       window.dispatchEvent(new Event("refreshPersonas"));
     }
 
-    return { success: true, personaId: inserted.uuid };
+    return { success: true, personaId: inserted.id };
   } catch (error: any) {
     console.error("[Personas] Unexpected error:", error);
     return { success: false, error: error.message };

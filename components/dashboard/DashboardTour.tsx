@@ -82,6 +82,22 @@ const allSteps: TourStep[] = [
     position: "right",
   },
   {
+    target: "[data-tour='sidebar-long-form']",
+    title: "Long-Form Content",
+    description:
+      "Generate in-depth articles and blog posts (1,500-5,000 words) with AI. Perfect for thought leadership and detailed guides.",
+    position: "right",
+    optional: true,
+  },
+  {
+    target: "[data-tour='sidebar-email-lists']",
+    title: "Email Lists",
+    description:
+      "Manage your subscriber lists and segments. Build your audience and send targeted campaigns.",
+    position: "right",
+    optional: true,
+  },
+  {
     target: "[data-tour='sidebar-settings']",
     title: "Settings & Integrations",
     description:
