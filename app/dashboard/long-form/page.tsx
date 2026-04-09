@@ -569,7 +569,41 @@ export default function LongFormPage() {
     </div>
   );
 }
+                <button
+                  onClick={() => setActiveTab("input")}
+                  className={`px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-widest transition-colors ${
+                    activeTab === "input"
+                      ? "bg-brand-navy text-white"
+                      : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
+                >
+                  Input
+                </button>
+                <button
+                  onClick={() => setActiveTab("output")}
+                  disabled={!article}
+                  className={`px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-widest transition-colors disabled:opacity-50 ${
+                    activeTab === "output"
+                      ? "bg-brand-navy text-white"
+                      : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
+                >
+                  Output
+                </button>
+                <button
+                  onClick={() => setActiveTab("history")}
+                  className={`px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-widest transition-colors ${
+                    activeTab === "history"
+                      ? "bg-brand-navy text-white"
+                      : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
+                >
+                  History ({history.length})
+                </button>
+              </div>
 
+              {activeTab === "input" ? (
+                <div className="bg-white border-4 border-slate-200 rounded-2xl p-6 space-y-6">
                   {/* Context Input */}
                   <div>
                     <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">
