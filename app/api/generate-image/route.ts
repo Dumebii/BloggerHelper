@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     const client = await getVertexAIClient();
     const response = await client.models.generateContent({
-      model: 'gemini-3.1-flash-image',
+      model: 'gemini-2.5-flash-image',
       contents: `${prompt}\n\nNegative instructions: ${negativePrompt}`,
       config: {
         responseModalities: [Modality.IMAGE],
