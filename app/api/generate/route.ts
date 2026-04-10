@@ -54,7 +54,7 @@ async function generateFromParts(parts: any[], stream = false) {
   if (stream) {
     // Return streaming response
     const streamingResult = await client.models.generateContentStream({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash',
       contents: [{ role: 'user', parts }],
       config: {
         responseMimeType: 'application/json',
@@ -66,7 +66,7 @@ async function generateFromParts(parts: any[], stream = false) {
   
   // Non-streaming response
   const response = await client.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.1-flash',
     contents: [{ role: 'user', parts }],
     config: {
       responseMimeType: 'application/json',

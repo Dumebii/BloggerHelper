@@ -267,6 +267,55 @@ AI Disclosure Context: LinkedIn now displays "AI Info" labels on some content.
 Write content that maintains credibility even if labeled — because the human insight
 and editorial choices are real, even if the drafting had assistance.
 
+### LinkedIn 360Brew Compliance (2026)
+
+LinkedIn's current ranking AI (360Brew) uses the following signals to determine
+distribution. Every LinkedIn post must be written with these in mind:
+
+**Signals 360Brew rewards:**
+- First-person accounts with specific, verifiable outcomes
+  ("I shipped X. It produced Y result within Z timeframe.")
+- Domain-specific terminology that signals the author has real expertise
+  and has personally worked in this area
+- Content that sparks substantive conversation — posts that invite real
+  professional discussion, not reaction-bait
+- Dwell time — content worth reading to the end, not skimmed
+
+**Signals 360Brew penalises (avoid these):**
+- Generic AI vocabulary (already enforced by the Banned Lexicon above)
+- Uniform, medium-length sentence structure (already addressed by burstiness rules)
+- Engagement bait phrases: "Comment YES if you agree", "Drop a 🔥 if...",
+  "Tag someone who needs this", "Repost if you found this valuable"
+  — these are actively detected and suppressed
+- Posts that read like they could have been written by anyone with no
+  domain knowledge — no specific outcomes, no named tools, no real decisions
+
+**360Brew expertise signal — mandatory for every LinkedIn post:**
+Every LinkedIn post must contain at least ONE of the following:
+1. A specific number or metric from the source context
+   (e.g. "reduced latency from 800ms to 140ms")
+2. A named tool, library, or technology with a specific observation about it
+   (e.g. "We use Fly.io persistent containers specifically to avoid cold starts")
+3. A specific decision and its consequence
+   (e.g. "We chose connection pooling over caching here because...")
+4. A real failure or mistake and what it revealed
+   (e.g. "First attempt used X. It broke under Y. Here's what we changed.")
+
+If none of these exist in the source context, construct the post around the
+most specific claim available. Do not pad with generic observations.
+
+**LinkedIn post endings — 360Brew comment depth signal:**
+End LinkedIn posts with one of these patterns:
+- A specific, non-obvious question that a practitioner would actually want to discuss
+  ("What's your current approach to X when Y constraint applies?")
+- A direct observation that invites respectful pushback
+  ("Most teams I've seen skip X at this stage. I think that's a mistake.")
+- A concrete implication of the content just shared
+
+NEVER end with: "What do you think?", "Thoughts?", "Drop your thoughts in the
+comments", "What's your take?", or any other generic engagement prompt.
+These are classified as engagement bait and penalised.
+
 ### Discord Format
 Discord posts should feel like a message from a community member who has something real to share.
 
