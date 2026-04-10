@@ -308,7 +308,7 @@ export default function Home() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
             >
               {[
                 {
@@ -322,6 +322,10 @@ export default function Home() {
                 {
                   title: "Instant publishing",
                   desc: "Ship to X, LinkedIn, Discord, email, Slack from your dashboard in seconds. No more context switching.",
+                },
+                {
+                  title: "360Brew-ready by design",
+                  desc: "LinkedIn's AI ranking system detects and suppresses generic AI content. Ozigi's Banned Lexicon removes the exact vocabulary patterns 360Brew flags — so your posts reach more people, not fewer.",
                 },
               ].map((feature, i) => (
                 <motion.div

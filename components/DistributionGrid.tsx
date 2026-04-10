@@ -12,6 +12,102 @@ import { PLATFORMS, getApiEndpoint } from "@/lib/platforms";
 import { uploadLargeAsset } from "@/lib/utils";
 import { ImagePlus, X } from "lucide-react";
 
+// ─── LinkedIn Engagement Nudge ────────────────────────────────────────────────
+function LinkedInEngagementNudge({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 flex items-start gap-4">
+      <div className="w-8 h-8 rounded-lg bg-[#0A66C2] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z" />
+          <circle cx="4" cy="4" r="2" />
+        </svg>
+      </div>
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-blue-900 mb-1">
+          Post is live — now engage for the next 60 minutes
+        </p>
+        <p className="text-xs text-blue-700 leading-relaxed">
+          {"LinkedIn's 360Brew algorithm uses early engagement to decide how widely to distribute your post. Reply to every comment, respond to reactions, and stay active in the thread. Posts where the author goes quiet after publishing are deprioritised automatically."}
+        </p>
+      </div>
+      <button
+        onClick={onDismiss}
+        className="text-blue-400 hover:text-blue-600 transition-colors flex-shrink-0 mt-0.5"
+        aria-label="Dismiss"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+// ─── LinkedIn Tips Modal ──────────────────────────────────────────────────────
+function LinkedInTipsModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-start mb-5">
+          <h2 className="text-base font-black uppercase tracking-tighter text-slate-900">
+            Getting the most out of LinkedIn in 2026
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition-colors ml-4 flex-shrink-0"
+            aria-label="Close"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="space-y-5 text-sm">
+          <div>
+            <p className="font-semibold text-slate-900 mb-1.5">Post natively when possible</p>
+            <p className="text-slate-600 leading-relaxed">
+              {"LinkedIn's 360Brew algorithm gives a small preference to content posted directly from LinkedIn.com. If reach matters, copy your post and paste it manually rather than using the OAuth publish button. The trade-off: native posting takes a few extra seconds."}
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 mb-1.5">Stay active for 60 minutes after posting</p>
+            <p className="text-slate-600 leading-relaxed">
+              {"360Brew watches whether the author engages after posting. Reply to every comment, respond to reactions, and don't disappear. The first hour determines how widely your post gets distributed."}
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 mb-1.5">Keep links out of the post body</p>
+            <p className="text-slate-600 leading-relaxed">
+              External links in a post body reduce reach by roughly 60%. If you need to share a link, put it in the first comment after posting. Even first-comment links carry a small penalty, but it&apos;s significantly lower than an in-post link.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 mb-1.5">The post ending matters more than you think</p>
+            <p className="text-slate-600 leading-relaxed">
+              Ozigi ends LinkedIn posts with a specific, practitioner-level question rather than a generic &quot;What do you think?&quot; 360Brew penalises engagement bait. A specific question gets fewer but higher-quality replies — and those replies carry more weight with the algorithm.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 mb-1.5">Best performing formats in 2026</p>
+            <p className="text-slate-600 leading-relaxed">
+              PDF carousels (document posts) are currently the highest-engagement format on LinkedIn. Text-only posts outperform single-image posts. If you have a set of related points, consider creating a carousel rather than a text post — each page-swipe counts as engagement and increases dwell time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Add the missing interface
 interface DistributionGridProps {
   campaign?: CampaignDay[];
@@ -73,6 +169,9 @@ function SocialCard({
   imagesGeneratedCount,
   incrementImageCount,
   planStatus,
+  showNudge,
+  onDismissNudge,
+  onOpenTips,
 }: {
   day: number;
   platformName: string;
@@ -90,6 +189,9 @@ function SocialCard({
   imagesGeneratedCount: number;
   incrementImageCount: () => void;
   planStatus: any;
+  showNudge?: boolean;
+  onDismissNudge?: () => void;
+  onOpenTips?: () => void;
 }) {
   const [text, setText] = useState(initialText);
   const [isEditing, setIsEditing] = useState(false);
@@ -380,6 +482,26 @@ function SocialCard({
         </button>
       )}
 
+      {onOpenTips && (
+        <div className="mt-2 flex justify-end">
+          <button
+            onClick={onOpenTips}
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            LinkedIn tips
+          </button>
+        </div>
+      )}
+
+      {showNudge && onDismissNudge && (
+        <LinkedInEngagementNudge onDismiss={onDismissNudge} />
+      )}
+
       {isScheduleModalOpen && (
         <ScheduleModal
           isOpen={isScheduleModalOpen}
@@ -410,6 +532,8 @@ export default function DistributionGrid({
   const [discordStatuses, setDiscordStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
   const [liStatuses, setLiStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
   const [slackStatuses, setSlackStatuses] = useState<{ [day: number]: "idle" | "loading" | "success" | "error" }>({});
+  const [liNudgeVisible, setLiNudgeVisible] = useState<{ [day: number]: boolean }>({});
+  const [showLinkedInTips, setShowLinkedInTips] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -521,6 +645,7 @@ export default function DistributionGrid({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to post to LinkedIn");
       setLiStatuses((prev) => ({ ...prev, [day]: "success" }));
+      setLiNudgeVisible((prev) => ({ ...prev, [day]: true }));
       setTimeout(() => setLiStatuses((prev) => ({ ...prev, [day]: "idle" })), 3000);
       toast.success("Posted to LinkedIn!");
     } catch (error: any) {
@@ -650,12 +775,15 @@ export default function DistributionGrid({
                   onPost={handlePostToLinkedIn}
                   postStatus={liStatuses[dayData.day]}
                   actionButtonConfig={{
-                    idle: "💼 Post to LinkedIn",
+                    idle: "Post to LinkedIn",
                     loading: "Posting...",
-                    success: "✅ Published!",
+                    success: "Published!",
                     classes: "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95",
                   }}
                   onStatsChange={onStatsChange}
+                  showNudge={liNudgeVisible[dayData.day] ?? false}
+                  onDismissNudge={() => setLiNudgeVisible((prev) => ({ ...prev, [dayData.day]: false }))}
+                  onOpenTips={() => setShowLinkedInTips(true)}
                 />
               )
             )}
@@ -845,6 +973,10 @@ export default function DistributionGrid({
             handleEmailSchedule(isoString, emailImageUrl || undefined);
           }}
         />
+      )}
+
+      {showLinkedInTips && (
+        <LinkedInTipsModal onClose={() => setShowLinkedInTips(false)} />
       )}
     </div>
   );
