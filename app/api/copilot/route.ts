@@ -111,7 +111,7 @@ export async function POST(req: Request) {
     // 6. Use the new GenAI client for streaming
     const client = await getVertexAIClient();
     const streamingResponse = await client.models.generateContentStream({
-      model: 'gemini-3-flash',
+      model: 'gemini-3-flash-preview',
       contents,
     });
 

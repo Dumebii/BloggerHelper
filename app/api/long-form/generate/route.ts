@@ -149,7 +149,7 @@ export async function POST(req: Request) {
     const client = await getVertexAIClient();
     
     const response = await client.models.generateContent({
-      model: 'gemini-3-flash',
+      model: 'gemini-3-flash-preview',
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: {
         temperature: 0.7,
