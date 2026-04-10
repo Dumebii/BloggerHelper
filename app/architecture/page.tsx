@@ -60,7 +60,7 @@ export default function Architecture() {
 
   // --- CHART CONFIGURATIONS ---
   const latencyData = {
-    labels: ["Gemini 3.1 Flash", "Claude Sonnet 4"],
+    labels: ["Gemini 3 Flash", "Claude Sonnet 4"],
     datasets: [
       {
         label: "Avg Response Time (Seconds)",
@@ -74,7 +74,7 @@ export default function Architecture() {
   };
 
   const costData = {
-    labels: ["Gemini 3.1 Flash", "Claude Sonnet 4"],
+    labels: ["Gemini 3 Flash", "Claude Sonnet 4"],
     datasets: [
       {
         label: "Cost Index (Proxy)",
@@ -100,7 +100,7 @@ export default function Architecture() {
 
   const toneData = {
     labels: [
-      lexiconActive ? "Gemini 3.1 Flash (+ Lexicon)" : "Gemini 3.1 Flash (Base)",
+      lexiconActive ? "Gemini 3 Flash (+ Lexicon)" : "Gemini 3 Flash (Base)",
       "Claude Sonnet 4 (Base)",
     ],
     datasets: [
@@ -169,7 +169,7 @@ export default function Architecture() {
             </div>
             <div className="flex gap-3">
               <span className="px-4 py-1.5 bg-blue-100 text-blue-800 text-xs font-black rounded-full border border-blue-200 uppercase tracking-widest">
-                Selected: Gemini 3.1
+                Selected: Gemini 3 Flash
               </span>
               <span className="px-4 py-1.5 bg-orange-50 text-orange-800 text-xs font-black rounded-full border border-orange-200 uppercase tracking-widest">
                 Evaluated: Claude Sonnet 4
@@ -217,7 +217,7 @@ export default function Architecture() {
                 This document outlines the overarching philosophy of the Ozigi architecture. The goal is to provide context on why the industry-favorite LLM for copywriting was bypassed in favor of a faster, more strictly constrained engine.
               </p>
               <p className="text-slate-600 leading-relaxed mb-10">
-                While Anthropic&apos;s Claude Sonnet 4 is widely considered the industry favorite for natural-sounding copy, the Ozigi Context Engine intentionally utilizes Google&apos;s <strong>Gemini 3.1 Flash</strong> via Vertex AI. This dashboard breaks down the four critical architectural reasons driving this decision.
+                While Anthropic&apos;s Claude Sonnet 4 is widely considered the industry favorite for natural-sounding copy, the Ozigi Context Engine intentionally utilizes Google&apos;s <strong>Gemini 3 Flash</strong> via Vertex AI. This dashboard breaks down the four critical architectural reasons driving this decision.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -282,7 +282,7 @@ export default function Architecture() {
                   Target: Sub-8 Seconds
                 </p>
                 <div className="h-64 relative w-full">
-                  <p className="sr-only">Bar chart showing Gemini 3.1 Flash at 6.2 seconds and Claude Sonnet 4 at 21.5 seconds average latency.</p>
+                  <p className="sr-only">Bar chart showing Gemini 3 Flash at 6.2 seconds and Claude Sonnet 4 at 21.5 seconds average latency.</p>
                   <Bar data={latencyData} options={barOptions} />
                 </div>
                 <div className="mt-6 text-xs text-slate-500 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -298,7 +298,7 @@ export default function Architecture() {
                   Cost per 1M Input Tokens
                 </p>
                 <div className="h-64 relative w-full">
-                  <p className="sr-only">Bar chart showing Claude Sonnet 4 costs approximately 20 times more per 1M input tokens compared to Gemini 3.1 Flash.</p>
+                  <p className="sr-only">Bar chart showing Claude Sonnet 4 costs approximately 20 times more per 1M input tokens compared to Gemini 3 Flash.</p>
                   <Bar data={costData} options={barOptions} />
                 </div>
                 <div className="mt-6 text-xs text-slate-500 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -522,7 +522,7 @@ export default function Architecture() {
                   Human Cadence Quality Score (1-10)
                 </h3>
                 <div className="h-64 relative w-full">
-                  <p className="sr-only">Bar chart comparing Quality Scores. Gemini 3.1 Flash with Banned Lexicon scores 9.2, Claude Sonnet 4 scores 9.5, and base Gemini 3.1 Flash scores 5.5.</p>
+                  <p className="sr-only">Bar chart comparing Quality Scores. Gemini 3 Flash with Banned Lexicon scores 9.2, Claude Sonnet 4 scores 9.5, and base Gemini 3 Flash scores 5.5.</p>
                   <Bar data={toneData} options={toneOptions} />
                 </div>
                 <div className="mt-6 text-xs text-slate-500 bg-slate-50 p-4 rounded-xl border border-slate-100">
