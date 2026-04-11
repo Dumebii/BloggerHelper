@@ -482,14 +482,13 @@ function LinkedInCarouselBuilder({
         {(status === "ready" || status === "published") && (
           <button
             onClick={handlePublish}
-            disabled={status === "publishing" || status === "published"}
+            disabled={status === "published"}
             className={`w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${
               status === "published"
                 ? "bg-green-100 text-green-700 border border-green-200"
                 : "bg-[#0A66C2] text-white hover:bg-[#004182] active:scale-95"
             }`}
           >
-            {status === "publishing" && "Publishing Carousel..."}
             {status === "published" && "Carousel Published!"}
             {status === "ready" && "Publish Carousel to LinkedIn"}
           </button>
