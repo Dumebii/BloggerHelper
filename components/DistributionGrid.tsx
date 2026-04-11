@@ -515,6 +515,7 @@ function SocialCard({
   showNudge,
   onDismissNudge,
   onOpenTips,
+  showCarouselOption,
 }: {
   day: number;
   platformName: string;
