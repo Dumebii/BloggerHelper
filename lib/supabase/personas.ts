@@ -18,7 +18,7 @@ export async function getMarketplacePersonas(): Promise<MarketplacePersona[]> {
     .select("*");
 
   if (error) {
-    console.error("[Personas] Error fetching marketplace personas:", error);
+    console.error("[Personas] Error fetching marketplace personas:", error.message, error.code, error.details);
     return [];
   }
 

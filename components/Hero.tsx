@@ -168,7 +168,7 @@ export default function Hero() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
               <span className="text-xs font-bold uppercase tracking-widest text-slate-700">
-                AI that learns your voice
+                AI that speaks your voice
               </span>
             </div>
 

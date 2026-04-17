@@ -17,10 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ozigi — Automated Content Generator for Creators",
-  description: "Automate social media content generation without sounding like an AI bot. Drop in raw notes, a PDF, or a URL. Ozigi generates content for X, LinkedIn, Slack and Discord in your voice. Free to try.",
+  title: "Ozigi — AI Content Generator That Sounds Human",
+  description: "Create social media content without sounding like ChatGPT wrote it. Drop in raw notes, a PDF, or a URL. Ozigi generates content for X, LinkedIn, Slack and Discord in your voice. Free to try.",
   keywords: [
     "AI content that doesn't sound like AI",
+    "AI Content Generator that sounds human",
+    "Best AI Tool For Producing Human-Sounding Content",
+    "Human-Sounding AI Content",
     "Best Social Marketing Tool",
     "Using AI in marketing",
     "AI content generator",
@@ -37,7 +40,7 @@ export const metadata: Metadata = {
     "turn notes into social media posts",
   ],
   openGraph: {
-    title: "Ozigi — Automated Content Generator for Technical Creators",
+    title: "Ozigi — AI Content Generator That Sounds Human",
     description: "Drop in raw notes, a PDF, or a URL. Get generated content or posts for X, LinkedIn, Slack and Discord in your voice — not AI's.",
     url: "https://ozigi.app",
     siteName: "Ozigi",
@@ -53,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ozigi — Automated Content Generator for Technical Creators",
+    title: "Ozigi — AI Content Generator That Sounds Human",
     description: "Drop in raw notes, a PDF, or a URL. Get content or posts for X, LinkedIn, Slack and Discord in your voice — not AI's.",
     images: ["https://ozigi.app/opengraph-image.png"],
     creator: "@DumebiTheWriter",
@@ -96,6 +99,7 @@ export default function RootLayout({
           {children}
         </ErrorBoundary>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

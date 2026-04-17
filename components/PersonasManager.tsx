@@ -84,7 +84,7 @@ export default function PersonasManager({ session }: PersonasManagerProps) {
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full bg-slate-950 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
+              className="w-full bg-slate-250 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
               placeholder="e.g., Expert DevRel"
             />
           </div>
@@ -94,7 +94,7 @@ export default function PersonasManager({ session }: PersonasManagerProps) {
               value={newPrompt}
               onChange={(e) => setNewPrompt(e.target.value)}
               rows={4}
-              className="w-full bg-slate-950 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
+              className="w-full bg-slate-250 rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium"
               placeholder="You are a developer educator who hates corporate buzzwords..."
             />
           </div>

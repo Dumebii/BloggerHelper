@@ -20,6 +20,8 @@ import { getMarketplacePersonas, savePersonaAndRedirect, type MarketplacePersona
 
 // Persona card icons - simple colored backgrounds
 const PERSONA_COLORS: Record<string, string> = {
+  // Technical personas
+  "Ozigi Founder": "bg-red-600",
   "Battle-Tested Engineer": "bg-orange-500",
   "DevRel Champion": "bg-blue-500",
   "Technical Founder": "bg-purple-500",
@@ -28,6 +30,12 @@ const PERSONA_COLORS: Record<string, string> = {
   "Technical Writer": "bg-teal-500",
   "Community Builder": "bg-pink-500",
   "Product Mapper": "bg-amber-500",
+  // Non-technical personas
+  "Brand & Marketing Manager": "bg-rose-500",
+  "Content Creator": "bg-violet-500",
+  "Small Business Owner": "bg-emerald-500",
+  "Career Coach": "bg-sky-500",
+  "Non-Profit & Social Impact Leader": "bg-orange-600",
 };
 
 export default function PersonaMarketplacePage() {
