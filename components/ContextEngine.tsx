@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Paperclip, ChevronDown, ArrowLeftRight, X } from "lucide-react";
@@ -14,6 +13,7 @@ interface DistilleryProps {
   session?: any;
   userPersonas?: { id: string; name: string; prompt?: string }[];
   onOpenSettings?: () => void;
+  onOpenPersonas?: () => void;
   inputs: {
     url: string;
     text: string;
@@ -34,12 +34,12 @@ export default function Distillery({
   session,
   userPersonas = [],
   onOpenSettings,
+  onOpenPersonas,
   inputs,
   setInputs,
   onGenerate,
   loading,
 }: DistilleryProps) {
-  const router = useRouter();
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
   const [personaPopoverOpen, setPersonaPopoverOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -99,11 +99,12 @@ export default function Distillery({
 
   const handlePersonaSelect = (personaId: string) => {
     if (personaId === "create_new") {
-      router.push("/dashboard/personas");
+      setPersonaPopoverOpen(false);
+      onOpenPersonas?.();
     } else {
       setInputs({ ...inputs, personaId });
+      setPersonaPopoverOpen(false);
     }
-    setPersonaPopoverOpen(false);
   };
 
   // Get selected persona name for display

@@ -135,7 +135,7 @@ export async function POST(req: Request) {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
-              "LinkedIn-Version": "20250101",
+              "LinkedIn-Version": "202501",
               "X-Restli-Protocol-Version": "2.0.0",
             },
             body: JSON.stringify({
@@ -265,7 +265,7 @@ export async function POST(req: Request) {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "20250101",
+            "LinkedIn-Version": "202501",
           },
           body: JSON.stringify(restPostPayload),
         });
@@ -301,7 +301,7 @@ export async function POST(req: Request) {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "20250101",
+            "LinkedIn-Version": "202501",
           },
           body: JSON.stringify(ugcPostPayload),
         });

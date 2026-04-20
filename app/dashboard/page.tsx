@@ -430,6 +430,7 @@ useEffect(() => {
                   window.dispatchEvent(new Event("openSettingsModal"));
                   setIsSettingsOpen(true);
                 }}
+                onOpenPersonas={() => setIsPersonasOpen(true)}
                 onGenerate={handleGenerate}
               />
             )}
