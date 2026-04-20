@@ -68,7 +68,8 @@ export default function Distillery({
     setInputs({ ...inputs, files: [...inputs.files, ...newFiles] });
     setIsUploading(true);
     try {
-      const uploadPromises = newFiles.map(file => uploadLargeAsset(file));
+      const authToken = session?.access_token;
+      const uploadPromises = newFiles.map(file => uploadLargeAsset(file, authToken));
       const newUrls = await Promise.all(uploadPromises);
       setInputs((prev: any) => ({ 
         ...prev, 

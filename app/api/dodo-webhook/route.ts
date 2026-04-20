@@ -18,7 +18,13 @@ export async function POST(req: Request) {
       .update(rawBody)
       .digest('hex');
 
-    if (signature !== expectedSignature) {
+    const signaturesMatch =
+      signature !== null &&
+      crypto.timingSafeEqual(
+        Buffer.from(signature),
+        Buffer.from(expectedSignature)
+      );
+    if (!signaturesMatch) {
       console.error('[Dodo Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }

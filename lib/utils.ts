@@ -1,9 +1,12 @@
-export const uploadLargeAsset = async (file: File): Promise<string> => {
+export const uploadLargeAsset = async (file: File, authToken?: string): Promise<string> => {
   const safeContentType = file.type || 'application/octet-stream';
 
   const presignedRes = await fetch('/api/upload/presigned', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    },
     body: JSON.stringify({ filename: file.name, contentType: safeContentType }),
   });
 

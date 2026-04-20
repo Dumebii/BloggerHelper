@@ -12,8 +12,6 @@ import { getVertexAIClient } from '@/lib/genai-client';
 import { getComposioConnection } from '@/lib/composio';
 import { extractYouTubeId, getYouTubeTranscript } from '@/lib/youtube';
 
-console.log('🔑 ANON_KEY starts with:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10));
-console.log('Service role key starts with:', process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 10));
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,

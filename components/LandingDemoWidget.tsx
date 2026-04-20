@@ -35,16 +35,16 @@ export function LandingDemoWidget() {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12)] ring-1 ring-slate-900/5">
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Paste a URL, drop meeting notes, or type a rough idea..."
-        rows={4}
+        rows={5}
         className="w-full text-sm text-slate-800 placeholder:text-slate-400
-                   bg-slate-50 border border-slate-200 rounded-xl px-4 py-3
+                   bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5
                    resize-none focus:outline-none focus:border-[#E8320A]/50
-                   transition-colors"
+                   focus:ring-2 focus:ring-[#E8320A]/10 transition-all"
       />
 
       {/* Sample pills */}

@@ -10,6 +10,7 @@ import AuthModal from "../components/AuthModal";
 import PricingCards from "../components/PricingCards";
 import BeforeAfterSlider from "../components/BeforeAfterSlider";
 import { LandingDemoWidget } from "../components/LandingDemoWidget";
+import SocialProof from "../components/SocialProof";
 import { supabase } from "@/lib/supabase/client";
 
 const fadeUp: Variants = {
@@ -49,16 +50,25 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
 
-        {/* ── Inline demo widget ──────────────────────────────────── */}
-        <section className="py-12 px-6">
-          <div className="max-w-2xl mx-auto">
-            <p className="text-center text-xs font-black uppercase tracking-widest
-                          text-slate-400 mb-6">
-              See it in your voice — right now
-            </p>
+        {/* ── Demo widget ──────────────────────────────────────────── */}
+        <section className="bg-white border-y border-slate-200 py-16 px-6">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                Try it now — free
+              </p>
+              <h2 className="text-3xl md:text-4xl font-black text-brand-navy tracking-tight">
+                See what human sounds like
+              </h2>
+              <p className="text-slate-500 font-medium mt-2 text-base">
+                Paste a URL, drop some notes, or type a rough idea. Done in 20 seconds.
+              </p>
+            </div>
             <LandingDemoWidget />
           </div>
         </section>
+
+        <SocialProof />
 
         {/* How It Works */}
         <section className="py-20 md:py-28 bg-gradient-to-b from-white to-brand-offwhite border-b border-slate-200/20 relative overflow-hidden">

@@ -44,7 +44,10 @@ console.log("Auth callback called, code present:", !!code);
       
       fetch(`${origin}/api/send-welcome`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-internal-secret': process.env.CRON_SECRET ?? '',
+        },
         body: JSON.stringify({ email: userEmail, name: userName }),
       }).catch(err => console.error('Welcome email fetch error:', err))
 
