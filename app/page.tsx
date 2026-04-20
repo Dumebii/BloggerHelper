@@ -76,7 +76,7 @@ export default function Home() {
                 From chaos to clarity
               </h2>
               <p className="text-slate-500 font-medium text-lg">
-                Your voice. Your insights. Polished and ready.
+                Your voice. Your ideas. Zero AI aftertaste.
               </p>
             </motion.div>
 
@@ -96,12 +96,12 @@ export default function Home() {
                 {
                   number: 2,
                   title: "Your voice applies",
-                  desc: "Set your persona once. Technical depth, tone, pacing, banned phrases—the engine locks in your style and enforces it perfectly every time.",
+                  desc: "Set your persona once. Technical depth, tone, pacing, banned AI phrases — the engine locks in your style so every post sounds like you wrote it at your most articulate.",
                 },
                 {
                   number: 3,
                   title: "Ship everywhere",
-                  desc: "Post to X, LinkedIn, Discord, email, or Slack directly. One click. Your content reaches your audience sounding exactly like you.",
+                  desc: "Post to X, LinkedIn, Discord, email, or Slack directly. One click. Your audience gets content that sounds human — because it is.",
                 },
               ].map((step, idx) => (
                 <motion.div
@@ -244,7 +244,7 @@ export default function Home() {
                 Works for your world
               </h2>
               <p className="text-slate-500 font-medium text-lg">
-                From technical founders to digital creators.
+                Every audience can tell when content sounds fake. Yours won't.
               </p>
             </motion.div>
 
@@ -258,19 +258,19 @@ export default function Home() {
               {[
                 {
                   title: "Developers & DevRel",
-                  desc: "Turn messy API docs or release notes into polished X threads that actually engage developers. Keep the rigor, lose the jargon.",
+                  desc: "Turn messy API docs or release notes into X threads and LinkedIn posts that read like a real engineer wrote them — not a marketing bot. Keep the rigor. Lose the AI smell.",
                 },
                 {
                   title: "Founders & Leaders",
-                  desc: "Take rough notes from a fundraising call or product meeting and generate thought leadership posts that move the needle on your go-to-market.",
+                  desc: "Take rough notes from a fundraising call or product meeting and get thought leadership posts that sound like you at your most articulate — not like you outsourced your voice to a chatbot.",
                 },
                 {
                   title: "Educators & Trainers",
-                  desc: "Upload your course slides or workshop deck. Ozigi pulls the core lessons and builds a multi-week campaign around them.",
+                  desc: "Upload your course slides or workshop deck. Ozigi pulls the core lessons and builds a multi-week content campaign that reads like you, not like a lesson plan generated on autopilot.",
                 },
                 {
                   title: "Creators & Writers",
-                  desc: "Publish a podcast, drop a video, or post a newsletter. Ozigi reads it and generates hooks and follow-ups that sound like you.",
+                  desc: "Drop a podcast, video, or newsletter. Ozigi extracts the ideas and generates hooks and follow-ups in your voice — the kind your audience recognises as yours, not AI's.",
                 },
               ].map((useCase, idx) => (
                 <motion.div
@@ -308,10 +308,10 @@ export default function Home() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-brand-navy">
-                Built for speed, styled for authenticity
+                Everything built to sound human
               </h2>
               <p className="text-slate-500 font-medium mt-4 max-w-2xl mx-auto">
-                Skip the blank page. Skip the awkward AI language. Just ship.
+                Skip the blank page. Skip the ChatGPT voice. Ship content that sounds like it came from a person — because it did.
               </p>
             </motion.div>
 
@@ -329,15 +329,15 @@ export default function Home() {
                 },
                 {
                   title: "Your voice locked in",
-                  desc: "Define your persona once. Tone, depth, banned words, style—the engine enforces it flawlessly.",
+                  desc: "Define your persona once. Tone, depth, banned AI phrases, sentence rhythm — the engine enforces it on every post so nothing slips into generic AI-speak.",
                 },
                 {
                   title: "Instant publishing",
-                  desc: "Ship to X, LinkedIn, Discord, email, Slack from your dashboard in seconds. No more context switching.",
+                  desc: "Ship to X, LinkedIn, Discord, email, Slack from your dashboard in seconds. No more context switching, no more copy-pasting AI slop.",
                 },
                 {
-                  title: "360Brew-ready by design",
-                  desc: "LinkedIn's AI ranking system detects and suppresses generic AI content. Ozigi's Banned Lexicon removes the exact vocabulary patterns 360Brew flags — so your posts reach more people, not fewer.",
+                  title: "Bypasses AI detection",
+                  desc: "LinkedIn's 360Brew system detects and suppresses generic AI content. Ozigi's Banned Lexicon strips the exact vocabulary patterns it flags — so your posts reach more people, not fewer.",
                 },
               ].map((feature, i) => (
                 <motion.div
@@ -365,7 +365,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-brand-navy">
-                No surprises. Just results.
+                No surprises. No AI voice. Just results.
               </h2>
               <p className="text-slate-500 font-medium mt-4">Try free forever. Scale when you ship.</p>
             </div>

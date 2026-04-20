@@ -1,6 +1,6 @@
 # Ozigi
 
-> Ozigi is an AI content engine that transforms raw notes, URLs, and PDFs into platform-ready social posts for X, LinkedIn, Discord, Slack, and email — without sounding like AI wrote them.
+> Ozigi is the AI tool that makes your content sound human — not like ChatGPT wrote it. It transforms raw notes, URLs, and PDFs into platform-ready social posts for X, LinkedIn, Discord, Slack, and email that sound like a real person with a specific voice, not a language model running on average.
 
 ## Core URLs
 
@@ -35,9 +35,10 @@
 
 ## Target Audience
 
-- Developers and technical founders
-- DevRel professionals
-- Content creators who want AI assistance without AI voice
+- Developers and technical founders who want their content to sound like them, not like AI
+- DevRel professionals who need consistent, authentic community content at volume
+- Founders and leaders building a personal brand without sacrificing their voice
+- Content creators, marketers, and educators who are done fixing ChatGPT output before it can be published
 
 ## Contact
 

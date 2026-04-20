@@ -21,7 +21,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm text-slate-500 leading-relaxed max-w-xs">
-              An Automated Content Engine built to close the gap between raw context and content, in your voice.
+              The AI that makes your content sound like you — not like ChatGPT. Drop in raw notes, links, or PDFs and get platform-ready posts that actually sound human.
             </p>
           </div>
 

@@ -376,10 +376,10 @@ export default function WritePage() {
           className="max-w-3xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-4xl font-black italic text-brand-navy uppercase tracking-tighter mb-6">
-            Use Ozigi to write better social media content
+            Write content that sounds like you, not like AI
           </h2>
           <p className="text-lg text-slate-700 mb-8">
-            Many of our best contributors use Ozigi to draft, refine, and perfect their social media content copy. Transform your rough ideas into polished, authentic pieces that sound like you.
+            Many of our contributors use Ozigi to turn rough ideas into polished social posts before amplifying their articles. Drop in your draft, your notes, or a link to your piece — Ozigi generates platform-ready content that sounds like you wrote it, not like you asked a chatbot.
           </p>
           <Link
             href="https://ozigi.app/dashboard"

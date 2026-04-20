@@ -1,6 +1,6 @@
-# ⚡ Ozigi — The Intelligent Context Engine
+# ⚡ Ozigi — AI Content That Sounds Human
 
-**Turn raw research into platform-ready social content. In your voice. Without sounding like a bot.**
+**Turn raw notes, links, and PDFs into platform-ready social posts that sound like you wrote them — not like you prompted a chatbot.**
 
 → **[Try it live at ozigi.app](https://ozigi.app)**
 
@@ -12,9 +12,11 @@
 
 ## What is Ozigi?
 
-Ozigi is a content engine built for technical creators, founders, and builders who have real things to say — but treat writing posts as a tax on their actual work.
+Ozigi is the AI that makes your content sound like *you* — not like a language model running on average. It's built for technical creators, founders, and builders who have real things to say but find that every AI writing tool strips out the specificity, voice, and credibility that makes content worth reading.
 
-You drop in raw context. Ozigi returns polished, platform-specific drafts for X (Twitter), LinkedIn, and Discord. You edit the 10% only you know. You publish.
+You drop in raw context — a URL, a block of notes, a PDF, an image. Ozigi returns polished, platform-specific drafts for X (Twitter), LinkedIn, Discord, Slack, and email. You edit the 10% only you know. You publish.
+
+The output doesn't sound like it came from ChatGPT. It doesn't open with "In today's fast-paced landscape." It doesn't use "delve" or "robust" or "seamlessly." It sounds like a person who actually built the thing and knows how to explain it.
 
 No prompt engineering. No reformatting for each platform. No AI slop.
 
@@ -26,7 +28,7 @@ No prompt engineering. No reformatting for each platform. No AI slop.
 Drop in a URL, paste raw notes, or upload a PDF/image. Ozigi extracts the core narrative without requiring you to summarise it first. Powered by Gemini 2.5 Flash's massive context window.
 
 ### 2. The Banned Lexicon
-Ozigi enforces a strict list of banned words at the API route level — not filtered after the fact, blocked at generation. No "delve", no "robust", no "seamlessly". The model is penalised for AI-speak, which forces output that reads like a professional wrote it.
+The single most important reason Ozigi doesn't sound like AI. A hard-coded blocklist enforced at the API route level — not filtered after generation, blocked *during* it. No "delve", no "robust", no "seamlessly", no "tapestry". The model is penalised for AI-speak vocabulary, which forces every sentence to be constructed from your actual content instead of padded with filler. The output reads like a professional wrote it, because the filler that makes AI sound like AI has been surgically removed.
 
 ### 3. System Personas
 Instead of prompting "write a tweet about X", you define *who* the AI is. Personas are saved to a database and applied automatically to every campaign. One persona setup. Consistent voice across every post, forever.
@@ -52,7 +54,7 @@ A built‑in AI assistant that lives in your dashboard. Brainstorm ideas, refine
 Generate comprehensive blog posts, tutorials, and technical documentation. Available for Organization and Enterprise tiers. Choose tone, structure, and length – get MDX-ready output with proper headings, code blocks, and formatting.
 
 ### 10. Persona Marketplace
-Choose from 8 pre-built personas designed for specific ICP types: Battle-Tested Engineer, DevRel Champion, Technical Founder, and more. Each persona has a distinct voice that produces meaningfully different output. Select one to instantly apply that voice to all your generations.
+Choose from 14 pre-built personas — technical and non-technical — each with a fully structured voice brief covering identity, origin, beliefs, tone, and key messages. Battle-Tested Engineer, DevRel Champion, Technical Founder, Brand & Marketing Manager, Career Coach, and more. Each persona produces meaningfully different output that sounds like a specific type of person, not a generic AI.
 
 ### 11. Subscription Management
 Full subscription lifecycle support including plan upgrades with tailored welcome emails, and self-service cancellation with reason tracking for compliance.

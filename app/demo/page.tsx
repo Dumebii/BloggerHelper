@@ -204,11 +204,11 @@ function DemoGateOverlay({
           </div>
 
           <h2 className="text-brand-navy font-black uppercase tracking-tight text-2xl mb-3">
-            You already made something good.
+            That didn't sound like AI. That's the point.
           </h2>
 
           <p className="text-slate-500 text-sm leading-relaxed mb-6">
-            Sign up free to save your campaign, run unlimited generations, and publish directly from the dashboard.
+            Sign up free to save your campaign, run unlimited generations, and publish directly from the dashboard — always in your voice.
           </p>
 
           <button
@@ -243,11 +243,10 @@ function PostGenerationCTA({ onSignUp }: { onSignUp: () => void }) {
     >
       <div>
         <p className="text-white font-black uppercase tracking-tight text-xl md:text-2xl mb-2">
-          This is your voice. Not a template.
+          This is what it sounds like when AI doesn't sound like AI.
         </p>
         <p className="text-slate-300 text-sm leading-relaxed max-w-xl">
-          Sign up free to save this campaign, run unlimited generations, and publish directly to X, LinkedIn, and
-          Discord — in the voice you just saw.
+          Sign up free to save this campaign, run unlimited generations, and publish directly to X, LinkedIn, and Discord — always in your voice, never in AI's.
         </p>
       </div>
       <div className="flex flex-col gap-3 shrink-0">
@@ -461,10 +460,10 @@ export default function DemoSandbox() {
               <span className="text-lg leading-none">←</span> Back to Home
             </Link>
             <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">
-              Try The Engine
+              See What Human Sounds Like
             </h1>
             <p className="text-slate-500 font-medium max-w-xl mx-auto">
-              Paste a URL, drop your notes, or upload a file. See your content in 20 seconds.
+              Paste a URL, drop your notes, or upload a file. Get content that sounds like you wrote it — in 20 seconds.
             </p>
           </div>
 

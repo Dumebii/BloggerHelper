@@ -5,22 +5,24 @@ import Footer from "@/components/Footer";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "Ozigi Blog - Insights, tutorials, and architecture for technical creators",
-  description: "Technical insights, tutorials, and architecture decisions from the Ozigi team. Engineering, marketing, content strategy, and product updates.",
+  title: "Ozigi Blog — How to Make AI Content Sound Human",
+  description: "Insights, tutorials, and deep dives from the Ozigi team on making AI content sound human, building technical voice, and shipping authentic content at scale.",
   keywords: [
-    "AI content generation",
-    "technical writing",
+    "AI content that sounds human",
+    "content that doesn't sound like AI",
+    "human-sounding AI content",
+    "AI writing without AI voice",
+    "technical content strategy",
     "content automation",
     "developer blog",
+    "DevRel content",
     "Next.js",
-    "architecture",
     "software engineering",
-    "DevRel",
   ],
   metadataBase: new URL("https://blog.ozigi.app"),
   openGraph: {
-    title: "Ozigi Blog",
-    description: "Technical insights, tutorials, and architecture decisions from the Ozigi team.",
+    title: "Ozigi Blog — How to Make AI Content Sound Human",
+    description: "Insights, tutorials, and deep dives on making AI content sound human, building technical voice, and shipping authentic content at scale.",
     url: "https://blog.ozigi.app",
     siteName: "Ozigi Blog",
     images: [
@@ -36,8 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ozigi Blog",
-    description: "Technical insights, tutorials, and architecture decisions from the Ozigi team.",
+    title: "Ozigi Blog — How to Make AI Content Sound Human",
+    description: "Insights and deep dives on making AI content sound human, building technical voice, and shipping authentic content at scale.",
     images: ["/images/og-default.png"],
     creator: "@ozigi_app",
     site: "@ozigi_app",
