@@ -1,6 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+// LinkedIn REST API version — must be an officially released YYYYMM version.
+// Uses the LinkedIn Marketing API versioning calendar (minimum 1-year support window).
+// 202505 = May 2025 — earliest currently active version as of April 2026.
+// 202504 and earlier have been sunset. To upgrade:
+// https://learn.microsoft.com/en-us/linkedin/marketing/versioning
+const LI_VERSION = "202505";
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -31,7 +38,16 @@ async function refreshLinkedInToken(refreshToken: string) {
 
 export async function POST(req: Request) {
   try {
-    const { text, userId, imageUrl, documentBase64, documentTitle, accessToken: providedToken } = await req.json();
+    const { text, userId, imageUrl, imageUrls, documentBase64, documentTitle, accessToken: providedToken } = await req.json();
+
+    // Normalise: accept either `imageUrl` (legacy, single string) or `imageUrls` (array).
+    // Deduplicate and cap at LinkedIn's 9-image limit.
+    const rawImageList: string[] = imageUrls
+      ? (Array.isArray(imageUrls) ? imageUrls : [imageUrls])
+      : imageUrl
+      ? [imageUrl]
+      : [];
+    const imageList = rawImageList.slice(0, 9);
     const authHeader = req.headers.get("Authorization");
 
     let linkedInToken: string | null = null;
@@ -81,26 +97,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Empty LinkedIn access token" }, { status: 401 });
     }
 
-    // Convert imageUrl to base64 if it's a public URL
-    let finalImageBase64: string | undefined;
-    if (imageUrl) {
-      if (imageUrl.startsWith('data:')) {
-        // Already a data URL
-        finalImageBase64 = imageUrl;
-      } else {
-        // Fetch the image from the public URL
-        console.log(`Fetching image from ${imageUrl}`);
-        const imageRes = await fetch(imageUrl);
-        if (!imageRes.ok) {
-          console.error(`Failed to fetch image: ${imageRes.status}`);
-        } else {
-          const imageBuffer = await imageRes.arrayBuffer();
-          const mimeType = imageRes.headers.get('content-type') || 'image/jpeg';
-          finalImageBase64 = `data:${mimeType};base64,${Buffer.from(imageBuffer).toString('base64')}`;
-          console.log(`Converted image to base64, size: ${finalImageBase64.length} bytes`);
-        }
-      }
-    }
+    // Convert each image URL to base64 (data URL). Fetch in parallel.
+    const finalImageBase64List: string[] = (
+      await Promise.all(
+        imageList.map(async (url) => {
+          if (url.startsWith("data:")) return url;
+          const imageRes = await fetch(url);
+          if (!imageRes.ok) {
+            console.error(`Failed to fetch image ${url}: ${imageRes.status}`);
+            return null;
+          }
+          const mimeType = imageRes.headers.get("content-type") || "image/jpeg";
+          const buf = await imageRes.arrayBuffer();
+          return `data:${mimeType};base64,${Buffer.from(buf).toString("base64")}`;
+        })
+      )
+    ).filter((x): x is string => x !== null);
 
     // Helper to post to LinkedIn
     async function postToLinkedIn(token: string) {
@@ -114,7 +126,7 @@ export async function POST(req: Request) {
       const profileData = await profileRes.json();
       const authorUrn = `urn:li:person:${profileData.sub}`;
 
-      let assetUrn: string | undefined = undefined;
+      const assetUrns: string[] = [];
       let isDocument = false;
 
       // Upload PDF document (carousel) if present
@@ -135,7 +147,7 @@ export async function POST(req: Request) {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
-              "LinkedIn-Version": "202501",
+              "LinkedIn-Version": LI_VERSION,
               "X-Restli-Protocol-Version": "2.0.0",
             },
             body: JSON.stringify({
@@ -177,16 +189,16 @@ export async function POST(req: Request) {
           );
         }
 
-        // Step 3: Set assetUrn to the document URN for the post payload
-        assetUrn = documentUrn;
+        // Step 3: Set assetUrns to the document URN for the post payload
+        assetUrns.push(documentUrn);
 
         // LinkedIn needs time to process the document
         await new Promise((resolve) => setTimeout(resolve, 3000));
       }
 
-      // Upload image if present
-      if (finalImageBase64) {
-        const base64Data = finalImageBase64.replace(/^data:image\/\w+;base64,/, "");
+      // Upload each image sequentially and collect asset URNs
+      for (const imageBase64 of finalImageBase64List) {
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
         const imageBuffer = Buffer.from(base64Data, "base64");
 
         const registerRes = await fetch(
@@ -217,7 +229,7 @@ export async function POST(req: Request) {
           registerData.value.uploadMechanism[
             "com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"
           ].uploadUrl;
-        assetUrn = registerData.value.asset;
+        const assetUrn = registerData.value.asset;
 
         const uploadRes = await fetch(uploadUrl, {
           method: "PUT",
@@ -228,17 +240,24 @@ export async function POST(req: Request) {
         if (!uploadRes.ok) {
           const errorText = await uploadRes.text();
           console.error("Image Upload Failed:", errorText);
-          throw new Error("Failed to upload the image file to LinkedIn's server.");
+          throw new Error("Failed to upload an image to LinkedIn's server.");
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 2500));
+        assetUrns.push(assetUrn);
+        // Brief pause between uploads to avoid rate limits
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      // After all images are uploaded, wait for LinkedIn to process them
+      if (finalImageBase64List.length > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
       // Create the post
       // Document posts must use the newer /rest/posts API; image/text posts use /v2/ugcPosts
       let postRes: Response;
 
-      if (isDocument && assetUrn) {
+      if (isDocument && assetUrns.length > 0) {
         // Use /rest/posts for document (carousel) posts
         const restPostPayload = {
           author: authorUrn,
@@ -252,7 +271,7 @@ export async function POST(req: Request) {
           content: {
             media: {
               title: documentTitle || "Carousel",
-              id: assetUrn,
+              id: assetUrns[0],
             },
           },
           lifecycleState: "PUBLISHED",
@@ -265,18 +284,18 @@ export async function POST(req: Request) {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "202501",
+            "LinkedIn-Version": LI_VERSION,
           },
           body: JSON.stringify(restPostPayload),
         });
       } else {
-        // Use /v2/ugcPosts for image or text-only posts
+        // Use /v2/ugcPosts for image (single or multi) or text-only posts
         let shareMediaCategory: string;
-        let media: any[];
+        let media: { status: string; media: string }[];
 
-        if (assetUrn) {
+        if (assetUrns.length > 0) {
           shareMediaCategory = "IMAGE";
-          media = [{ status: "READY", media: assetUrn }];
+          media = assetUrns.map((urn) => ({ status: "READY", media: urn }));
         } else {
           shareMediaCategory = "NONE";
           media = [];
@@ -301,7 +320,7 @@ export async function POST(req: Request) {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "202501",
+            "LinkedIn-Version": LI_VERSION,
           },
           body: JSON.stringify(ugcPostPayload),
         });

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "Ozigi Blog",
     images: [
       {
-        url: "/images/og-default.png",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
         alt: "Ozigi Blog",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ozigi Blog — How to Make AI Content Sound Human",
     description: "Insights and deep dives on making AI content sound human, building technical voice, and shipping authentic content at scale.",
-    images: ["/images/og-default.png"],
+    images: ["/opengraph-image"],
     creator: "@ozigi_app",
     site: "@ozigi_app",
   },

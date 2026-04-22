@@ -3,11 +3,6 @@ import Image from "next/image";
 import { getAllPosts, getAllSections } from "@/lib/blog";
 import { format } from "date-fns";
 
-export const metadata = {
-  title: "Blog | Ozigi",
-  description: "Insights, updates, and tutorials from the Ozigi team.",
-};
-
 export default async function BlogPage() {
   const posts = await getAllPosts();
   const sections = getAllSections();
@@ -54,7 +49,7 @@ export default async function BlogPage() {
                 className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all"
               >
                 {post.coverImage && (
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                  <div className="relative w-full aspect-[1200/630] overflow-hidden bg-slate-100">
                     <Image
                       src={post.coverImage}
                       alt={post.title}

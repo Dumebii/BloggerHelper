@@ -10,7 +10,9 @@
       "Bash(grep -l \"bg-black\\\\|bg-slate-9\\\\|bg-zinc-9\\\\|bg-gray-9\" C:/Users/PC/fork/OziGi/components/*.tsx C:/Users/PC/fork/OziGi/app/*.tsx)",
       "Bash(xargs grep *)",
       "Bash(grep -E \"\\\\.mdx$|\\\\.md$\")",
-      "Bash(xargs ls *)"
+      "Bash(xargs ls *)",
+      "WebFetch(domain:developer.linkedin.com)",
+      "WebSearch"
     ]
   }
 }

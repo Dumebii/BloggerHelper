@@ -156,7 +156,7 @@ const hasHeadings = post.headings && post.headings.length > 0;
         </div>
 
         {post.coverImage && (
-          <div className="relative w-full h-[400px] mb-8 rounded-2xl overflow-hidden bg-slate-100">
+          <div className="relative w-full aspect-[1200/630] mb-8 rounded-2xl overflow-hidden bg-slate-100">
             <Image
               src={post.coverImage}
               alt={post.title}
@@ -339,7 +339,7 @@ const hasHeadings = post.headings && post.headings.length > 0;
                       className="group bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all"
                     >
                       {related.coverImage && (
-                        <div className="relative h-32 w-full overflow-hidden bg-slate-100">
+                        <div className="relative w-full aspect-[1200/630] overflow-hidden bg-slate-100">
                           <Image
                             src={related.coverImage}
                             alt={related.title}

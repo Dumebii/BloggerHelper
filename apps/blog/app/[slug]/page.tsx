@@ -110,7 +110,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
                 className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all"
               >
                 {post.coverImage && (
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                  <div className="relative w-full aspect-[1200/630] overflow-hidden bg-slate-100">
                     <Image
                       src={post.coverImage}
                       alt={post.title}

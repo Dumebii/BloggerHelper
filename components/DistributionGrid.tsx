@@ -975,7 +975,7 @@ function SocialCard({
   platformName: string;
   initialText: string;
   session: any;
-  onPost?: (text: string, day: number, imageUrl?: string, carouselData?: { documentBase64: string; documentTitle: string }) => void;
+  onPost?: (text: string, day: number, imageUrls?: string[], carouselData?: { documentBase64: string; documentTitle: string }) => void;
   postStatus?: "idle" | "loading" | "success" | "error";
   actionButtonConfig?: {
     idle: string;
@@ -995,7 +995,7 @@ function SocialCard({
   const [text, setText] = useState(initialText);
   const [isEditing, setIsEditing] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [imageTitle, setImageTitle] = useState("");
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -1075,37 +1075,42 @@ function SocialCard({
   };
 
   const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-    // Optional: limit file size (e.g., 5MB) and type (images only)
-    if (!file.type.startsWith('image/')) {
-      toast.error("Please upload an image file (JPEG, PNG, etc.)");
+    const remaining = 9 - imageUrls.length;
+    if (remaining <= 0) {
+      toast.error("Maximum 9 images per post.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image must be less than 10MB");
-      return;
-    }
+    const toUpload = files.slice(0, remaining);
 
-    setIsUploadingImg(true);
-    try {
-      const publicUrl = await uploadLargeAsset(file);
-      setImageUrl(publicUrl);
-      toast.success("Image uploaded!");
-    } catch (err: any) {
-      console.error("Upload error:", err);
-      toast.error("Failed to upload image.");
-    } finally {
-      setIsUploadingImg(false);
-      // Reset file input so same file can be uploaded again if needed
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    for (const file of toUpload) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image.`);
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds 10 MB.`);
+        continue;
+      }
+      setIsUploadingImg(true);
+      try {
+        const publicUrl = await uploadLargeAsset(file, session?.access_token);
+        setImageUrls((prev) => [...prev, publicUrl]);
+      } catch (err: any) {
+        console.error("Upload error:", err);
+        toast.error(`Failed to upload ${file.name}.`);
+      } finally {
+        setIsUploadingImg(false);
+      }
     }
+    toast.success(toUpload.length === 1 ? "Image uploaded!" : `${toUpload.length} images uploaded!`);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleRemoveImage = () => {
-    setImageUrl(null);
-    toast.info("Image removed");
+  const handleRemoveImage = (idx: number) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSchedule = async (scheduledFor: string, email?: string | null) => {
@@ -1126,7 +1131,7 @@ function SocialCard({
           {
             platform: platformName.toLowerCase(),
             content: text,
-            imageUrl: imageUrl || undefined,
+            imageUrl: imageUrls[0] || undefined,
             day: day,
             email: email,
           },
@@ -1211,16 +1216,17 @@ function SocialCard({
       <div className="mb-4 flex gap-2">
         <button
           onClick={() => fileInputRef.current?.click()}
-          disabled={isUploadingImg}
+          disabled={isUploadingImg || imageUrls.length >= 9}
           className="flex-1 py-2 border border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-red hover:border-brand-red hover:bg-red-50 transition-all flex items-center justify-center gap-2"
         >
-          {isUploadingImg ? "Uploading..." : <><ImagePlus size={12} /> Upload</>}
+          {isUploadingImg ? "Uploading..." : <><ImagePlus size={12} /> Upload {imageUrls.length > 0 && `(${imageUrls.length}/9)`}</>}
         </button>
         <input
           type="file"
           ref={fileInputRef}
           className="hidden"
           accept="image/*"
+          multiple
           onChange={handleUploadImage}
         />
         {planStatus?.imageGenLimit !== 0 && (
@@ -1234,27 +1240,31 @@ function SocialCard({
         )}
       </div>
 
-      {imageUrl && (
-        <div className="relative mb-4 group">
-          <img src={imageUrl} alt="Campaign image" className="w-full rounded-lg border border-slate-200" />
-          <div className="absolute top-2 right-2 flex gap-1.5">
-            <button
-              onClick={handleDownloadImage}
-              className="bg-white/90 rounded-full p-1.5 shadow-md hover:bg-blue-100 transition-colors"
-              title="Download image"
-            >
-              <svg className="w-3.5 h-3.5 text-slate-600 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-            </button>
-            <button
-              onClick={handleRemoveImage}
-              className="bg-white/90 rounded-full p-1.5 shadow-md hover:bg-red-100 transition-colors"
-              title="Remove image"
-            >
-              <X size={14} className="text-slate-600 hover:text-red-600" />
-            </button>
-          </div>
+      {imageUrls.length > 0 && (
+        <div className={`mb-4 grid gap-2 ${imageUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+          {imageUrls.map((url, idx) => (
+            <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-200">
+              <img src={url} alt={`Image ${idx + 1}`} className="w-full aspect-video object-cover" />
+              <div className="absolute top-1.5 right-1.5 flex gap-1">
+                <button
+                  onClick={handleDownloadImage}
+                  className="bg-white/90 rounded-full p-1.5 shadow-md hover:bg-blue-100 transition-colors"
+                  title="Download image"
+                >
+                  <svg className="w-3 h-3 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleRemoveImage(idx)}
+                  className="bg-white/90 rounded-full p-1.5 shadow-md hover:bg-red-100 transition-colors"
+                  title="Remove image"
+                >
+                  <X size={12} className="text-slate-600" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -1270,7 +1280,7 @@ function SocialCard({
 
       {onPost && actionButtonConfig && (
         <button
-          onClick={() => onPost(text, day, imageUrl || undefined, carouselData || undefined)}
+          onClick={() => onPost(text, day, imageUrls.length > 0 ? imageUrls : undefined, carouselData || undefined)}
           disabled={postStatus === "loading" || postStatus === "success"}
           className={`w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 mt-auto ${postStatus === "success"
               ? "bg-green-100 text-green-700 border border-green-200"
@@ -1347,7 +1357,7 @@ function SocialCard({
           postText={text}
           platform={platformName}
           day={day}
-          imageUrl={imageUrl || undefined}
+          imageUrl={imageUrls[0] || undefined}
           userEmail={session?.user?.email}
         />
       )}
@@ -1467,7 +1477,7 @@ export default function DistributionGrid({
   const handlePostToLinkedIn = async (
     text: string,
     day: number,
-    imageUrl?: string,
+    imageUrls?: string[],
     carouselData?: { documentBase64: string; documentTitle: string }
   ) => {
     if (!session?.access_token) {
@@ -1476,7 +1486,7 @@ export default function DistributionGrid({
     }
     setLiStatuses((prev) => ({ ...prev, [day]: "loading" }));
     try {
-      const payload: any = { text, userId: session.user.id, imageUrl };
+      const payload: any = { text, userId: session.user.id, imageUrls };
       if (carouselData) {
         payload.documentBase64 = carouselData.documentBase64;
         payload.documentTitle = carouselData.documentTitle;

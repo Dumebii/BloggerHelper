@@ -177,7 +177,9 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
     const userMessage: Message = { role: "user", content: userText };
     const snapshot = [...messages, userMessage];
 
-    setMessages(snapshot);
+    // Add the user message AND the loading placeholder together so the thinking
+    // indicator appears immediately — before any network round-trip.
+    setMessages([...snapshot, { role: "assistant", content: "__LOADING__" }]);
     setInput("");
     setIsLoading(true);
     isStreamingRef.current = true;
@@ -191,9 +193,6 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
       });
 
       if (!res.ok || !res.body) throw new Error("Failed to connect");
-
-      // Add the placeholder assistant message once
-      setMessages(prev => [...prev, { role: "assistant", content: "__LOADING__" }]);
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -233,7 +232,11 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
       });
 
     } catch (err: any) {
-      setMessages(prev => [...prev, { role: "assistant", content: `**Error:** ${err.message}` }]);
+      setMessages(prev => {
+        const next = [...prev];
+        next[next.length - 1] = { role: "assistant", content: `**Error:** ${err.message}` };
+        return next;
+      });
     } finally {
       isStreamingRef.current = false;
       setIsLoading(false);
@@ -271,15 +274,16 @@ export default function CopilotPanel({ isOpen, onClose, onSendToEngine }: Copilo
           </div>
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-100">Ozigi Copilot</h2>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={handleClearConversation}
-            className="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest"
+            className="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded hover:bg-white/10"
           >
-            <Trash2 size={14} /> Clear
+            <Trash2 size={13} /> Clear
           </button>
-          <button onClick={onClose} className="text-slate-400 hover:text-brand-red transition-colors">
-            <X size={20} />
+          <div className="w-px h-4 bg-slate-600" />
+          <button onClick={onClose} className="text-slate-400 hover:text-brand-red transition-colors p-1 rounded hover:bg-white/10">
+            <X size={18} />
           </button>
         </div>
       </div>
