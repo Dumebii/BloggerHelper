@@ -23,6 +23,28 @@ export const TUTORIALS: Tutorial[] = [
     category: "Getting Started",
     publishedAt: "2026-04-17",
   },
+    {
+    id: "2",
+    slug: "understanding-personas-in-ozigi",
+    title: "Understanding Personas in Ozigi",
+    description:
+      "Learn how to create and manage personas in Ozigi to create better content for your target audience.",
+    videoId: "olWZZOW9WYk",
+    duration: "2:15", // ← update this to the actual video length
+    category: "Features",
+    publishedAt: "2026-04-22",
+  },
+      {
+    id: "3",
+    slug: "scheduling-generated-content-with-ozigi",
+    title: "Scheduling Generated Content in Ozigi",
+    description:
+      "Learn how to schedule content generation in Ozigi to streamline your workflow.",
+    videoId: "ylqy_hr2sio",
+    duration: "1:05", // ← update this to the actual video length
+    category: "Workflows",
+    publishedAt: "2026-04-22",
+  },
   // Add more tutorials here as you upload videos to YouTube.
   // Copy the block above, increment the id, update the slug, title,
   // description, videoId (the part after ?v= in the YouTube URL),

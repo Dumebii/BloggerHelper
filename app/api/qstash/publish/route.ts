@@ -2,10 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { verifyQStashRequest } from "@/lib/qstash";
 import { SendMailClient } from "zeptomail";
-import nodemailer from "nodemailer";
 import { buildXReminderEmail, buildNewsletterEmail } from "@/lib/email-templates";
 
-const USE_SMTP = !!process.env.SMTP_HOST;
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 
 // ZeptoMail configuration
@@ -142,27 +140,12 @@ export async function POST(req: Request) {
           const htmlBody = buildNewsletterEmail(finalBody, unsubscribeLink, replyToInfo, senderName, false, post.id);
 
           try {
-            if (USE_SMTP) {
-              const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: Number(process.env.SMTP_PORT),
-                secure: true,
-                auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-              });
-              await transporter.sendMail({
-                from: `"${senderName}" <${fromAddress}>`,
-                to: subscriber.email,
-                subject,
-                html: htmlBody,
-              });
-            } else {
-              await mailClient.sendMail({
-                from: { address: fromAddress, name: senderName },
-                to: [{ email_address: { address: subscriber.email, name: "" } }],
-                subject,
-                htmlbody: htmlBody,
-              });
-            }
+            await mailClient.sendMail({
+              from: { address: fromAddress, name: senderName },
+              to: [{ email_address: { address: subscriber.email, name: "" } }],
+              subject,
+              htmlbody: htmlBody,
+            });
             console.log(`[QStash] Sent email to ${subscriber.email}`);
           } catch (err: any) {
             console.error(`[QStash] Failed to send email to ${subscriber.email}:`, err);
@@ -180,27 +163,12 @@ export async function POST(req: Request) {
         const htmlBody = buildXReminderEmail(post.content, intentUrl, dashboardUrl);
 
         try {
-          if (USE_SMTP) {
-            const transporter = nodemailer.createTransport({
-              host: process.env.SMTP_HOST,
-              port: Number(process.env.SMTP_PORT),
-              secure: true,
-              auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-            });
-            await transporter.sendMail({
-              from: `"${EMAIL_FROM_NAME}" <${EMAIL_FROM_ADDRESS}>`,
-              to: post.user_email,
-              subject: "Your scheduled X post is ready",
-              html: htmlBody,
-            });
-          } else {
-            await mailClient.sendMail({
-              from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
-              to: [{ email_address: { address: post.user_email, name: "" } }],
-              subject: "Your scheduled X post is ready",
-              htmlbody: htmlBody,
-            });
-          }
+          await mailClient.sendMail({
+            from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
+            to: [{ email_address: { address: post.user_email, name: "" } }],
+            subject: "Your scheduled X post is ready",
+            htmlbody: htmlBody,
+          });
 
           await supabase
             .from("scheduled_posts")

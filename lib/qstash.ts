@@ -21,7 +21,13 @@ export async function schedulePostWithQStash(
   postId: string,
   scheduledFor: string
 ): Promise<string> {
-  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl || appUrl.includes("localhost")) {
+    throw new Error(
+      "APP_URL is not set to a public URL. QStash cannot deliver webhooks to localhost. " +
+      "Set APP_URL=https://your-production-domain.com in your environment variables."
+    );
+  }
   const publishUrl = `${appUrl}/api/qstash/publish`;
   
   // Calculate delay in seconds from now

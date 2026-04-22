@@ -1,10 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { SendMailClient } from "zeptomail";
-import nodemailer from "nodemailer";
 import { buildPromotionalEmail } from "@/lib/email-templates";
 
-const USE_SMTP = !!process.env.SMTP_HOST;
 const CRON_SECRET = process.env.CRON_SECRET;
 const APP_URL = process.env.APP_URL || "https://ozigi.app";
 
@@ -14,8 +12,8 @@ const mailClient = new SendMailClient({
   token: `Zoho-enczapikey ${process.env.ZEPTOMAIL_API_KEY!}`,
 });
 
-const PROMO_FROM_ADDRESS = "hello@ozigi.app";
-const PROMO_FROM_NAME = "Ozigi";
+const PROMO_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || "hello@ozigi.app";
+const PROMO_FROM_NAME = process.env.EMAIL_FROM_NAME || "Ozigi";
 
 /**
  * GET /api/cron/promotional
@@ -127,25 +125,10 @@ export async function GET(req: Request) {
 }
 
 async function sendEmail(to: string, subject: string, htmlBody: string) {
-  if (USE_SMTP) {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: true,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    });
-    await transporter.sendMail({
-      from: `"${PROMO_FROM_NAME}" <${PROMO_FROM_ADDRESS}>`,
-      to,
-      subject,
-      html: htmlBody,
-    });
-  } else {
-    await mailClient.sendMail({
-      from: { address: PROMO_FROM_ADDRESS, name: PROMO_FROM_NAME },
-      to: [{ email_address: { address: to, name: "" } }],
-      subject,
-      htmlbody: htmlBody,
-    });
-  }
+  await mailClient.sendMail({
+    from: { address: PROMO_FROM_ADDRESS, name: PROMO_FROM_NAME },
+    to: [{ email_address: { address: to, name: "" } }],
+    subject,
+    htmlbody: htmlBody,
+  });
 }

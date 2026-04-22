@@ -3,11 +3,16 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { buildUpgradeWelcomeEmail, buildPaymentReceiptEmail } from '@/lib/email-templates';
 import { SendMailClient } from 'zeptomail';
-import nodemailer from 'nodemailer';
 
-const USE_SMTP = !!process.env.SMTP_HOST;
 const ZEPTOMAIL_BASE_URL = "https://api.zeptomail.com/v1.1/email";
 const ZEPTOMAIL_RAW_TOKEN = process.env.ZEPTOMAIL_API_KEY!;
+const mailClient = new SendMailClient({
+  url: ZEPTOMAIL_BASE_URL,
+  token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
+});
+
+const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'hello@ozigi.app';
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi';
 
 export async function POST(req: Request) {
   try {
@@ -77,31 +82,12 @@ export async function POST(req: Request) {
           ? "Welcome to Organization - Full power unlocked!"
           : "Welcome to Enterprise - Let's build something amazing!";
 
-        if (USE_SMTP) {
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: true,
-            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-          });
-          await transporter.sendMail({
-            from: '"Ozigi" <hello@ozigi.app>',
-            to: profile.email,
-            subject,
-            html: htmlBody,
-          });
-        } else {
-          const mailClient = new SendMailClient({
-            url: ZEPTOMAIL_BASE_URL,
-            token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
-          });
-          await mailClient.sendMail({
-            from: { address: 'hello@ozigi.app', name: 'Ozigi' },
-            to: [{ email_address: { address: profile.email, name: profile.display_name || '' } }],
-            subject,
-            htmlbody: htmlBody,
-          });
-        }
+        await mailClient.sendMail({
+          from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
+          to: [{ email_address: { address: profile.email, name: profile.display_name || '' } }],
+          subject,
+          htmlbody: htmlBody,
+        });
 
         // Mark email as sent (idempotency)
         await supabaseAdmin
@@ -209,31 +195,12 @@ export async function POST(req: Request) {
           currency: (paymentData.currency || 'usd').toUpperCase(),
         }).format(paymentData.amount / 100)}`;
 
-        if (USE_SMTP) {
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: true,
-            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-          });
-          await transporter.sendMail({
-            from: '"Ozigi" <hello@ozigi.app>',
-            to: profile.email,
-            subject,
-            html: receiptHtml,
-          });
-        } else {
-          const mailClient = new SendMailClient({
-            url: ZEPTOMAIL_BASE_URL,
-            token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
-          });
-          await mailClient.sendMail({
-            from: { address: 'hello@ozigi.app', name: 'Ozigi' },
-            to: [{ email_address: { address: profile.email, name: profile.display_name || '' } }],
-            subject,
-            htmlbody: receiptHtml,
-          });
-        }
+        await mailClient.sendMail({
+          from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
+          to: [{ email_address: { address: profile.email, name: profile.display_name || '' } }],
+          subject,
+          htmlbody: receiptHtml,
+        });
 
         // Mark receipt as sent
         await supabaseAdmin

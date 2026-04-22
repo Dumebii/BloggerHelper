@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
+import { useSession } from "@/components/hooks/useSession";
 
 interface ScheduledPost {
   id: string;
@@ -18,6 +19,7 @@ interface ScheduledPostsModalProps {
 }
 
 export default function ScheduledPostsModal({ onClose, onStatsChange }: ScheduledPostsModalProps) {
+  const { session } = useSession();
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<string | null>(null);
@@ -43,19 +45,31 @@ export default function ScheduledPostsModal({ onClose, onStatsChange }: Schedule
   };
 
   const handleCancel = async (postId: string) => {
+    if (!session?.access_token) {
+      toast.error("You must be logged in to cancel a post.");
+      return;
+    }
     setCancelling(postId);
-    const { error } = await supabase
-      .from("scheduled_posts")
-      .update({ status: "cancelled" })
-      .eq("id", postId);
-
-    if (error) {
-      console.error("Error cancelling post:", error);
+    try {
+      const res = await fetch("/api/schedule/cancel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to cancel post. Please try again.");
+      } else {
+        setPosts(posts.filter(p => p.id !== postId));
+        if (onStatsChange) onStatsChange();
+        toast.success("Post cancelled.");
+      }
+    } catch (err) {
+      console.error("Error cancelling post:", err);
       toast.error("Failed to cancel post. Please try again.");
-    } else {
-      setPosts(posts.filter(p => p.id !== postId));
-      if (onStatsChange) onStatsChange();
-      toast.success("Post cancelled.");
     }
     setCancelling(null);
   };

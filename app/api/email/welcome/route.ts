@@ -1,22 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { SendMailClient } from "zeptomail";
-import nodemailer from "nodemailer";
 import { buildWelcomeEmail } from "@/lib/email-templates";
 
-const USE_SMTP = !!process.env.SMTP_HOST;
-
-// ZeptoMail configuration
 const ZEPTOMAIL_BASE_URL = "https://api.zeptomail.com/v1.1/email";
-const ZEPTOMAIL_RAW_TOKEN = process.env.ZEPTOMAIL_API_KEY!;
 const mailClient = new SendMailClient({
   url: ZEPTOMAIL_BASE_URL,
-  token: `Zoho-enczapikey ${ZEPTOMAIL_RAW_TOKEN}`,
+  token: `Zoho-enczapikey ${process.env.ZEPTOMAIL_API_KEY!}`,
 });
 
-// Hardcoded sender - never use personal emails or environment overrides
-const WELCOME_FROM_ADDRESS = "hello@ozigi.app";
-const WELCOME_FROM_NAME = "Ozigi";
+const WELCOME_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || "hello@ozigi.app";
+const WELCOME_FROM_NAME = process.env.EMAIL_FROM_NAME || "Ozigi";
 
 // Secret to verify webhook calls (optional but recommended)
 const WEBHOOK_SECRET = process.env.WELCOME_EMAIL_WEBHOOK_SECRET;
@@ -76,31 +70,12 @@ export async function POST(req: Request) {
     const htmlBody = buildWelcomeEmail(userName);
     const subject = "Welcome to Ozigi - Let's Get Started!";
 
-    if (USE_SMTP) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: true,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: `"${WELCOME_FROM_NAME}" <${WELCOME_FROM_ADDRESS}>`,
-        to: userEmail,
-        subject,
-        html: htmlBody,
-      });
-    } else {
-      await mailClient.sendMail({
-        from: { address: WELCOME_FROM_ADDRESS, name: WELCOME_FROM_NAME },
-        to: [{ email_address: { address: userEmail, name: userName || "" } }],
-        subject,
-        htmlbody: htmlBody,
-      });
-    }
+    await mailClient.sendMail({
+      from: { address: WELCOME_FROM_ADDRESS, name: WELCOME_FROM_NAME },
+      to: [{ email_address: { address: userEmail, name: userName || "" } }],
+      subject,
+      htmlbody: htmlBody,
+    });
 
     console.log(`[Welcome Email] Successfully sent to ${userEmail}`);
 

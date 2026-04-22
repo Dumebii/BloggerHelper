@@ -1,10 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { SendMailClient } from "zeptomail";
-import nodemailer from 'nodemailer';
 import { buildXReminderEmail, buildNewsletterEmail } from "@/lib/email-templates";
 
-const USE_SMTP = !!process.env.SMTP_HOST;
 const CRON_SECRET = process.env.CRON_SECRET;
 const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 
@@ -17,10 +15,10 @@ const mailClient = new SendMailClient({
 });
 
 // Hardcoded senders - never use personal emails or environment overrides
-const EMAIL_FROM_ADDRESS = 'hello@ozigi.app';
-const EMAIL_FROM_NAME = 'Ozigi';
-const NEWSLETTER_FROM_ADDRESS = 'hello@ozigi.app';
-const NEWSLETTER_FROM_NAME = 'Ozigi';
+const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'hello@ozigi.app';
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Ozigi';
+const NEWSLETTER_FROM_ADDRESS = process.env.NEWSLETTER_FROM_ADDRESS || 'hello@ozigi.app';
+const NEWSLETTER_FROM_NAME = process.env.NEWSLETTER_FROM_NAME || 'Ozigi';
 
 interface UserToken {
   user_id: string;
@@ -172,32 +170,13 @@ if (post.platform === 'email') {
       }
 
       try {
-        if (USE_SMTP) {
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: true,
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS,
-            },
-          });
-          await transporter.sendMail({
-            from: `"${senderName}" <${fromAddress}>`,
-            to: subscriber.email,
-            subject,
-            html: htmlBody,
-          });
-        } else {
-          const payload: any = {
-            from: { address: fromAddress, name: senderName },
-            to: [{ email_address: { address: subscriber.email, name: '' } }],
-            subject: subject,
-            htmlbody: htmlBody,
-          };
-          await mailClient.sendMail(payload);
-          console.log(`✅ ZeptoMail sent to ${subscriber.email}`);
-        }
+        await mailClient.sendMail({
+          from: { address: fromAddress, name: senderName },
+          to: [{ email_address: { address: subscriber.email, name: '' } }],
+          subject,
+          htmlbody: htmlBody,
+        });
+        console.log(`✅ Sent to ${subscriber.email}`);
       } catch (err: any) {
         console.error(`❌ Failed to send email to ${subscriber.email}:`, err);
         if (err.response) {
@@ -217,32 +196,12 @@ else if (post.platform === 'x') {
             const htmlBody = buildXReminderEmail(post.content, intentUrl, dashboardUrl);
 
             try {
-              if (USE_SMTP) {
-                const transporter = nodemailer.createTransport({
-                  host: process.env.SMTP_HOST,
-                  port: Number(process.env.SMTP_PORT),
-                  secure: true,
-                  auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS,
-                  },
-                  
-                });
-                await transporter.sendMail({
-                  from: `"${EMAIL_FROM_NAME}" <${EMAIL_FROM_ADDRESS}>`,
-                  to: post.user_email,
-                  subject: 'Your scheduled X post is ready',
-                  html: htmlBody,
-                });
-              } else {
-                const payload: any = {
-                  from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
-                  to: [{ email_address: { address: post.user_email, name: '' } }],
-                  subject: 'Your scheduled X post is ready',
-                  htmlbody: htmlBody,
-                };
-                await mailClient.sendMail(payload);
-              }
+              await mailClient.sendMail({
+                from: { address: EMAIL_FROM_ADDRESS, name: EMAIL_FROM_NAME },
+                to: [{ email_address: { address: post.user_email, name: '' } }],
+                subject: 'Your scheduled X post is ready',
+                htmlbody: htmlBody,
+              });
 
               await supabase
                 .from("scheduled_posts")
