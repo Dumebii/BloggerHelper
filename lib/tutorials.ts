@@ -45,6 +45,16 @@ export const TUTORIALS: Tutorial[] = [
     category: "Workflows",
     publishedAt: "2026-04-22",
   },
+        {
+    id: "4",
+    slug: "ozigi-content-engine-explained",
+    title: "Ozigi Content Engine Explained",
+    description: "This video is an in-depth explanation of how the Ozigi content engine operates. From the brain behind the API to how it all plays out in the user interface. Ozigi is your AI-powered content generztor that produces human sounding content",
+    videoId: "dFbCTd_npQY",
+    duration: "4:51", // ← update this to the actual video length
+    category: "Getting Started",
+    publishedAt: "2026-04-22",
+  },
   // Add more tutorials here as you upload videos to YouTube.
   // Copy the block above, increment the id, update the slug, title,
   // description, videoId (the part after ?v= in the YouTube URL),
