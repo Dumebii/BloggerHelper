@@ -68,6 +68,25 @@ export default function Home() {
           </div>
         </section>
 
+{/* BetterLaunch badge — place above the logo ticker in the social proof section */}
+<div className="flex justify-center mb-6">
+  <a
+    href="https://www.betterlaunch.co"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+    aria-label="Featured on Better Launch"
+  >
+    <img
+      src="https://www.betterlaunch.co/badge.svg"
+      alt="Featured on Better Launch"
+      width={120}
+      height={24}
+      className="h-5 w-auto opacity-80 group-hover:opacity-100 transition-opacity duration-200"
+    />
+  </a>
+</div>
+        
         <SocialProof />
 
         {/* How It Works */}
