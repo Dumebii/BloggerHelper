@@ -90,10 +90,10 @@ const allSteps: TourStep[] = [
     optional: true,
   },
   {
-    target: "[data-tour='sidebar-long-form']",
-    title: "Long-Form Content",
+    target: "[data-tour='sidebar-blog-post']",
+    title: "Blog Post",
     description:
-      "Generate in-depth articles and blog posts (500-8,000 words) with AI. Perfect for thought leadership and detailed guides.",
+      "Generate in-depth blog posts and articles (500-8,000 words) with AI. Perfect for thought leadership and detailed guides. Available on Organization plan.",
     position: "right",
     optional: true,
   },

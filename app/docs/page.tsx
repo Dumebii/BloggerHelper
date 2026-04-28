@@ -50,7 +50,7 @@ export default function DocsPage() {
                 <li><a href="#publishing" className="hover:text-slate-900 transition-colors block">8. Publishing Integrations</a></li>
                 <li><a href="#scheduling" className="hover:text-slate-900 transition-colors block">9. Scheduling & Reminders</a></li>
                 <li><a href="#email" className="hover:text-slate-900 transition-colors block">10. Email Newsletters</a></li>
-                <li><a href="#longform" className="hover:text-slate-900 transition-colors block">11. Long-Form Content</a></li>
+                <li><a href="#longform" className="hover:text-slate-900 transition-colors block">11. Blog Post Generation</a></li>
                 <li><a href="#copilot" className="hover:text-slate-900 transition-colors block">12. Ozigi Copilot</a></li>
                 <li><a href="#pricing" className="hover:text-slate-900 transition-colors block">13. Pricing & Gating</a></li>
                 <li><a href="#troubleshooting" className="hover:text-slate-900 transition-colors block">14. Troubleshooting</a></li>
@@ -553,13 +553,13 @@ export default function DocsPage() {
               </div>
             </section>
 
-            {/* 11. Long-Form Content Generation */}
+            {/* 11. Blog Post Generation */}
             <section id="longform" className="scroll-mt-28">
               <h2 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 border-b-2 border-slate-100 pb-2 mb-6">
-                11. Long-Form Content Generation
+                11. Blog Post Generation
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                Ozigi's Long-Form engine generates thought-leadership articles, blog posts, and whitepapers from 500 to 8,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
+                Ozigi's Blog Post engine generates thought-leadership articles, deep dives, and whitepapers from 500 to 8,000 words. Powered by Claude Opus, it produces SEO-friendly, deeply researched content with configurable structure and tone.
               </p>
 
               <div className="bg-slate-900 text-white p-6 rounded-2xl mb-6">
@@ -567,7 +567,7 @@ export default function DocsPage() {
                   <span>🚀</span> Available on Organization & Enterprise Plans
                 </h3>
                 <ul className="space-y-2 text-sm">
-                  <li>• <strong>Rate Limit:</strong> 5 articles per 24 hours (Organization), unlimited (Enterprise)</li>
+                  <li>• <strong>Rate Limit:</strong> 5 blog posts per 24 hours (Organization), unlimited (Enterprise)</li>
                   <li>• <strong>Processing:</strong> Takes 30-90 seconds depending on length and complexity</li>
                   <li>• <strong>Output:</strong> Structured sections with intro, body, conclusion</li>
                 </ul>
@@ -589,9 +589,9 @@ export default function DocsPage() {
               </div>
 
               <div className="bg-white border border-slate-200 p-6 rounded-2xl mb-4">
-                <h3 className="font-bold text-slate-900 mb-3">How to Generate Long-Form Content</h3>
+                <h3 className="font-bold text-slate-900 mb-3">How to Generate a Blog Post</h3>
                 <ol className="space-y-3 text-sm text-slate-600">
-                  <li><strong>1. Go to Long-Form:</strong> Click "Long-Form Content" in your sidebar.</li>
+                  <li><strong>1. Go to Blog Post:</strong> Click "Blog Post" in your sidebar.</li>
                   <li><strong>2. Add Context:</strong> Paste an article, research notes, a URL, or raw ideas (minimum 50 characters).</li>
                   <li><strong>3. Configure:</strong> Choose target length (500–8,000 words), tone, structure, and optional instructions.</li>
                   <li><strong>4. Select Persona:</strong> Pick a saved persona to inject your voice into the content.</li>
@@ -605,7 +605,7 @@ export default function DocsPage() {
                 <p className="text-sm text-slate-700 mb-3">Long-form generation is intentionally throttled to prevent abuse and ensure quality output.</p>
                 <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">
                   <li><strong>Organization Plan:</strong> 5 articles per 24-hour rolling window</li>
-                  <li><strong>Enterprise Plan:</strong> Unlimited long-form generation with priority processing</li>
+                  <li><strong>Enterprise Plan:</strong> Unlimited blog post generation with priority processing</li>
                   <li><strong>Billing:</strong> Rate limits reset at the same time each day based on your timezone</li>
                   <li><strong>Upgrade:</strong> Running out of quota? Contact us for higher limits or enterprise access</li>
                 </ul>

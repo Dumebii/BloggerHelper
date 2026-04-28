@@ -114,11 +114,14 @@ function DashboardContent() {
       icon: <Store className="w-5 h-5 opacity-70" />,
       onClick: () => router.push("/dashboard/personas/marketplace"),
     },
-    ...(planStatus?.hasLongForm ? [{
-      label: "Long-Form Content",
+    {
+      label: "Blog Post",
       icon: <FileText className="w-5 h-5 opacity-70" />,
-      onClick: () => router.push("/dashboard/long-form"),
-    }] : []),
+      onClick: () => planStatus?.hasLongForm
+        ? router.push("/dashboard/long-form")
+        : setIsUpgradeModalOpen(true),
+      locked: !planStatus?.hasLongForm,
+    },
     {
       label: "Settings & Integrations",
       icon: (

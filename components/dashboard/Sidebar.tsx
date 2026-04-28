@@ -6,6 +6,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   onClick: () => void;
+  locked?: boolean;
 }
 
 interface SidebarProps {
@@ -72,7 +73,7 @@ export default function Sidebar({
     case "Subscribers": tourId = "sidebar-subscribers"; break;
     case "Personas": tourId = "sidebar-personas"; break;
     case "Persona Marketplace": tourId = "sidebar-personas-marketplace"; break;
-    case "Long-Form Content": tourId = "sidebar-long-form"; break;
+    case "Blog Post": tourId = "sidebar-blog-post"; break;
     case "Email Lists": tourId = "sidebar-email-lists"; break;
     case "Settings & Integrations": tourId = "sidebar-settings"; break;
     case "Copilot Settings": tourId = "sidebar-copilot-settings"; break;
@@ -82,11 +83,20 @@ export default function Sidebar({
       key={item.label}
       data-tour={tourId}
       onClick={() => { item.onClick(); setIsMobileSidebarOpen(false); }}
-      className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-brand-red rounded-xl transition-colors ${isSidebarCollapsed ? 'justify-center' : ''}`}
+      className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold rounded-xl transition-colors ${isSidebarCollapsed ? 'justify-center' : ''} ${item.locked ? 'text-slate-400 hover:bg-slate-50 hover:text-slate-500 cursor-pointer' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-red'}`}
       title={isSidebarCollapsed ? item.label : undefined}
     >
       <span className={isSidebarCollapsed ? 'mx-auto' : ''}>{item.icon}</span>
-      {!isSidebarCollapsed && item.label}
+      {!isSidebarCollapsed && (
+        <span className="flex items-center gap-2 flex-1">
+          {item.label}
+          {item.locked && (
+            <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+              Org
+            </span>
+          )}
+        </span>
+      )}
     </button>
   );
 })}

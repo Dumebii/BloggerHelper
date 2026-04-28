@@ -242,7 +242,7 @@ export default function LongFormPage() {
             <div className="flex items-center gap-3 mb-2">
               <FileText className="w-8 h-8 text-brand-red" />
               <h1 className="text-3xl font-black uppercase tracking-tighter">
-                Long-Form Content
+                Blog Post
               </h1>
             </div>
             <p className="text-slate-500">Generate articles optimized for your audience</p>
@@ -252,10 +252,10 @@ export default function LongFormPage() {
             <div className="bg-white border-4 border-slate-200 rounded-2xl p-8 text-center">
               <Lock className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-slate-900 mb-2">
-                Upgrade to Access Long-Form
+                Upgrade to Access Blog Post Generation
               </h2>
               <p className="text-slate-500 mb-6">
-                Long-form content generation is available on Organization and Enterprise plans.
+                Blog post generation is available on Organization and Enterprise plans.
               </p>
               <button
                 onClick={() => router.push("/pricing")}
@@ -394,7 +394,7 @@ export default function LongFormPage() {
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5" />
-                        Generate Long-Form Content
+                        Generate Blog Post
                       </>
                     )}
                   </button>
