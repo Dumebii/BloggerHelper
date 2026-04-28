@@ -48,46 +48,112 @@ export default function Home() {
     <div className="bg-brand-offwhite font-sans text-slate-900 min-h-screen flex flex-col overflow-hidden">
       <Header session={session} onSignIn={() => setIsAuthModalOpen(true)} />
       <main className="flex-1">
-        <Hero />
 
-        {/* ── Demo widget ──────────────────────────────────────────── */}
-        <section className="bg-white border-y border-slate-200 py-16 px-6">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-8">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-red mb-3">
-                Try it now — free
-              </p>
-              <h2 className="text-3xl md:text-4xl font-black text-brand-navy tracking-tight">
-                See what human sounds like
-              </h2>
-              <p className="text-slate-500 font-medium mt-2 text-base">
-                Paste a URL, drop some notes, or type a rough idea. Done in 20 seconds.
-              </p>
-            </div>
-            <LandingDemoWidget />
+        {/* ── Demo Hero ─────────────────────────────────────────────── */}
+        <section className="relative bg-brand-offwhite overflow-hidden py-16 md:py-24 px-6">
+          {/* Subtle background accents */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-red/6 rounded-full blur-3xl opacity-60 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-red/4 rounded-full blur-3xl opacity-50 pointer-events-none" />
+
+          <div className="max-w-3xl mx-auto relative z-10">
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45 }}
+              className="flex justify-center mb-6"
+            >
+              <span className="inline-flex items-center gap-2 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full border border-brand-red/20">
+                <span className="w-1.5 h-1.5 bg-brand-red rounded-full animate-pulse" />
+                Live demo — no sign-up required
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.08 }}
+              className="text-center mb-4"
+            >
+              <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-brand-navy leading-[1.05]">
+                Content that sounds like{" "}
+                <span className="text-brand-red">a person</span>{" "}
+                wrote it.
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.16 }}
+              className="text-center text-slate-500 font-medium text-lg mb-10 max-w-xl mx-auto"
+            >
+              Paste a URL, drop some notes, or type a rough idea. Get a 3-day campaign for X, LinkedIn, Discord, and email. Done in 20 seconds.
+            </motion.p>
+
+            {/* Demo widget */}
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.22 }}
+            >
+              <LandingDemoWidget />
+            </motion.div>
+
+            {/* Launch badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="flex flex-wrap items-center justify-center gap-4 mt-10"
+            >
+              <a
+                href="https://www.betterlaunch.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-60 hover:opacity-100 transition-opacity duration-200 grayscale hover:grayscale-0"
+                aria-label="Featured on Better Launch"
+              >
+                <img
+                  src="https://www.betterlaunch.co/badge.svg"
+                  alt="Featured on Better Launch"
+                  width={140}
+                  height={32}
+                  className="h-8 w-auto"
+                />
+              </a>
+              <a
+                href="https://www.scrolllaunch.com/products/ozigi?utm_source=badge&utm_medium=embed&utm_campaign=ozigi&ref=scrolllaunch"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-60 hover:opacity-100 transition-opacity duration-200 grayscale hover:grayscale-0"
+              >
+                <img
+                  src="https://www.scrolllaunch.com/api/badge/ozigi"
+                  alt="Featured on ScrollLaunch"
+                  width={220}
+                  height={48}
+                  loading="lazy"
+                  className="h-8 w-auto"
+                />
+              </a>
+            </motion.div>
           </div>
         </section>
 
-{/* BetterLaunch badge — place above the logo ticker in the social proof section */}
-<div className="flex justify-center mb-6">
-  <a
-    href="https://www.betterlaunch.co"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-200"
-    aria-label="Featured on Better Launch"
-  >
-    <img
-      src="https://www.betterlaunch.co/badge.svg"
-      alt="Featured on Better Launch"
-      width={120}
-      height={24}
-      className="h-5 w-auto opacity-80 group-hover:opacity-100 transition-opacity duration-200"
-    />
-  </a>
-</div>
-        
         <SocialProof />
+
+        {/* ── Output showcase (Hero animated cards) ─────────────────── */}
+        <div className="bg-white border-t border-slate-100 pt-12 px-6 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 mb-1">
+            What it produces
+          </p>
+          <p className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-brand-navy">
+            Swipe through real outputs
+          </p>
+        </div>
+        <Hero />
 
         {/* How It Works */}
         <section className="py-20 md:py-28 bg-gradient-to-b from-white to-brand-offwhite border-b border-slate-200/20 relative overflow-hidden">

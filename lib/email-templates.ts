@@ -31,27 +31,24 @@ export function buildNewsletterEmail(
   replyTo?: string,
   senderName?: string,
   isWebView = false,
-  postId?: string
+  viewInBrowserUrl?: string
 ) {
-  const senderDisplay = senderName || 'Ozigi Newsletter';
-  const viewInBrowserLink = postId ? `${process.env.APP_URL}/email/${postId}` : '';
+  const senderDisplay = senderName || 'Newsletter';
 
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden;">
-      <div style="background: #fafafa; padding: 24px 32px; text-align: center; border-bottom: 1px solid #e2e8f0;">
-        <img src="https://ozigi.app/logo.png" alt="Ozigi" style="height: 32px;">
-      </div>
       <div style="padding: 32px; font-size: 16px; line-height: 1.5;">
         ${body}
       </div>
       <div style="background: #f8fafc; padding: 16px 32px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 0.75rem; color: #64748b;">
-        <p style="margin: 0 0 8px 0;">
+        <p style="margin: 0 0 6px 0;">
           You're receiving this because you subscribed to ${senderDisplay}.
+          ${replyTo ? ` &bull; Reply to: <a href="mailto:${replyTo}" style="color: #64748b;">${replyTo}</a>` : ''}
         </p>
-        ${!isWebView && unsubscribeLink ? `<p style="margin: 0;"><a href="${unsubscribeLink}" style="color: #ef4444; text-decoration: none;">Unsubscribe</a></p>` : ''}
-        ${replyTo ? `<p style="margin-top: 8px;">Reply to: ${replyTo}</p>` : ''}
-        <p style="margin-top: 8px;">Powered by Ozigi with ❤️</p>
-        ${!isWebView && viewInBrowserLink ? `<p style="margin-top: 8px;"><a href="${viewInBrowserLink}" style="color: #1d4ed8;">View in browser</a></p>` : ''}
+        ${!isWebView && unsubscribeLink ? `<p style="margin: 0 0 6px 0;"><a href="${unsubscribeLink}" style="color: #ef4444; text-decoration: none;">Unsubscribe</a></p>` : ''}
+        <p style="margin: 0; color: #94a3b8; font-size: 0.65rem;">
+          ${!isWebView && viewInBrowserUrl ? `<a href="${viewInBrowserUrl}" style="color: #94a3b8; text-decoration: underline;">View in browser</a> &nbsp;&middot;&nbsp; ` : ''}Powered by <a href="https://ozigi.app" style="color: #94a3b8; text-decoration: none;">Ozigi</a>
+        </p>
       </div>
     </div>
   `;

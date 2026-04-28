@@ -158,7 +158,7 @@ if (post.platform === 'email') {
         replyToInfo,
         senderName,
         false,
-        post.id
+        `${APP_URL}/email/${post.id}`
       );
 
       // Size check

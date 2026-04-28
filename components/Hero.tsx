@@ -274,9 +274,9 @@ export default function Hero() {
             </p>
 
             {/* Main value prop — this is what dominates */}
-            <h1 className="text-[52px] md:text-[64px] lg:text-[72px] font-black text-brand-navy leading-[1.05] tracking-tighter">
-              content that<br />sounds like you.
-            </h1>
+            <h2 className="text-[52px] md:text-[64px] lg:text-[72px] uppercase  font-black text-brand-navy leading-[1.05] tracking-tighter">
+              Content that<br />sounds like you.
+            </h2>
 
             {/* Punch line — the differentiator, high contrast */}
             <p className="text-[28px] md:text-[34px] lg:text-[38px] font-black text-brand-red leading-none tracking-tight">

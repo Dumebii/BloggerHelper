@@ -13,7 +13,17 @@
       "Bash(xargs ls *)",
       "WebFetch(domain:developer.linkedin.com)",
       "WebSearch",
-      "Bash(xargs head *)"
+      "Bash(xargs head *)",
+      "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp ok'\\)\")",
+      "Bash(magick --version)",
+      "Bash(ffmpeg -version)",
+      "Bash(npm list *)",
+      "Bash(npx --yes sharp-cli --version)",
+      "Bash(python3 -c \"from PIL import Image; print\\('pillow ok'\\)\")",
+      "Bash(python -c \"from PIL import Image; print\\('pillow ok'\\)\")",
+      "Bash(python3 -)",
+      "Bash(py --version)",
+      "Bash(py -c \"from PIL import Image; print\\('pillow ok'\\)\")"
     ]
   }
 }
