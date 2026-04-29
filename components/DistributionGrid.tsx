@@ -6,7 +6,6 @@ import { CampaignDay } from "../lib/types";
 import ScheduleModal from "./ScheduleModal";
 import RichTextEditor from "./RichTextEditor";
 import ScheduleEmailModal from "./ScheduleEmailModal";
-import { uploadBase64Image } from "@/lib/utils";
 import { usePlanStatus } from "@/components/hooks/usePlanStatus";
 import { PLATFORMS, getApiEndpoint } from "@/lib/platforms";
 import { uploadLargeAsset } from "@/lib/utils";
@@ -601,6 +600,7 @@ function LinkedInCarouselBuilder({
   const [uploadedPdfBase64, setUploadedPdfBase64] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "generating" | "ready">("idle");
+  const [isExtractingSlides, setIsExtractingSlides] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
   // ── Theme state ────────────────────────────────────────────────────────────
@@ -661,13 +661,28 @@ function LinkedInCarouselBuilder({
     if (selectedThemeId === id) handleSelectTheme(BUILT_IN_THEMES[0].id);
   };
 
-  const handleParseFromPost = () => {
-    const parsed = parsePostIntoSlides(postText);
-    setSlides(parsed);
-    setPdfDataUri(null);
-    setUploadedPdfBase64(null);
-    setUploadedFileName(null);
-    setStatus("idle");
+  const handleParseFromPost = async () => {
+    setIsExtractingSlides(true);
+    try {
+      const res = await fetch("/api/generate-carousel-slides", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postText }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to extract slides");
+      setSlides(data.slides);
+    } catch (err: any) {
+      toast.error(`Could not extract slides: ${err.message}`);
+      // Fallback to heuristic
+      setSlides(parsePostIntoSlides(postText));
+    } finally {
+      setPdfDataUri(null);
+      setUploadedPdfBase64(null);
+      setUploadedFileName(null);
+      setStatus("idle");
+      setIsExtractingSlides(false);
+    }
   };
 
   const handleAddSlide = () => {
@@ -895,9 +910,10 @@ function LinkedInCarouselBuilder({
           <div className="flex gap-1.5 flex-wrap">
             <button
               onClick={handleParseFromPost}
-              className="text-[10px] font-black uppercase tracking-widest px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:border-[#0A66C2] hover:text-[#0A66C2] transition-colors"
+              disabled={isExtractingSlides}
+              className="text-[10px] font-black uppercase tracking-widest px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:border-[#0A66C2] hover:text-[#0A66C2] transition-colors disabled:opacity-50 disabled:cursor-wait"
             >
-              Parse Post
+              {isExtractingSlides ? "Extracting…" : "Extract Slides"}
             </button>
             <button
               onClick={handleAddSlide}
@@ -1033,8 +1049,7 @@ function SocialCard({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      const publicUrl = await uploadBase64Image(data.imageUrl);
-      setImageUrl(publicUrl);
+      setImageUrls((prev) => [...prev, data.imageUrl]);
       incrementImageCount();
       toast.success("Image generated!");
     } catch (err: any) {
