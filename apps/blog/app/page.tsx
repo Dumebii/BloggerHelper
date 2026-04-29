@@ -50,13 +50,22 @@ export default async function BlogPage() {
               >
                 {post.coverImage && (
                   <div className="relative w-full aspect-[1200/630] overflow-hidden bg-slate-100">
-                    <Image
-                      src={post.coverImage}
-                      alt={post.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+                    {post.coverImage.toLowerCase().endsWith('.svg') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.coverImage}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <Image
+                        src={post.coverImage}
+                        alt={post.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    )}
                   </div>
                 )}
                 <div className="p-6">

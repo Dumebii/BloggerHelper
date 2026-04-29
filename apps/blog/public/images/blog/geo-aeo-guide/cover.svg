@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <!-- Background gradient: deep navy to slightly lighter navy -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070E1C"/>
+      <stop offset="100%" stop-color="#0F1E35"/>
+    </linearGradient>
+
+    <!-- Ember glow behind the red accent -->
+    <radialGradient id="glow" cx="72%" cy="55%" r="38%">
+      <stop offset="0%" stop-color="#E8320A" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#E8320A" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Subtle top-left cool glow -->
+    <radialGradient id="glow2" cx="15%" cy="20%" r="35%">
+      <stop offset="0%" stop-color="#1E4A8A" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0A1628" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Base background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Atmospheric glows -->
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- ═══ CIRCUIT / GRID PATTERN (right side) ═══ -->
+  <!-- Horizontal grid lines -->
+  <g stroke="#1E293B" stroke-width="1" opacity="0.6">
+    <line x1="580" y1="80"  x2="1160" y2="80"/>
+    <line x1="580" y1="160" x2="1160" y2="160"/>
+    <line x1="580" y1="240" x2="1160" y2="240"/>
+    <line x1="580" y1="320" x2="1160" y2="320"/>
+    <line x1="580" y1="400" x2="1160" y2="400"/>
+    <line x1="580" y1="480" x2="1160" y2="480"/>
+    <line x1="580" y1="560" x2="1160" y2="560"/>
+  </g>
+  <!-- Vertical grid lines -->
+  <g stroke="#1E293B" stroke-width="1" opacity="0.6">
+    <line x1="620"  y1="40" x2="620"  y2="590"/>
+    <line x1="700"  y1="40" x2="700"  y2="590"/>
+    <line x1="780"  y1="40" x2="780"  y2="590"/>
+    <line x1="860"  y1="40" x2="860"  y2="590"/>
+    <line x1="940"  y1="40" x2="940"  y2="590"/>
+    <line x1="1020" y1="40" x2="1020" y2="590"/>
+    <line x1="1100" y1="40" x2="1100" y2="590"/>
+  </g>
+
+  <!-- Circuit traces -->
+  <g fill="none" stroke="#1E3A5F" stroke-width="1.5" opacity="0.7">
+    <!-- Top right circuit trace -->
+    <path d="M860 80 L860 160 L940 160 L940 240 L1020 240"/>
+    <path d="M1020 80 L1020 160 L1100 160"/>
+    <path d="M700 240 L700 320 L780 320 L780 400 L860 400"/>
+    <path d="M940 320 L1020 320 L1020 400 L1100 400 L1100 480"/>
+    <path d="M780 480 L780 560 L860 560 L860 480 L940 480"/>
+    <path d="M620 400 L700 400 L700 480"/>
+  </g>
+
+  <!-- Circuit node dots -->
+  <g fill="#1E3A5F" opacity="0.9">
+    <circle cx="860" cy="160" r="4"/>
+    <circle cx="940" cy="240" r="4"/>
+    <circle cx="1020" cy="160" r="4"/>
+    <circle cx="780" cy="320" r="4"/>
+    <circle cx="860" cy="400" r="4"/>
+    <circle cx="1020" cy="400" r="4"/>
+    <circle cx="860" cy="480" r="4"/>
+    <circle cx="700" cy="400" r="4"/>
+    <circle cx="780" cy="560" r="4"/>
+  </g>
+
+  <!-- Highlighted active circuit nodes (ember) -->
+  <g fill="#E8320A" opacity="0.85">
+    <circle cx="940" cy="160" r="5"/>
+    <circle cx="1100" cy="400" r="5"/>
+    <circle cx="780" cy="400" r="5"/>
+  </g>
+  <!-- Glow rings around active nodes -->
+  <g fill="none" stroke="#E8320A" stroke-width="1" opacity="0.3">
+    <circle cx="940" cy="160" r="12"/>
+    <circle cx="1100" cy="400" r="12"/>
+    <circle cx="780" cy="400" r="12"/>
+  </g>
+
+  <!-- Active circuit trace highlight -->
+  <path d="M940 80 L940 160 L1020 160 L1020 240" fill="none" stroke="#E8320A" stroke-width="1.5" opacity="0.5"/>
+  <path d="M700 320 L780 320 L780 400" fill="none" stroke="#E8320A" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- ═══ LEFT SIDE: TEXT CONTENT ═══ -->
+
+  <!-- Category label -->
+  <text x="80" y="118" font-family="'DM Sans', 'Inter', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#E8320A" letter-spacing="3">CONTENT GUIDE  ·  APRIL 2026</text>
+
+  <!-- Main title line 1 -->
+  <text x="80" y="220" font-family="'DM Sans', 'Inter', 'Helvetica Neue', sans-serif" font-size="88" font-weight="800" fill="#FAFAFA">What Is</text>
+
+  <!-- GEO + AEO highlighted -->
+  <text x="80" y="330" font-family="'DM Sans', 'Inter', 'Helvetica Neue', sans-serif" font-size="88" font-weight="800" fill="#FAFAFA">GEO <tspan fill="#E8320A">&amp;</tspan> AEO?</text>
+
+  <!-- Subtitle line 1 -->
+  <text x="80" y="405" font-family="'DM Sans', 'Inter', 'Helvetica Neue', sans-serif" font-size="30" font-weight="400" fill="#94A3B8">How to get your content cited</text>
+  <!-- Subtitle line 2 -->
+  <text x="80" y="445" font-family="'DM Sans', 'Inter', 'Helvetica Neue', sans-serif" font-size="30" font-weight="400" fill="#94A3B8">by AI search in 2026</text>
+
+  <!-- Divider line -->
+  <line x1="80" y1="490" x2="420" y2="490" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- Stat pills at bottom -->
+  <!-- Pill 1 -->
+  <rect x="80" y="508" width="155" height="36" rx="18" fill="#1E293B"/>
+  <text x="157" y="531" text-anchor="middle" font-family="'DM Sans', 'Inter', sans-serif" font-size="13" font-weight="500" fill="#FAFAFA">527% AI traffic growth</text>
+
+  <!-- Pill 2 -->
+  <rect x="246" y="508" width="130" height="36" rx="18" fill="#1E293B"/>
+  <text x="311" y="531" text-anchor="middle" font-family="'DM Sans', 'Inter', sans-serif" font-size="13" font-weight="500" fill="#FAFAFA">5x conversion rate</text>
+
+  <!-- Ozigi wordmark + tagline -->
+  <text x="80" y="598" font-family="'DM Sans', 'Inter', sans-serif" font-size="13" font-weight="700" fill="#E8320A" letter-spacing="3">OZIGI</text>
+  <text x="136" y="598" font-family="'DM Sans', 'Inter', sans-serif" font-size="13" fill="#94A3B8" opacity="0.7">  ·  blog.ozigi.app</text>
+
+  <!-- Red accent bar left edge -->
+  <rect x="0" y="0" width="6" height="630" fill="#E8320A"/>
+
+</svg>

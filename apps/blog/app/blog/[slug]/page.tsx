@@ -157,14 +157,24 @@ const hasHeadings = post.headings && post.headings.length > 0;
 
         {post.coverImage && (
           <div className="relative w-full aspect-[1200/630] mb-8 rounded-2xl overflow-hidden bg-slate-100">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 1200px"
-            />
+            {post.coverImage.toLowerCase().endsWith('.svg') ? (
+              // SVGs can't go through Next.js image optimisation — use plain img
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={post.coverImage}
+                alt={post.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 1200px"
+              />
+            )}
           </div>
         )}
 
@@ -340,12 +350,21 @@ const hasHeadings = post.headings && post.headings.length > 0;
                     >
                       {related.coverImage && (
                         <div className="relative w-full aspect-[1200/630] overflow-hidden bg-slate-100">
-                          <Image
-                            src={related.coverImage}
-                            alt={related.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          {related.coverImage.toLowerCase().endsWith('.svg') ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={related.coverImage}
+                              alt={related.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <Image
+                              src={related.coverImage}
+                              alt={related.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          )}
                         </div>
                       )}
                       <div className="p-4">
