@@ -7,8 +7,16 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   dsn: "https://0c22d3ac235eb3968f0b71ffab86dd67@o4511042432270336.ingest.de.sentry.io/4511042438758480",
 
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+  // Add optional integrations for additional features.
+  //
+  // maskAllText/blockAllMedia are Sentry's own defaults, but they are NOT the
+  // defaults here: `sendDefaultPii: true` (set below) silently flips both to
+  // false, which would ship the literal on-screen text of every recorded
+  // session — draft content, lead lists, recipient addresses, and anything
+  // pasted into /slop-checker — to Sentry. Pinning them back on keeps replays
+  // useful for layout and interaction bugs without carrying user content off
+  // the browser. Do not remove without deciding that trade deliberately.
+  integrations: [Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true })],
 
   // Every client trace, log and replay chunk is an HTTP POST from the browser.
   // Sampling these down cuts both Sentry quota and — because these are sent
