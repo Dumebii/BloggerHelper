@@ -149,11 +149,8 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
                   onMouseEnter={() => setIsToolsDropdownOpen(true)}
                   onMouseLeave={() => setIsToolsDropdownOpen(false)}
                 >
-                  <button className="text-sm font-semibold text-foreground-muted hover:text-foreground transition flex items-center gap-1">
+                  <button className="text-sm font-semibold text-foreground-muted hover:text-foreground transition">
                     Free Tools
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
                   </button>
                   {isToolsDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-64 rounded-xl py-2 z-50"
@@ -179,11 +176,8 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
                   onMouseEnter={() => setIsFeaturesDropdownOpen(true)}
                   onMouseLeave={() => setIsFeaturesDropdownOpen(false)}
                 >
-                  <button className="text-sm font-semibold text-foreground-muted hover:text-foreground transition flex items-center gap-1">
+                  <button className="text-sm font-semibold text-foreground-muted hover:text-foreground transition">
                     Features
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
                   </button>
                   {isFeaturesDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-56 rounded-xl py-2 z-50"
