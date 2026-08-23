@@ -884,8 +884,17 @@ export default function Home() {
                 No sign-up needed. Generate one piece of content for free — then see the pipeline that fills itself.
               </motion.p>
 
-              <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
+                  {
+                    label: "AI Slop Checker",
+                    href: "/slop-checker",
+                    desc: "Paste anything and see which words, phrases, and sentence patterns make it read as AI-written. Runs in your browser — nothing you paste is uploaded.",
+                    tag: "New",
+                    bg: C.cardR,
+                    accent: true,
+                    wide: true,
+                  },
                   {
                     label: "Article Generator",
                     href: "/long-form",
@@ -898,8 +907,7 @@ export default function Home() {
                     href: "/email-outreach",
                     desc: "Personalised first-touch emails with subject lines that earn replies.",
                     tag: "Outreach",
-                    bg: C.cardR,
-                    accent: true,
+                    bg: C.cardG,
                   },
                   {
                     label: "LinkedIn Message Generator",
@@ -913,13 +921,13 @@ export default function Home() {
                     href: "/newsletter",
                     desc: "Full newsletter issues — hook, body, takeaway, and a subject line that earns opens.",
                     tag: "Newsletter",
-                    bg: C.cardG,
+                    bg: C.cardB,
                   },
-                ].map(({ label, href, desc, tag, bg, accent }) => (
+                ].map(({ label, href, desc, tag, bg, accent, wide }) => (
                   <Link
                     key={href}
                     href={href}
-                    className="group relative rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    className={`group relative rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${wide ? "lg:col-span-2" : ""}`}
                     style={{ background: bg, border: `1px solid ${accent ? "rgba(232,50,10,0.2)" : C.border}` }}
                   >
                     <div className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl"

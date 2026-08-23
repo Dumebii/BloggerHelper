@@ -38,6 +38,7 @@ const RELATED_LINKS = [
   { href: "/blog/email-vs-linkedin-outreach-dev-tools", label: "Email vs LinkedIn outreach for dev tools" },
   { href: "/pricing", label: "See LinkedIn outreach pricing" },
   { href: "/email-outreach", label: "Cold email generator" },
+  { href: "/slop-checker", label: "AI slop checker" },
 ];
 
 const STORAGE_KEY = "ozigi_demo_linkedin_outreach";

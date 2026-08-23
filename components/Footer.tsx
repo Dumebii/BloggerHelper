@@ -31,6 +31,9 @@ export default function Footer() {
               Free Tools
             </h4>
             <div className="flex flex-col gap-3">
+              <Link href="/slop-checker" className="text-sm text-foreground-subtle hover:text-accent transition-colors">
+                AI Slop Checker
+              </Link>
               <Link href="/long-form" className="text-sm text-foreground-subtle hover:text-accent transition-colors">
                 Article Generator
               </Link>

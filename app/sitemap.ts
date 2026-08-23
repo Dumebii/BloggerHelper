@@ -37,6 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/pricing`,               lastModified: new Date("2026-06-01"), changeFrequency: "monthly", priority: 0.9 },
 
     // High-intent public tool pages (SEO landing + demo gate)
+    { url: `${BASE}/slop-checker`,          lastModified: new Date("2026-08-23"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/long-form`,             lastModified: new Date("2026-06-30"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/email-outreach`,        lastModified: new Date("2026-06-30"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/linkedin-outreach`,     lastModified: new Date("2026-06-30"), changeFrequency: "monthly", priority: 0.9 },

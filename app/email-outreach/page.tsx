@@ -38,6 +38,7 @@ const RELATED_LINKS = [
   { href: "/blog/does-ai-written-cold-email-get-flagged", label: "Does AI-written cold email get flagged as spam" },
   { href: "/pricing", label: "See full pricing" },
   { href: "/linkedin-outreach", label: "LinkedIn message generator" },
+  { href: "/slop-checker", label: "AI slop checker" },
 ];
 
 const STORAGE_KEY = "ozigi_demo_email_outreach";

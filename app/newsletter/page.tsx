@@ -37,6 +37,7 @@ const RELATED_LINKS = [
   { href: "/blog/first-10-newsletter-issues-2026", label: "Your first 10 newsletter issues" },
   { href: "/pricing", label: "Compare newsletter plans" },
   { href: "/long-form", label: "AI blog post generator" },
+  { href: "/slop-checker", label: "AI slop checker" },
 ];
 
 const STORAGE_KEY = "ozigi_demo_newsletter";

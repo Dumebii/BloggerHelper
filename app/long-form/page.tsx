@@ -40,6 +40,7 @@ const RELATED_LINKS = [
   { href: "/blog/geo-aeo-guide-ozigi", label: "GEO/AEO guide for AI search visibility" },
   { href: "/pricing", label: "See long-form pricing" },
   { href: "/newsletter", label: "AI newsletter generator" },
+  { href: "/slop-checker", label: "AI slop checker" },
 ];
 
 const STORAGE_KEY = "ozigi_demo_longform";

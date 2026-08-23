@@ -36,6 +36,7 @@ export default function Header({ session: propSession, onSignIn, onOpenMobileSid
   ];
 
   const tools = [
+    { name: "AI Slop Checker", href: "/slop-checker" },
     { name: "Long-Form Article Generator", href: "/long-form" },
     { name: "Cold Email Generator", href: "/email-outreach" },
     { name: "LinkedIn Message Generator", href: "/linkedin-outreach" },
