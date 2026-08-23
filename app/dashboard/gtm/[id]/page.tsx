@@ -504,7 +504,10 @@ export default function CampaignDetailPage() {
       )}
 
       {/* ── Tabs ────────────────────────────────────────────────────────────── */}
-      <div className="flex mb-5 border-b-2 border-border overflow-x-auto">
+      {/* pb-0.5 + overflow-y-hidden: the tabs' -mb-0.5 underline protrudes 2px,
+          and overflow-x-auto makes overflow-y auto, which painted a phantom
+          vertical scrollbar. See the same pairing in GtmPageHeader. */}
+      <div className="flex mb-5 pb-0.5 border-b-2 border-border overflow-x-auto overflow-y-hidden">
         {([
           { key: 'leads',    label: `Leads (${leads.length})` },
           { key: 'email',    label: `Email (${emailSent} sent)` },

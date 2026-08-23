@@ -27,7 +27,11 @@ export default function GtmPageHeader({ title }: { title: string }) {
       </div>
 
       {/* GTM sub-nav */}
-      <div className="px-6 flex items-center gap-1 overflow-x-auto">
+      {/* overflow-x-auto forces overflow-y to compute as auto, and the tabs'
+          -mb-px underline protrudes 1px past the content box — which painted a
+          phantom vertical scrollbar. pb-px absorbs the protrusion, overflow-y-hidden
+          stops the pairing from coming back. Keep all three together. */}
+      <div className="px-6 pb-px flex items-center gap-1 overflow-x-auto overflow-y-hidden">
         {NAV.map(item => {
           const active = item.href === '/dashboard' || item.href === '/dashboard/gtm'
             ? pathname === item.href

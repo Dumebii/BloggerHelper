@@ -262,7 +262,7 @@ export default function EmailOutreachPage() {
 
         {/* Filter tabs + email list */}
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
-          <div className="flex items-center gap-1 px-5 py-3.5 border-b border-border overflow-x-auto">
+          <div className="flex items-center gap-1 px-5 py-3.5 border-b border-border overflow-x-auto overflow-y-hidden">
             {['all', 'sent', 'opened', 'replied', 'bounced', 'scheduled'].map(f => (
               <button
                 key={f}
