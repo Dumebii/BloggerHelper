@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+// Every status that means the email actually went out. 'opened'/'clicked' are in
+// the sequence_sends CHECK constraint but nothing writes them yet; including them
+// keeps this correct once open tracking lands.
+const DELIVERED = new Set(['sent', 'opened', 'clicked', 'replied'])
+
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +32,7 @@ export async function GET() {
 
     // All sequence sends (last 30 days)
     supabaseAdmin.from('sequence_sends')
-      .select('id, channel, status, sent_at, created_at')
+      .select('id, campaign_id, channel, status, sent_at, created_at')
       .eq('user_id', user.id)
       .gte('created_at', thirtyDaysAgo),
 
@@ -39,7 +44,7 @@ export async function GET() {
 
     // LinkedIn queue
     supabaseAdmin.from('linkedin_queue')
-      .select('id, action, status, created_at')
+      .select('id, campaign_id, action, status, created_at')
       .eq('user_id', user.id)
       .gte('created_at', thirtyDaysAgo),
 
@@ -71,9 +76,14 @@ export async function GET() {
   const campaigns  = campaignsRes.data ?? []
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  const emailsSent    = sends.filter(s => s.channel === 'email'    && s.status === 'sent').length
+  // `status` is a single mutually-exclusive column, so a send that gets a reply
+  // moves out of 'sent' and into 'replied'. Both are delivered emails and both
+  // belong in the sent total — counting only 'sent' would shrink the denominator
+  // with every reply and inflate the reply rate.
+  const emailSends    = sends.filter(s => s.channel === 'email')
+  const emailsSent    = emailSends.filter(s => DELIVERED.has(s.status)).length
   const liDone        = liQueue.filter(q => q.status === 'done').length
-  const replies       = sends.filter(s => s.status === 'replied').length
+  const replies       = emailSends.filter(s => s.status === 'replied').length
   const replyRate     = emailsSent > 0 ? ((replies / emailsSent) * 100).toFixed(1) : '0.0'
   const activeCampaigns = campaigns.filter(c => c.status === 'active').length
 
@@ -95,7 +105,7 @@ export async function GET() {
   // ── Email sends chart — emails sent per day (last 14 days) ───────────────
   const sendsByDay: Record<string, number> = {}
   for (const k of Object.keys(leadsByDay)) sendsByDay[k] = 0
-  for (const s of sends.filter(s => s.channel === 'email' && s.status === 'sent')) {
+  for (const s of emailSends.filter(s => DELIVERED.has(s.status))) {
     const day = (s.sent_at ?? s.created_at).split('T')[0]
     if (day in sendsByDay) sendsByDay[day]++
   }
@@ -117,8 +127,8 @@ export async function GET() {
     id:              c.id,
     name:            c.name,
     status:          c.status,
-    emailsSent:      sends.filter(s => s.status === 'sent' && s.channel === 'email').length,
-    liDone:          liQueue.filter(q => q.status === 'done').length,
+    emailsSent:      emailSends.filter(s => s.campaign_id === c.id && DELIVERED.has(s.status)).length,
+    liDone:          liQueue.filter(q => q.campaign_id === c.id && q.status === 'done').length,
   }))
 
   return NextResponse.json({

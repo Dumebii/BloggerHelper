@@ -29,6 +29,10 @@ export async function POST(req: Request) {
     .eq('channel', 'email')
     .eq('status', 'sent')
     .not('gmail_thread_id', 'is', null)
+    // Belt-and-braces: SMTP sends used to store '' here, which passes the NULL
+    // check above. The backfill migration clears them, but this keeps the batch
+    // clean if any older build is still writing rows during a rollout.
+    .neq('gmail_thread_id', '')
     .gte('sent_at', cutoff)
     .order('sent_at', { ascending: false })
     .limit(200)
@@ -79,7 +83,7 @@ export async function POST(req: Request) {
         // Mark this specific send as replied
         supabaseAdmin
           .from('sequence_sends')
-          .update({ status: 'replied' })
+          .update({ status: 'replied', replied_at: now })
           .eq('id', send.id),
 
         // Mark the lead as replied — stops all future sequence steps

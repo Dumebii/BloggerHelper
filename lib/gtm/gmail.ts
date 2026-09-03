@@ -117,7 +117,10 @@ export async function refreshAccessToken(accountId: string): Promise<string> {
 
 export interface GmailSendResult {
   messageId: string
-  threadId:  string
+  // null for transports with no thread concept (SMTP). Must stay null rather
+  // than '' so the reply-detection query's `gmail_thread_id is not null` filter
+  // actually excludes those sends.
+  threadId:  string | null
 }
 
 // Builds a RFC 2822 message and sends via Gmail REST API.

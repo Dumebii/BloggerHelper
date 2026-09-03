@@ -3,7 +3,7 @@ import { verifyQStashRequest } from '@/lib/qstash'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { composeEmail, composeLinkedInMessage } from '@/lib/gtm/composer'
 import { spreadScheduledAt } from '@/lib/gtm/schedule'
-import { sendViaGmail } from '@/lib/gtm/gmail'
+import { sendViaGmail, type GmailSendResult } from '@/lib/gtm/gmail'
 import { sendViaSmtp } from '@/lib/gtm/smtp'
 import { syncLeadToCRM } from '@/lib/gtm/crm'
 import { getPlanStatus, incrementSequenceSend } from '@/lib/plan'
@@ -177,7 +177,7 @@ export async function POST(req: Request) {
                 const recipient = process.env.TEST_EMAIL ?? lead.email!
 
                 let sendState = primaryState
-                let sendResult: { messageId: string; threadId: string }
+                let sendResult: GmailSendResult
                 try {
                   const sender = sendState.account.provider === 'gmail' ? sendViaGmail : sendViaSmtp
                   sendResult = await sender(

@@ -60,6 +60,9 @@ export async function sendViaSmtp(
   // nodemailer returns a messageId; no threadId concept outside Gmail
   return {
     messageId: info.messageId ?? '',
-    threadId:  '',   // SMTP has no thread concept — reply detection won't work
+    // null, not '' — an empty string still satisfies `is not null` in Postgres,
+    // so these sends would be pulled into the check-replies batch and then
+    // silently skipped, crowding out real Gmail sends under its row limit.
+    threadId:  null,
   }
 }
