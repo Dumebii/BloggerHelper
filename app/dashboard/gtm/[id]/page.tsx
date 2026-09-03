@@ -461,6 +461,16 @@ export default function CampaignDetailPage() {
             <button onClick={() => { setShowImport(true); setImportMsg('') }} className="px-3 py-1.5 border border-border rounded-lg bg-surface text-sm text-foreground-muted hover:text-foreground hover:border-border-strong transition-colors">
               Import CSV
             </button>
+            {leads.length > 0 ? (
+              <a href={`/api/gtm/campaigns/${id}/export`} download
+                className="px-3 py-1.5 border border-border rounded-lg bg-surface text-sm text-foreground-muted hover:text-foreground hover:border-border-strong transition-colors">
+                Export CSV
+              </a>
+            ) : (
+              <span className="px-3 py-1.5 border border-border rounded-lg bg-surface text-sm text-foreground-subtle opacity-50 cursor-not-allowed">
+                Export CSV
+              </span>
+            )}
             <button onClick={previewEmails} disabled={previewing} className="px-3 py-1.5 border border-indigo-400 rounded-lg bg-surface text-sm text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-60">
               {previewing ? 'Generating…' : '👁 Preview emails'}
             </button>
