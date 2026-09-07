@@ -3,6 +3,21 @@ import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
+  // getAllPosts() reads content/blog with fs at runtime. Next traces files it can
+  // see being read from a static path, but not these — so the serverless bundle
+  // ships without them, fs.existsSync fails, and getAllPosts silently returns [].
+  //
+  // That is invisible for anything generated at build time (the post pages,
+  // feed.xml), which is why the RSS feed looks fine. sitemap.ts is the exception:
+  // its `revalidate = 3600` means it is REGENERATED at runtime an hour after
+  // deploy, in a function that cannot see content/ — so it rebuilt itself with
+  // zero posts and cached that. Every article dropped out of the sitemap.
+  //
+  // Same fix already applied to ./emails/** in the root next.config.ts.
+  outputFileTracingIncludes: {
+    '/sitemap.xml': ['./content/blog/**/*'],
+    '/feed.xml': ['./content/blog/**/*'],
+  },
   // Pages render both natively at blog.ozigi.app and proxied at ozigi.app/blog/*.
   // Next.js's built JS/CSS bundles are referenced by root-relative /_next/static/*
   // paths, which resolve against whichever host the browser is actually on — so

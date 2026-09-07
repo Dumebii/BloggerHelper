@@ -1,6 +1,6 @@
 // Vercel Hobby tier caps function runtime at 60s.
-// Images and other files are passed as fileData URIs (not base64-inlined)
-// so Vertex AI fetches them directly — no encoding overhead.
+// Files are fetched here and inlined as base64 rather than handed to Vertex as
+// crawlable URLs — see buildFileParts for why.
 export const maxDuration = 60;
 
 import { NextResponse } from 'next/server';
@@ -70,22 +70,65 @@ function guessMimeType(url: string): string {
 }
 
 /**
- * Build file parts for Gemini. We pass HTTPS URLs directly via fileData.fileUri
- * so Vertex AI fetches them itself — no base64 encoding, no fetch overhead,
- * no extra bytes in the request body. Cap at 5 files to stay well within budget.
+ * Build file parts for Gemini. We fetch the bytes here and inline them as base64
+ * rather than passing HTTPS URLs via fileData.fileUri: Vertex fetches such URLs
+ * itself, as a crawler that honours robots.txt under the Google-Extended agent,
+ * and Cloudflare's managed robots.txt disallows Google-Extended on our CDN — so
+ * every request carrying a file failed with URL_ROBOTED-ROBOTED_DENIED. Inlining
+ * removes the dependency on an external crawl policy entirely, and matches what
+ * app/api/qstash/generate already does.
+ *
+ * Cap at 5 files, and cap total inlined bytes: uploads allow 10 MB each, which
+ * would overshoot Vertex's request ceiling once base64 adds its ~33%.
  */
-function buildFileParts(assetUrls: string[]): any[] {
+async function buildFileParts(assetUrls: string[]): Promise<any[]> {
   const MAX_FILES = 5;
+  const MAX_TOTAL_BYTES = 15 * 1024 * 1024;
+
   const urls = assetUrls.slice(0, MAX_FILES);
   if (assetUrls.length > MAX_FILES) {
     console.warn(`[generate] Capped asset count: ${assetUrls.length} → ${MAX_FILES}`);
   }
-  return urls.map((url) => ({
-    fileData: {
-      mimeType: guessMimeType(url),
-      fileUri: url,
-    },
-  }));
+
+  // Fetched in parallel — these are CDN edge reads, and the whole route shares a 60s budget.
+  const assets = await Promise.all(
+    urls.map(async (url) => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        // R2 serves octet-stream when the upload did not carry a usable type;
+        // the extension is a better guess than a type Gemini will reject.
+        const headerType = res.headers.get('content-type')?.split(';')[0].trim();
+        const mimeType =
+          headerType && headerType !== 'application/octet-stream'
+            ? headerType
+            : guessMimeType(url);
+        return { url, buffer: Buffer.from(await res.arrayBuffer()), mimeType };
+      } catch (err) {
+        // One unreachable asset should not sink the whole generation.
+        console.error(`[generate] Failed to fetch asset ${url}:`, err);
+        return null;
+      }
+    }),
+  );
+
+  const parts: any[] = [];
+  let usedBytes = 0;
+  for (const asset of assets) {
+    if (!asset) continue;
+    if (usedBytes + asset.buffer.byteLength > MAX_TOTAL_BYTES) {
+      console.warn(
+        `[generate] Skipped ${asset.url}: ${asset.buffer.byteLength} bytes exceeds the remaining inline budget`,
+      );
+      continue;
+    }
+    usedBytes += asset.buffer.byteLength;
+    parts.push({
+      inlineData: { data: asset.buffer.toString('base64'), mimeType: asset.mimeType },
+    });
+  }
+
+  return parts;
 }
 
 async function generateFromParts(parts: any[]): Promise<string> {
@@ -190,7 +233,7 @@ export async function POST(req: Request) {
       }
 
       const textPrompt = buildGenerationPrompt({ tweetFormat, personaVoice, textContext: finalContext, urlContext: effectiveUrlContext });
-      const parts: any[] = [{ text: textPrompt }, ...buildFileParts(assetUrls)];
+      const parts: any[] = [{ text: textPrompt }, ...(await buildFileParts(assetUrls))];
 
       const { responseText, report: lexiconReport, retried } =
         await generateWithLexiconGuard(parts);
@@ -296,7 +339,7 @@ export async function POST(req: Request) {
     }
 
     const textPrompt = buildGenerationPrompt({ tweetFormat, personaVoice, textContext: finalContext, urlContext: effectiveUrlContext });
-    const parts: any[] = [{ text: textPrompt }, ...buildFileParts(assetUrls)];
+    const parts: any[] = [{ text: textPrompt }, ...(await buildFileParts(assetUrls))];
 
     const { responseText, report: lexiconReport, retried } =
       await generateWithLexiconGuard(parts);
