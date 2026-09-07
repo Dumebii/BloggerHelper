@@ -21,6 +21,9 @@ export const REFILL_TARGET = 8;
 export const BROADCAST_TEMPLATE = "broadcast";
 
 const dashboardUrl = `${APP_URL}/dashboard`;
+const gtmUrl = `${APP_URL}/dashboard/gtm`;
+const EXTENSION_STORE_URL =
+  "https://chromewebstore.google.com/detail/ozigi-for-linkedin/kilioffojdajfheabhckfnpinobhjnoa";
 
 export interface BroadcastCampaign {
   subject: string;
@@ -30,6 +33,9 @@ export interface BroadcastCampaign {
   cta_url: string;
 }
 
+// Ordered so consecutive sends alternate between the content engine and the
+// GTM engine rather than running four outbound emails in a row. At two sends a
+// week the full rotation takes ~7 weeks before a subscriber sees a repeat.
 export const BROADCAST_CAMPAIGNS: BroadcastCampaign[] = [
   {
     subject: "Turn one link into a week of content",
@@ -43,6 +49,18 @@ export const BROADCAST_CAMPAIGNS: BroadcastCampaign[] = [
     cta_url: dashboardUrl,
   },
   {
+    subject: "LinkedIn outreach that runs in your own browser",
+    headline: "The Ozigi extension is on the Chrome Web Store",
+    body_content: `
+      <p style="margin:0 0 16px 0;">LinkedIn quietly breaks server-side automation. It withholds search results and hides the Connect button from flagged sessions, so the tool looks like it is working while nothing actually goes out.</p>
+      <p style="margin:0 0 16px 0;"><strong style="color:#0f172a;">Ozigi for LinkedIn</strong> sidesteps that. It runs as a Chrome extension inside your own logged-in tab: it finds people matching your ICP, and sends connection requests with a note written from that person's real profile — at human pace, under a daily cap you set yourself.</p>
+      <p style="margin:0 0 16px 0;">No password to hand over, no headless browser on a server somewhere. Install it, paste your connection token, switch it on.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Connection requests with a personalised note — Ozigi does not send LinkedIn DMs.</p>
+    `,
+    cta_text: "Install the extension",
+    cta_url: EXTENSION_STORE_URL,
+  },
+  {
     subject: "Write it once, post it everywhere",
     headline: "One source. Every platform. No copy-paste.",
     body_content: `
@@ -52,6 +70,40 @@ export const BROADCAST_CAMPAIGNS: BroadcastCampaign[] = [
     `,
     cta_text: "Create a multi-platform campaign",
     cta_url: dashboardUrl,
+  },
+  {
+    subject: "Your leads, in a CSV, whenever you want them",
+    headline: "Export is live — the data is yours",
+    body_content: `
+      <p style="margin:0 0 16px 0;">Leads used to live only inside the Ozigi table. Now every campaign has an <strong style="color:#0f172a;">Export CSV</strong> button, sitting right next to Import.</p>
+      <p style="margin:0 0 16px 0;">You get the whole record, not a preview: name, email, company, location, source, LinkedIn URL, X handle, GitHub username, bio, tags, ICP score, status, and date added — for every lead in the campaign, not just the first page.</p>
+      <p style="margin:0 0 16px 0;">Take it into your CRM, a spreadsheet, Zapier, or a sales tool you already pay for. Nothing is locked in.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Open a campaign, hit Export CSV. That's the whole thing.</p>
+    `,
+    cta_text: "Export your leads",
+    cta_url: gtmUrl,
+  },
+  {
+    subject: "Your brand voice, saved once and reused forever",
+    headline: "One voice, across content and outreach",
+    body_content: `
+      <p style="margin:0 0 16px 0;">Personas are where you tell Ozigi who is writing — role, tone, beliefs, the things you would never say. Save it once and every campaign, every outreach step, and every long-form draft after that sounds unmistakably like you.</p>
+      <p style="margin:0 0 16px 0;">Running content for clients? Save a separate persona for each one and switch between them in a click.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Browse the Persona Marketplace for ready-made voices, or build your own in a few minutes.</p>
+    `,
+    cta_text: "Browse the marketplace",
+    cta_url: `${APP_URL}/dashboard/personas/marketplace`,
+  },
+  {
+    subject: "Where your next 200 leads come from",
+    headline: "Five sources, one ICP, scored before they reach you",
+    body_content: `
+      <p style="margin:0 0 16px 0;">Describe who you are after once. Ozigi sources matching people from <strong style="color:#0f172a;">GitHub, Dev.to, npm, Hacker News, and LinkedIn</strong> — where technical buyers actually are, not a stale database someone resold.</p>
+      <p style="margin:0 0 16px 0;">When a GitHub profile hides its email, Ozigi recovers a real address from that person's public commit history. Then every lead is scored 0.0–1.0 against your ICP, and only the ones above your threshold enter a sequence.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Clean lists in, better replies out — without you filtering by hand.</p>
+    `,
+    cta_text: "Set up your ICP",
+    cta_url: gtmUrl,
   },
   {
     subject: "Never write a newsletter from scratch again",
@@ -65,15 +117,27 @@ export const BROADCAST_CAMPAIGNS: BroadcastCampaign[] = [
     cta_url: dashboardUrl,
   },
   {
-    subject: "Your brand voice, saved once and reused forever",
-    headline: "Stop sounding like generic AI",
+    subject: "Leads should land where your team already works",
+    headline: "Ozigi talks to your CRM",
     body_content: `
-      <p style="margin:0 0 16px 0;">The reason most AI content feels flat is that it has no voice. Personas fix that. Describe your tone once — direct and punchy, thoughtful and educational, high-energy, whatever fits — and every campaign after that sounds unmistakably like you.</p>
-      <p style="margin:0 0 16px 0;">Running content for clients? Save a separate persona for each one and switch between them in a click.</p>
-      <p style="margin:0;color:#64748b;font-size:14px;">Browse the Persona Marketplace for ready-made voices, or build your own in a few minutes.</p>
+      <p style="margin:0 0 16px 0;">Outreach that lives in a silo creates a second pipeline nobody trusts. Ozigi pushes each lead into your CRM on first contact, so the record exists before anyone has to ask where it came from.</p>
+      <p style="margin:0 0 16px 0;">HubSpot, Zoho, and Salesforce connect over OAuth — click through once, no API keys to paste. Swipe One connects with a key.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Set it up under Outreach Settings → Integrations.</p>
     `,
-    cta_text: "Set up a persona",
-    cta_url: `${dashboardUrl}?tab=personas`,
+    cta_text: "Connect your CRM",
+    cta_url: `${APP_URL}/dashboard/gtm/settings`,
+  },
+  {
+    subject: "Why Ozigi content doesn't read as AI",
+    headline: "The Banned Lexicon",
+    body_content: `
+      <p style="margin:0 0 16px 0;">Most AI writing gives itself away in the vocabulary. "Delve." "Robust." "Seamlessly." "Tapestry." "Game-changing." Readers clock it in one line, and spam filters clock it too.</p>
+      <p style="margin:0 0 16px 0;">Ozigi enforces a hard blocklist at the API route level. The words are not filtered out afterwards — they are blocked <em>during</em> generation, so the model is penalised for reaching for AI-speak and has to build every sentence out of your actual material instead.</p>
+      <p style="margin:0 0 16px 0;">The same list applies everywhere: cold email, blog posts, LinkedIn, newsletters. One standard, every channel.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Curious how it works? The full write-up is in the docs.</p>
+    `,
+    cta_text: "Read the deep dive",
+    cta_url: `${APP_URL}/docs/the-banned-lexicon`,
   },
   {
     subject: "Schedule a week of posts in ten minutes",
@@ -87,38 +151,62 @@ export const BROADCAST_CAMPAIGNS: BroadcastCampaign[] = [
     cta_url: dashboardUrl,
   },
   {
-    subject: "Turn a rough idea into a full blog post",
-    headline: "Long-form, without the blank-page dread",
-    body_content: `
-      <p style="margin:0 0 16px 0;">Beyond short social posts, Ozigi writes long-form articles — a structured blog post from a topic, an outline, or source material you already have.</p>
-      <p style="margin:0 0 16px 0;">You get a real draft with sections and flow that you can edit in a proper editor, then repurpose into social posts and a newsletter without starting over.</p>
-      <p style="margin:0;color:#64748b;font-size:14px;">One idea in, a week of content out.</p>
-    `,
-    cta_text: "Write a blog post",
-    cta_url: `${APP_URL}/dashboard/long-form`,
-  },
-  {
     subject: "Fill your pipeline while your content runs",
     headline: "Cold outreach, built into the same tool",
     body_content: `
-      <p style="margin:0 0 16px 0;">Ozigi isn't only content. It also finds leads that match your ideal customer, scores them, and runs personalised cold email and LinkedIn sequences written from each lead's real profile — not generic blasts.</p>
-      <p style="margin:0 0 16px 0;">Connect your email, describe who you're targeting, and let the sequences run. Replies come back to your inbox; leads sync to your CRM automatically.</p>
+      <p style="margin:0 0 16px 0;">Ozigi isn't only content. It also finds leads that match your ideal customer, scores them, and runs multi-step email and LinkedIn sequences written from each lead's real profile — not generic blasts.</p>
+      <p style="margin:0 0 16px 0;">Connect your email, describe who you're targeting, and set the delays between steps. Per-channel daily limits protect your domain reputation and your LinkedIn standing, and replies come straight back to your own inbox.</p>
       <p style="margin:0;color:#64748b;font-size:14px;">Content keeps you visible. Outreach starts the conversations.</p>
     `,
     cta_text: "Explore outreach",
-    cta_url: `${APP_URL}/dashboard/gtm`,
+    cta_url: gtmUrl,
+  },
+  {
+    subject: "A PDF, a screenshot, a page of rough notes",
+    headline: "Your source doesn't have to be a link",
+    body_content: `
+      <p style="margin:0 0 16px 0;">Not every idea arrives as a tidy URL. Ozigi also takes a PDF, an image, a YouTube video, or a block of raw unedited notes, and pulls the actual narrative out of it.</p>
+      <p style="margin:0 0 16px 0;">Conference slides become a LinkedIn post. A whiteboard photo becomes a thread. Half-finished notes from a customer call become a newsletter.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">The messier the input, the more this one earns its keep.</p>
+    `,
+    cta_text: "Upload a source",
+    cta_url: dashboardUrl,
+  },
+  {
+    subject: "Every long-form draft gets audited before you see it",
+    headline: "Long-form, with a structural audit attached",
+    body_content: `
+      <p style="margin:0 0 16px 0;">Ozigi writes full blog posts, tutorials, and technical docs from a topic, an outline, or material you already have. Pick who the piece is for and it calibrates the jargon, the code, and how claims get evidenced.</p>
+      <p style="margin:0 0 16px 0;">Then seventeen detectors run over the draft and score it out of 100 — catching the AI cadence a word list can't reach: thirty paragraphs of identical length, four sentences opening the same way, the same point made in three places.</p>
+      <p style="margin:0 0 16px 0;">It also reads every code block for leaked credentials and for smart quotes — invisible on the page, and a syntax error the second a reader pastes your snippet.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">About 10ms on a 2,500-word article, with no second model call.</p>
+    `,
+    cta_text: "Write a blog post",
+    cta_url: `${APP_URL}/dashboard/long-form`,
   },
   {
     subject: "Add the visuals without opening a design tool",
     headline: "Images and a copilot, right where you write",
     body_content: `
       <p style="margin:0 0 16px 0;">Two things that make your posts land harder, both built in:</p>
-      <p style="margin:0 0 16px 0;"><strong style="color:#0f172a;">AI images</strong> — describe the visual you want and get a polished graphic to attach to your post, no separate design app.</p>
-      <p style="margin:0 0 16px 0;"><strong style="color:#0f172a;">The Copilot</strong> — stuck on an angle? Brainstorm with it, pull in live web context, and send the result straight into the generator.</p>
+      <p style="margin:0 0 16px 0;"><strong style="color:#0f172a;">AI images</strong> — describe the visual you want and get a polished graphic to attach to your post. Leave the field blank for an abstract background matched to the topic, or add a title for a clean text graphic.</p>
+      <p style="margin:0 0 16px 0;"><strong style="color:#0f172a;">The Copilot</strong> — stuck on an angle? It knows your current campaign and your personas, can pull in live web context, and sends the result straight into the generator.</p>
       <p style="margin:0;color:#64748b;font-size:14px;">Small features, big difference in how finished your content feels.</p>
     `,
     cta_text: "Try it now",
     cta_url: dashboardUrl,
+  },
+  {
+    subject: "Free tools you don't need an account for",
+    headline: "Borrow the engine, no signup",
+    body_content: `
+      <p style="margin:0 0 16px 0;">A few pieces of Ozigi are just open on the site — useful on their own, and a fair way to judge the writing before you commit anything to it:</p>
+      <p style="margin:0 0 16px 0;"><strong style="color:#0f172a;">The AI Slop Checker</strong> — paste any draft and see which lines read as machine-written, and why.</p>
+      <p style="margin:0 0 16px 0;">Alongside it: standalone generators for cold email, LinkedIn messages, newsletters, and long-form articles.</p>
+      <p style="margin:0;color:#64748b;font-size:14px;">Worth sending to a teammate who hasn't signed up yet.</p>
+    `,
+    cta_text: "Try the Slop Checker",
+    cta_url: `${APP_URL}/slop-checker`,
   },
 ];
 
