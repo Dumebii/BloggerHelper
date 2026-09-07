@@ -1,10 +1,10 @@
 ---
 title: "LinkedIn Extension"
-readTime: "6 min read"
+readTime: "5 min read"
 tag: "Outbound"
 ---
 
-LinkedIn outreach runs from your own browser. Ozigi finds the leads and writes the connection notes and messages; the extension sends them from your logged-in LinkedIn tab, at human pace.
+LinkedIn outreach runs from your own browser. Ozigi finds the leads and writes the connection notes; the extension sends them from your logged-in LinkedIn tab, at human pace.
 
 Nothing runs on a server, which is the entire point.
 
@@ -16,11 +16,11 @@ Sending from your own browser, in a tab you already have open, in the session yo
 
 ```diagram
    ┌──────────┐     queue of      ┌───────────────┐
-   │  OZIGI   │  connects & msgs  │  YOUR BROWSER │
-   │  finds   │ ────────────────▶ │   extension   │
+   │  OZIGI   │ connection reqs   │  YOUR BROWSER │
+   │  scores  │ ────────────────▶ │   extension   │
    │  leads,  │                   │  polls, sends │
    │  writes  │ ◀──────────────── │  from your    │
-   │  copy    │     results       │  LinkedIn tab │
+   │  notes   │  results & leads  │  LinkedIn tab │
    └──────────┘                   └───────────────┘
                                           │
                                           ▼
@@ -32,7 +32,7 @@ Sending from your own browser, in a tab you already have open, in the session yo
 
 Go to **Outreach Settings → LinkedIn**.
 
-1. **Install the extension in Chrome.** Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and select the `extension` folder.
+1. **Install the extension.** Add [Ozigi for LinkedIn](https://chromewebstore.google.com/detail/ozigi-for-linkedin/kilioffojdajfheabhckfnpinobhjnoa) from the Chrome Web Store — it is free. The **Add to Chrome** button in Outreach Settings goes to the same listing.
 2. **Copy your connection token** from the LinkedIn section of Outreach Settings.
 3. **Open the extension**, paste the token, and switch it on.
 4. **Keep a LinkedIn tab open** while you work. Ozigi sends in the background at a human pace.
@@ -43,17 +43,17 @@ That is the whole setup. There is no password to hand over.
 
 ## What it sends
 
-**Connection requests with a personalised note.** The primary action. The note is written per lead from real signal about that person, not a template with a name slotted in.
+**Connection requests with a personalised note — and nothing else.** The note is written per lead from real signal about that person, not a template with a name slotted in.
 
-**Messages after acceptance.** Once someone accepts, a follow-up message can go out as the next step in the sequence.
+That is the whole channel. Ozigi does not send LinkedIn DMs: not follow-up messages after someone accepts, not Open Profile messages to Premium accounts, not cold messages to strangers. If you need to say more than a connection note holds, say it over email, where the sequence has as many steps as you want.
 
-**Open Profile direct messages.** Where a lead has LinkedIn Premium's Open Profile enabled, LinkedIn permits messaging without a connection. Ozigi uses that as first contact when available.
-
-It does not cold-message people who have neither accepted a connection nor enabled Open Profile. LinkedIn does not permit it.
+Everything the extension does happens on a profile page you could have opened yourself: it clicks **Connect**, pastes the note, and sends. Where a profile hides Connect behind the **…** menu, it opens the menu and uses it there.
 
 ## Sourcing leads from LinkedIn
 
 LinkedIn search also runs through the extension, for the same reason sending does. It is the only source that yields a LinkedIn profile URL, which makes it the only source that can feed the LinkedIn channel of a sequence.
+
+The extension handles both jobs on one loop, and **sending always wins**. It only runs a people search when there is nothing queued to send — searching just fills the funnel, and it is the more rate-limit sensitive of the two, so it waits its turn.
 
 Leads sourced from GitHub, Dev.to, npm, or Hacker News can be emailed but generally cannot be reached on LinkedIn, because Ozigi has no reliable way to map a GitHub handle to a LinkedIn profile.
 
@@ -61,7 +61,14 @@ Leads sourced from GitHub, Dev.to, npm, or Hacker News can be emailed but genera
 
 The extension sends slowly on purpose. LinkedIn's tolerance for connection requests is lower than most people expect, and the penalty for exceeding it is a restricted account rather than a warning.
 
-Set your per-day cap on the campaign. Start conservative — well below what feels productive — and increase over weeks rather than days. An account restriction takes far longer to recover from than a slow ramp takes to run.
+There are two caps, and **the lower one wins**:
+
+- **Per campaign.** Set when you create the campaign, default 20. This limits how many leads Ozigi will hand the extension in a day.
+- **Per browser.** Click the Ozigi icon and edit **Connection requests per day** — default 20, anything from 1 to 100. This limits how many the extension will actually send, across every campaign you are running.
+
+The browser cap is the one to reach for day to day, since it covers your account as a whole rather than one campaign. The same popup shows **Connects today** and **Leads found today**, both resetting daily, so you can see where you stand against it.
+
+Start conservative — well below what feels productive — and increase over weeks rather than days. An account restriction takes far longer to recover from than a slow ramp takes to run.
 
 Leaving the tab open longer beats raising the cap. The extension paces itself across the whole time it is running.
 
